@@ -9,10 +9,17 @@ environment:
 executables:
   kateri: kateri
 
-# dependencies:
-#   path: ^1.8.0
-
 dev_dependencies:
   lints: ^1.0.0
-dependencies: 
+  flutter_lints: ^1.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
   pdf: ^3.7.3
+  path_provider: ^2.0.9
+
+flutter:
+  uses-material-design: true
+  assets:
+    - images/
