@@ -47,7 +47,7 @@ class DrawOnCanvas extends DrawOn {
       case PointShape.box:
       case PointShape.uglyegg:
         canvas.drawRect(
-            Rect.fromCircle(center: Offset(-size / 2, -size / 2), radius: size),
+            Rect.fromCircle(center: Offset(0, 0), radius: size / 2),
             paint);
         break;
     }
