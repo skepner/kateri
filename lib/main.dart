@@ -10,6 +10,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 
+import 'src/draw_on.dart';
+import 'src/draw_on_canvas.dart';
+
 // ----------------------------------------------------------------------
 
 void main() {
@@ -74,13 +77,22 @@ const List<Point> POINT = [Point(100, 100)];
 class OpenPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    make_pdf().then((success) => print("pdf saved"));
-    print("draw");
+    _draw_points(DrawOnCanvas(canvas, size));
+  }
 
-    draw_point(canvas, Offset(size.width / 2, size.height / 2), 200, 1.0, 0.0);
-    draw_point(canvas, Offset(size.width / 2, size.height / 4), 200, 0.5, 0.0);
-    draw_point(
-        canvas, Offset(size.width / 2, size.height / 4 * 3), 200, 0.7, 1.0);
+  void _draw_points(DrawOn drawOn) {
+    drawOn.point(const Offset(150, 150), 100, fill: Color(0xFFFFA500), outlineWidth: 10);
+    drawOn.point(const Offset(75, 75), 50, fill: Color(0xFFFFA500), outlineWidth: 10);
+    drawOn.point(const Offset(200, 200), 50, fill: Color(0xFFFF0000), outlineWidth: 5);
+  }
+
+    // make_pdf().then((success) => print("pdf saved"));
+    // print("draw");
+
+    // draw_point(canvas, Offset(size.width / 2, size.height / 2), 200, 1.0, 0.0);
+    // draw_point(canvas, Offset(size.width / 2, size.height / 4), 200, 0.5, 0.0);
+    // draw_point(
+    //     canvas, Offset(size.width / 2, size.height / 4 * 3), 200, 0.7, 1.0);
 
     // if (size.width > 1.0 && size.height > 1.0) {
     //   print(">1.9");
@@ -133,93 +145,94 @@ class OpenPainter extends CustomPainter {
     // );
     // canvas.save();
     // canvas.restore();
-  }
+  // }
 
-  Future<bool> make_pdf() async {
-    final pdf = pw.Document();
-    // pw.Page page = pw.Page(
-    //   pageFormat: PdfPageFormat(300, 300), // PdfPageFormat.a4,
-    //   margin: pw.EdgeInsets.all(32),
-    //   build: (context) => pw.Column(children: [pw.Text("voice"), pw.PdfLogo(), pw.FlutterLogo(), pw.CustomPaint(foregroundPainter: pdf_paint, size: PdfPoint(500, 500))])
-    // );
-    // pdf.addPage(page);
+  // Future<bool> make_pdf() async {
+  //   final pdf = pw.Document();
+  //   // pw.Page page = pw.Page(
+  //   //   pageFormat: PdfPageFormat(300, 300), // PdfPageFormat.a4,
+  //   //   margin: pw.EdgeInsets.all(32),
+  //   //   build: (context) => pw.Column(children: [pw.Text("voice"), pw.PdfLogo(), pw.FlutterLogo(), pw.CustomPaint(foregroundPainter: pdf_paint, size: PdfPoint(500, 500))])
+  //   // );
+  //   // pdf.addPage(page);
 
-    pdf.addPage(pw.Page(
-        pageFormat: PdfPageFormat(300, 300), // PdfPageFormat.a4,
-        build: (context) => pw.CustomPaint(
-          size: PdfPoint(200, 200),
-          painter: (PdfGraphics canvas, PdfPoint size) {
-            canvas
-            ..drawEllipse(size.x / 2, size.y / 2, size.x / 2, size.y / 2)
-            ..setFillColor(PdfColors.blue)
-            ..fillPath();
-          },
-    )));
+  //   pdf.addPage(pw.Page(
+  //       pageFormat: PdfPageFormat(300, 300), // PdfPageFormat.a4,
+  //       build: (context) => pw.CustomPaint(
+  //             size: PdfPoint(200, 200),
+  //             painter: (PdfGraphics canvas, PdfPoint size) {
+  //               canvas
+  //                 ..drawEllipse(size.x / 2, size.y / 2, size.x / 2, size.y / 2)
+  //                 ..setFillColor(PdfColors.pink)
+  //                 ..fillPath();
+  //             },
+  //           )));
 
-    final output = await getTemporaryDirectory();
-    print("output ${output}");
-    final file = File("${output?.path}/a.pdf");
-    await file.writeAsBytes(await pdf.save());
-    return true;
-  }
+  //   final output = await getDownloadsDirectory();
+  //   final file = File("${output?.path}/a.pdf");
+  //   await file.writeAsBytes(await pdf.save());
+  //   print("pdf: ${file.path}");
+  //   await Process.run("open-and-back-to-emacs", [file.path]);
+  //   return true;
+  // }
 
-  void pdf_paint(PdfGraphics canvas, PdfPoint size) {
-    print("pdf ${size}");
-    canvas.setColor(PdfColor.fromHex("#FFa500"));
-    canvas.setLineWidth(10);
-    canvas.moveTo(100, 100);
-    canvas.lineTo(200, 200);
-    canvas.drawEllipse(size.x / 2, size.y / 2, size.x / 8, size.y / 7);
-    canvas.drawRect(100, 100, 200, 300);
-  }
+  // void pdf_paint(PdfGraphics canvas, PdfPoint size) {
+  //   print("pdf ${size}");
+  //   canvas.setColor(PdfColor.fromHex("#FFa500"));
+  //   canvas.setLineWidth(10);
+  //   canvas.moveTo(100, 100);
+  //   canvas.lineTo(200, 200);
+  //   canvas.drawEllipse(size.x / 2, size.y / 2, size.x / 8, size.y / 7);
+  //   canvas.drawRect(100, 100, 200, 300);
+  // }
 
-  void draw_point(Canvas canvas, Offset center, double size, double aspect,
-      double rotation) {
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotation);
-    canvas.scale(aspect, 1.0);
+  // void draw_point(Canvas canvas, Offset center, double size, double aspect,
+  //     double rotation) {
+  //   canvas.save();
+  //   canvas.translate(center.dx, center.dy);
+  //   canvas.rotate(rotation);
+  //   canvas.scale(aspect, 1.0);
 
-    var paint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = Colors.blue
-      // ..strokeWidth = 2.0
-      ..isAntiAlias = true;
-    // paint.color = Colors.grey[900];
-    canvas.drawCircle(const Offset(0, 0), size / 2, paint);
+  //   var paint = Paint()
+  //     ..style = PaintingStyle.fill
+  //     ..color = Colors.blue
+  //     // ..strokeWidth = 2.0
+  //     ..isAntiAlias = true;
+  //   // paint.color = Colors.grey[900];
+  //   canvas.drawCircle(const Offset(0, 0), size / 2, paint);
 
-    paint.color = const Color(0x60ffa500);
-    paint.strokeWidth = 20;
-    paint.style = PaintingStyle.stroke;
-    canvas.drawCircle(const Offset(0, 0), size / 2, paint);
+  //   paint.color = const Color(0x60ffa500);
+  //   paint.strokeWidth = 20;
+  //   paint.style = PaintingStyle.stroke;
+  //   canvas.drawCircle(const Offset(0, 0), size / 2, paint);
 
-    canvas.restore();
-  }
+  //   canvas.restore();
+  // }
 
-  // @override
-  void xpaint(Canvas canvas, Size size) {
-    var paint1 = Paint()
-      ..color = Color(0xff63aa65)
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 50;
-    //list of points
-    var points = [
-      Offset(0, 0),
-      Offset(size.width, 50),
-      Offset(size.width, size.height),
-      Offset(size.width / 2, size.height / 2),
-      // Offset(80, 70),
-      // Offset(380, 175),
-      // Offset(200, 175),
-      // Offset(150, 105),
-      // Offset(300, 75),
-      // Offset(320, 200),
-      // Offset(89, 125)
-    ];
-    //draw points on canvas
-    canvas.drawPoints(PointMode.points, points, paint1);
-    // print(size);
-  }
+  // // @override
+  // void xpaint(Canvas canvas, Size size) {
+  //   var paint1 = Paint()
+  //     ..color = Color(0xff63aa65)
+  //     ..strokeCap = StrokeCap.round
+  //     ..strokeWidth = 50;
+  //   //list of points
+  //   var points = [
+  //     Offset(0, 0),
+  //     Offset(size.width, 50),
+  //     Offset(size.width, size.height),
+  //     Offset(size.width / 2, size.height / 2),
+  //     // Offset(80, 70),
+  //     // Offset(380, 175),
+  //     // Offset(200, 175),
+  //     // Offset(150, 105),
+  //     // Offset(300, 75),
+  //     // Offset(320, 200),
+  //     // Offset(89, 125)
+  //   ];
+  //   //draw points on canvas
+  //   canvas.drawPoints(PointMode.points, points, paint1);
+  //   // print(size);
+  // }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
