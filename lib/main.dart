@@ -38,15 +38,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter Tutorial - googleflutter.com'),
-        backgroundColor: Color(0xFF444444),
+        title: Text('Kateri ${DateTime.now()}'),
+        backgroundColor: Colors.pink,
       ),
       body: ListView(children: <Widget>[
-        Text(
-          'Canvas',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, height: 2),
-        ),
         Container(
           width: 1000,
           height: 1000,
@@ -84,67 +79,71 @@ class OpenPainter extends CustomPainter {
     drawOn.point(const Offset(75, 220), 70, fill: Color(0x80FFA500), outlineWidth: 10);
     drawOn.point(const Offset(220, 75), 70, fill: Color(0x80FF0000), outlineWidth: 5);
     drawOn.point(const Offset(220, 75), 70, shape: PointShape.box, fill: Color(0x80FF0000), outlineWidth: 5);
+
+    drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidth: 1);
+    drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
+    drawOn.point3d(const Offset(400, 400), 10, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
   }
 
-    // make_pdf().then((success) => print("pdf saved"));
-    // print("draw");
+  // make_pdf().then((success) => print("pdf saved"));
+  // print("draw");
 
-    // draw_point(canvas, Offset(size.width / 2, size.height / 2), 200, 1.0, 0.0);
-    // draw_point(canvas, Offset(size.width / 2, size.height / 4), 200, 0.5, 0.0);
-    // draw_point(
-    //     canvas, Offset(size.width / 2, size.height / 4 * 3), 200, 0.7, 1.0);
+  // draw_point(canvas, Offset(size.width / 2, size.height / 2), 200, 1.0, 0.0);
+  // draw_point(canvas, Offset(size.width / 2, size.height / 4), 200, 0.5, 0.0);
+  // draw_point(
+  //     canvas, Offset(size.width / 2, size.height / 4 * 3), 200, 0.7, 1.0);
 
-    // if (size.width > 1.0 && size.height > 1.0) {
-    //   print(">1.9");
-    //   _sizeUtil.logicSize = size;
-    // }
-    // var paint = Paint()
-    //   ..style = PaintingStyle.fill
-    //   ..color = Colors.blue
-    //   ..strokeWidth = 2.0
-    //   ..isAntiAlias = true;
-    // // paint.color = Colors.grey[900];
-    // canvas.drawCircle(Offset(size.width / 2, 250.0), 200.0, paint);
+  // if (size.width > 1.0 && size.height > 1.0) {
+  //   print(">1.9");
+  //   _sizeUtil.logicSize = size;
+  // }
+  // var paint = Paint()
+  //   ..style = PaintingStyle.fill
+  //   ..color = Colors.blue
+  //   ..strokeWidth = 2.0
+  //   ..isAntiAlias = true;
+  // // paint.color = Colors.grey[900];
+  // canvas.drawCircle(Offset(size.width / 2, 250.0), 200.0, paint);
 
-    // paint.color = const Color(0x60f26388);
-    // paint.strokeWidth = 20;
-    // paint.style = PaintingStyle.stroke;
-    // // canvas.drawCircle(const Offset(250, 250.0), 200.0, paint);
-    // canvas.drawOval(
-    //     Rect.fromCenter(
-    //         center: const Offset(250, 250.0), width: 400, height: 600),
-    //     paint);
+  // paint.color = const Color(0x60f26388);
+  // paint.strokeWidth = 20;
+  // paint.style = PaintingStyle.stroke;
+  // // canvas.drawCircle(const Offset(250, 250.0), 200.0, paint);
+  // canvas.drawOval(
+  //     Rect.fromCenter(
+  //         center: const Offset(250, 250.0), width: 400, height: 600),
+  //     paint);
 
-    // var center = Offset(
-    //   _sizeUtil.getAxisX(250.0),
-    //   _sizeUtil.getAxisY(250.0),
-    // );
-    // var radius = _sizeUtil.getAxisBoth(200);
-    // _drawArcGroup(
-    //   canvas,
-    //   center: center,
-    //   radius: radius,
-    //   sources: [
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //     1,
-    //   ],
-    //   colors: [BLUE_DARK1, RED_DARK1, BLUE_DARK2, GREEN_NORMAL, YELLOW_NORMAL],
-    //   paintWidth: 80.0,
-    //   startAngle: 1.3 * startAngle / radius,
-    //   hasEnd: true,
-    //   hasCurrent: false,
-    //   curPaintWidth: 45.0,
-    //   curIndex: 1,
-    // );
-    // canvas.save();
-    // canvas.restore();
+  // var center = Offset(
+  //   _sizeUtil.getAxisX(250.0),
+  //   _sizeUtil.getAxisY(250.0),
+  // );
+  // var radius = _sizeUtil.getAxisBoth(200);
+  // _drawArcGroup(
+  //   canvas,
+  //   center: center,
+  //   radius: radius,
+  //   sources: [
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //     1,
+  //   ],
+  //   colors: [BLUE_DARK1, RED_DARK1, BLUE_DARK2, GREEN_NORMAL, YELLOW_NORMAL],
+  //   paintWidth: 80.0,
+  //   startAngle: 1.3 * startAngle / radius,
+  //   hasEnd: true,
+  //   hasCurrent: false,
+  //   curPaintWidth: 45.0,
+  //   curIndex: 1,
+  // );
+  // canvas.save();
+  // canvas.restore();
   // }
 
   // Future<bool> make_pdf() async {
