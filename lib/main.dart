@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'src/draw_on.dart';
 import 'src/draw_on_canvas.dart';
+import 'src/draw_on_pdf.dart';
 
 // ----------------------------------------------------------------------
 
@@ -43,8 +44,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView(children: <Widget>[
         Container(
-          width: 1000,
-          height: 1000,
+          width: 500,
+          height: 500,
           child: CustomPaint(
             painter: OpenPainter(),
           ),
@@ -72,6 +73,10 @@ class OpenPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _draw_points(DrawOnCanvas(canvas, size));
+
+    DrawOnPdf.file(size)
+      ..draw(_draw_points)
+      ..write("/r/a.pdf", open: true);
   }
 
   void _draw_points(DrawOn drawOn) {
