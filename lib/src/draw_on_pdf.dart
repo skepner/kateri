@@ -9,9 +9,11 @@ import 'draw_on.dart';
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   Size size;
+  late final _canvas;
 
   DrawOnPdf(this.size) : doc = PdfDocument() {
     PdfPage(doc, pageFormat: PdfPageFormat(size.width, size.height));
+    _canvas = doc.pdfPageList.pages[0].getGraphics();
   }
 
   void draw(Function painter) {
@@ -26,9 +28,9 @@ class DrawOnPdf extends DrawOn {
     }
   }
 
-  PdfGraphics get _canvas {
-    return doc.pdfPageList.pages[0].getGraphics();
-  }
+  // PdfGraphics get _canvas {
+  //   return doc.pdfPageList.pages[0].getGraphics();
+  // }
 
   // ----------------------------------------------------------------------
   // 2D
@@ -37,17 +39,34 @@ class DrawOnPdf extends DrawOn {
   @override
   void point(Offset center, double size,
       {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
+    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
         ..rotateZ(rotation)
         ..scale(aspect, 1.0))
-      ..setFillColor(PdfColor.fromInt(fill.value))
-      ..setStrokeColor(PdfColor.fromInt(outline.value))
-      ..setLineWidth(outlineWidth)
-      ..drawEllipse(0, 0, size / 2, size / 2)
+      ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
+      ..setFillColor(fillc)
+      ..setStrokeColor(outlinec)
+      ..setLineWidth(outlineWidth);
+    _drawShape(shape, size);
+    _canvas
       ..fillAndStrokePath()
       ..restoreContext();
+  }
+
+  void _drawShape(PointShape shape, double size) {
+    switch (shape) {
+      case PointShape.circle:
+      case PointShape.egg:
+        _canvas.drawEllipse(0.0, 0.0, size / 2, size / 2);
+        break;
+      case PointShape.box:
+      case PointShape.triangle:
+      case PointShape.uglyegg:
+        _canvas.drawRect(-size / 2, -size / 2, size, size);
+        break;
+    }
   }
 
   // ----------------------------------------------------------------------

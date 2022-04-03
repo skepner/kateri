@@ -26,24 +26,25 @@ class DrawOnCanvas extends DrawOn {
       ..color = fill
       ..strokeWidth = outlineWidth
       ..isAntiAlias = true;
-    _draw_shape(paint, shape, size);
+    _drawShape(paint, shape, size);
 
     paint
       ..color = outline
       ..strokeWidth = outlineWidth
       ..style = PaintingStyle.stroke;
-    _draw_shape(paint, shape, size);
+    _drawShape(paint, shape, size);
 
     canvas.restore();
   }
 
-  void _draw_shape(Paint paint, PointShape shape, double size) {
+  void _drawShape(Paint paint, PointShape shape, double size) {
     switch (shape) {
       case PointShape.circle:
       case PointShape.egg:
         canvas.drawCircle(Offset.zero, size / 2, paint);
         break;
       case PointShape.box:
+      case PointShape.triangle:
       case PointShape.uglyegg:
         canvas.drawRect(Rect.fromCircle(center: Offset.zero, radius: size / 2), paint);
         break;
@@ -85,14 +86,14 @@ class DrawOnCanvas extends DrawOn {
       ..strokeWidth = outlineWidth
       ..shader = shader
       ..isAntiAlias = true;
-    _draw_shape(paint, shape, size);
+    _drawShape(paint, shape, size);
 
     paint
       ..color = outline
       ..strokeWidth = outlineWidth
       ..shader = null
       ..style = PaintingStyle.stroke;
-    _draw_shape(paint, shape, size);
+    _drawShape(paint, shape, size);
 
     canvas.restore();
   }

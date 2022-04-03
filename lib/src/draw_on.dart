@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-enum PointShape { circle, box, egg, uglyegg }
+enum PointShape { circle, box, triangle, egg, uglyegg }
 
 abstract class DrawOn {
   void point(Offset center, double size,
