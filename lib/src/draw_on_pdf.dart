@@ -14,6 +14,8 @@ class DrawOnPdf extends DrawOn {
   DrawOnPdf(this.size) : doc = PdfDocument() {
     PdfPage(doc, pageFormat: PdfPageFormat(size.width, size.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
+    // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
+    _canvas.setTransform(Matrix4.translationValues(0.0, size.height, 0.0)..scale(1.0, -1.0));
   }
 
   void draw(Function painter) {
