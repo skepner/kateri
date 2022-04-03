@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
+import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
 
@@ -41,10 +42,19 @@ class DrawOnPdf extends DrawOn {
   @override
   void point(Offset center, double size,
       {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
-    _canvas
-      ..drawEllipse(0, 0, 100, 200)
-      ..setFillColor(PdfColors.pink)
-      ..fillPath();
+      _canvas
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
+        ..rotateZ(-rotation)
+        ..scale(aspect, 1.0))
+      ..setFillColor(PdfColor.fromInt(fill.value))
+      ..setStrokeColor(PdfColor.fromInt(outline.value))
+      ..setLineWidth(outlineWidth)
+      ..drawEllipse(0, 0, size, size)
+      ..fillPath()
+      ..strokePath()
+      ..restoreContext()
+      ;
   }
 
   // ----------------------------------------------------------------------
