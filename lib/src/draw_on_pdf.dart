@@ -8,15 +8,10 @@ import 'draw_on.dart';
 
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
-  // PdfGraphics canvas;
   Size size;
 
-  DrawOnPdf(this.doc, this.size);
-
-  factory DrawOnPdf.file(Size size) {
-    final doc = PdfDocument();
+  DrawOnPdf(this.size) : doc = PdfDocument() {
     PdfPage(doc, pageFormat: PdfPageFormat(size.width, size.height));
-    return DrawOnPdf(doc, size);
   }
 
   void draw(Function painter) {
@@ -42,19 +37,17 @@ class DrawOnPdf extends DrawOn {
   @override
   void point(Offset center, double size,
       {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
-      _canvas
+    _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
-        ..rotateZ(-rotation)
+        ..rotateZ(rotation)
         ..scale(aspect, 1.0))
       ..setFillColor(PdfColor.fromInt(fill.value))
       ..setStrokeColor(PdfColor.fromInt(outline.value))
       ..setLineWidth(outlineWidth)
-      ..drawEllipse(0, 0, size, size)
-      ..fillPath()
-      ..strokePath()
-      ..restoreContext()
-      ;
+      ..drawEllipse(0, 0, size / 2, size / 2)
+      ..fillAndStrokePath()
+      ..restoreContext();
   }
 
   // ----------------------------------------------------------------------
@@ -64,6 +57,6 @@ class DrawOnPdf extends DrawOn {
   @override
   void point3d(Offset center, double size,
       {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
-    point(center, size);
+    point(center, size, shape: shape, fill: fill, outline: outline, outlineWidth: outlineWidth, rotation: rotation, aspect: aspect);
   }
 }

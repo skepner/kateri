@@ -38,14 +38,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Kateri ${DateTime.now()}'),
-        backgroundColor: Colors.pink,
-      ),
+      // appBar: AppBar(
+      //   title: Text('Kateri ${DateTime.now()}'),
+      //   backgroundColor: Colors.pink,
+      // ),
       body: ListView(children: <Widget>[
         Container(
-          width: 500,
-          height: 500,
+          width: 1000,
+          height: 1000,
           child: CustomPaint(
             painter: OpenPainter(),
           ),
@@ -70,16 +70,26 @@ class _MyHomePageState extends State<MyHomePage> {
 // const List<Point> POINT = [Point(100, 100)];
 
 class OpenPainter extends CustomPainter {
+  late Size size;
+
   @override
   void paint(Canvas canvas, Size size) {
+    this.size = size;
+    print("paint ${size}");
+
     _draw_points(DrawOnCanvas(canvas, size));
 
-    DrawOnPdf.file(size)
+    DrawOnPdf(size)
       ..draw(_draw_points)
       ..write("/r/a.pdf", open: true);
   }
 
   void _draw_points(DrawOn drawOn) {
+    drawOn.point(const Offset(0, 0), 10, fill: Colors.pink, outlineWidth: 0);
+    drawOn.point(Offset(size.width, 0), 10, fill: Colors.pink, outlineWidth: 0);
+    drawOn.point(Offset(size.width, size.height), 10, fill: Colors.pink, outlineWidth: 0);
+    drawOn.point(Offset(0, size.height), 10, fill: Colors.pink, outlineWidth: 0);
+
     drawOn.point(const Offset(150, 150), 200, fill: Color(0xFFFFA500), outlineWidth: 10, rotation: math.pi / 4, aspect: 0.7);
     drawOn.point(const Offset(75, 220), 70, fill: Color(0x80FFA500), outlineWidth: 10);
     drawOn.point(const Offset(220, 75), 70, fill: Color(0x80FF0000), outlineWidth: 5);
