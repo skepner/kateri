@@ -60,15 +60,16 @@ class DrawOnCanvas extends DrawOn {
     var paint = Paint()
       ..style = PaintingStyle.fill
       ..color = fill
-      ..strokeWidth = outlineWidthPixels * pixelSize
       ..isAntiAlias = true;
     _drawShape(paint, shape, sizePixels * pixelSize);
 
-    paint
-      ..color = outline
-      ..strokeWidth = outlineWidthPixels * pixelSize
-      ..style = PaintingStyle.stroke;
-    _drawShape(paint, shape, sizePixels * pixelSize);
+    if (outlineWidthPixels > 0) {
+      paint
+        ..color = outline
+        ..strokeWidth = outlineWidthPixels * pixelSize
+        ..style = PaintingStyle.stroke;
+      _drawShape(paint, shape, sizePixels * pixelSize);
+    }
 
     canvas.restore();
   }

@@ -83,9 +83,12 @@ class DrawOnPdf extends DrawOn {
       ..setStrokeColor(outlinec)
       ..setLineWidth(outlineWidthPixels * pixelSize);
     _drawShape(shape, sizePixels * pixelSize);
-    _canvas
-      ..fillAndStrokePath()
-      ..restoreContext();
+    if (outlineWidthPixels > 0) {
+      _canvas.fillAndStrokePath();
+    } else {
+      _canvas.fillPath();
+    }
+    _canvas.restoreContext();
   }
 
   void _drawShape(PointShape shape, double size) {

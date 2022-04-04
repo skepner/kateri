@@ -26,6 +26,14 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0, bool close = true});
 
+  // arrow
+  // circle
+  // sector
+  // rectangle (filled)
+  // text
+  // label
+  // legend
+
   void point(
       {required Offset center,
       required double sizePixels,
