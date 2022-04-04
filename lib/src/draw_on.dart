@@ -12,15 +12,19 @@ const RotationLeft45 = - math.pi / 4;
 const RotationLeft60 = - math.pi / 3;
 
 abstract class DrawOn {
-  void point(Offset center, double size,
-      {PointShape shape = PointShape.circle,
+  void point(
+      {required Offset center,
+      required double sizePixels,
+      PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidth = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0});
-  void point3d(Offset center, double size,
-      {PointShape shape = PointShape.circle,
+  void point3d(
+      {required Offset center,
+      required double sizePixels,
+      PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidth = 1.0,

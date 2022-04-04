@@ -15,8 +15,8 @@ class DrawOnCanvas extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void point(Offset center, double size,
-      {PointShape shape = PointShape.circle,
+  void point({required Offset center, required double sizePixels,
+      PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidth = 1.0,
@@ -32,19 +32,19 @@ class DrawOnCanvas extends DrawOn {
       ..color = fill
       ..strokeWidth = outlineWidth
       ..isAntiAlias = true;
-    _drawShape(paint, shape, size);
+    _drawShape(paint, shape, sizePixels);
 
     paint
       ..color = outline
       ..strokeWidth = outlineWidth
       ..style = PaintingStyle.stroke;
-    _drawShape(paint, shape, size);
+    _drawShape(paint, shape, sizePixels);
 
     canvas.restore();
   }
 
-  void _drawShape(Paint paint, PointShape shape, double size) {
-    final radius = size / 2;
+  void _drawShape(Paint paint, PointShape shape, double sizePixels) {
+    final radius = sizePixels / 2;
     switch (shape) {
       case PointShape.circle:
         canvas.drawCircle(Offset.zero, radius, paint);
@@ -84,8 +84,8 @@ class DrawOnCanvas extends DrawOn {
         canvas.drawPath(
             Path()
               ..moveTo(0.0, -radius)
-              ..lineTo(-radius * cosPi6, size / 4)
-              ..lineTo(radius * cosPi6, size / 4)
+              ..lineTo(-radius * cosPi6, sizePixels / 4)
+              ..lineTo(radius * cosPi6, sizePixels / 4)
               ..close(),
             paint);
         break;
@@ -97,8 +97,8 @@ class DrawOnCanvas extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void point3d(Offset center, double size,
-      {PointShape shape = PointShape.circle,
+  void point3d({required Offset center, required double sizePixels,
+      PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidth = 1.0,
@@ -109,7 +109,7 @@ class DrawOnCanvas extends DrawOn {
     // canvas.rotate(rotation);
     // canvas.scale(aspect, 1.0);
 
-    final rect = Offset(-size * 0.7, -size * 0.7) & Size.square(size * 1.1);
+    final rect = Offset(-sizePixels * 0.7, -sizePixels * 0.7) & Size.square(sizePixels * 1.1);
     final shader = RadialGradient(
       // colors: [
       //   const Color(0xFFC0C0FF),
@@ -132,14 +132,14 @@ class DrawOnCanvas extends DrawOn {
       ..strokeWidth = outlineWidth
       ..shader = shader
       ..isAntiAlias = true;
-    _drawShape(paint, shape, size);
+    _drawShape(paint, shape, sizePixels);
 
     paint
       ..color = outline
       ..strokeWidth = outlineWidth
       ..shader = null
       ..style = PaintingStyle.stroke;
-    _drawShape(paint, shape, size);
+    _drawShape(paint, shape, sizePixels);
 
     canvas.restore();
   }
