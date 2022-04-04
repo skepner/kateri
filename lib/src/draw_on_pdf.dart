@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:pdf/pdf.dart';
-// import 'package:pdf/widgets.dart' as pw;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
@@ -30,17 +30,13 @@ class DrawOnPdf extends DrawOn {
     }
   }
 
-  // PdfGraphics get _canvas {
-  //   return doc.pdfPageList.pages[0].getGraphics();
-  // }
-
   // ----------------------------------------------------------------------
   // 2D
   // ----------------------------------------------------------------------
 
   @override
   void point(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
     final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas
       ..saveContext()
@@ -64,9 +60,16 @@ class DrawOnPdf extends DrawOn {
         _canvas.drawEllipse(0.0, 0.0, size / 2, size / 2);
         break;
       case PointShape.box:
-      case PointShape.triangle:
       case PointShape.uglyegg:
         _canvas.drawRect(-size / 2, -size / 2, size, size);
+        break;
+      case PointShape.triangle:
+        final cosPi6 = math.cos(math.pi / 6);
+        _canvas
+          ..moveTo(0.0, -size / 2)
+          ..lineTo(-size / 2 * cosPi6, size / 4)
+          ..lineTo(size / 2 * cosPi6, size / 4)
+          ..closePath();
         break;
     }
   }
@@ -77,7 +80,7 @@ class DrawOnPdf extends DrawOn {
 
   @override
   void point3d(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
     point(center, size, shape: shape, fill: fill, outline: outline, outlineWidth: outlineWidth, rotation: rotation, aspect: aspect);
   }
 }

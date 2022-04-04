@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'draw_on.dart';
@@ -15,7 +16,7 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void point(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotation);
@@ -44,9 +45,18 @@ class DrawOnCanvas extends DrawOn {
         canvas.drawCircle(Offset.zero, size / 2, paint);
         break;
       case PointShape.box:
-      case PointShape.triangle:
       case PointShape.uglyegg:
         canvas.drawRect(Rect.fromCircle(center: Offset.zero, radius: size / 2), paint);
+        break;
+      case PointShape.triangle:
+        final cosPi6 = math.cos(math.pi / 6);
+        canvas.drawPath(
+            Path()
+              ..moveTo(0.0, -size / 2)
+              ..lineTo(-size / 2 * cosPi6, size / 4)
+              ..lineTo(size / 2 * cosPi6, size / 4)
+              ..close(),
+            paint);
         break;
     }
   }
@@ -57,7 +67,7 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void point3d(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = 0.0, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     // canvas.rotate(rotation);
