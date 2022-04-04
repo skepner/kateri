@@ -59,6 +59,7 @@ class DrawOnPdf extends DrawOn {
       case PointShape.circle:
         _canvas.drawEllipse(0.0, 0.0, radius, radius);
         break;
+
       case PointShape.egg:
         // https://books.google.de/books?id=StdwgT34RCwC&pg=PA107
         _canvas
@@ -67,10 +68,23 @@ class DrawOnPdf extends DrawOn {
           ..curveTo(-radius * 0.8, -radius * 0.98, -radius * 1.4, radius * 0.95, 0.0, radius)
           ..closePath();
         break;
+
       case PointShape.box:
-      case PointShape.uglyegg:
         _canvas.drawRect(-radius, -radius, size, size);
         break;
+
+      case PointShape.uglyegg:
+        final c1x = radius * 1.0, c1y = radius * 0.6, c2x = radius * 0.8, c2y = -radius * 0.6;
+        _canvas
+          ..moveTo(0.0, radius)
+          ..lineTo(c1x, c1y)
+          ..lineTo(c2x, c2y)
+          ..lineTo(0.0, -radius)
+          ..lineTo(-c2x, c2y)
+          ..lineTo(-c1x, c1y)
+          ..closePath();
+        break;
+
       case PointShape.triangle:
         final cosPi6 = math.cos(math.pi / 6);
         _canvas

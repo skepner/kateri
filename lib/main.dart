@@ -95,6 +95,12 @@ class OpenPainter extends CustomPainter {
     drawOn.point(const Offset(520, 375), 70, shape: PointShape.egg, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
     drawOn.point(const Offset(520, 475), 70, shape: PointShape.egg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
 
+    drawOn.point(const Offset(640,  75), 70, shape: PointShape.uglyegg, fill: Colors.red, outlineWidth: 2);
+    drawOn.point(const Offset(640, 175), 70, shape: PointShape.uglyegg, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
+    drawOn.point(const Offset(640, 275), 70, shape: PointShape.uglyegg, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
+    drawOn.point(const Offset(640, 375), 70, shape: PointShape.uglyegg, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
+    drawOn.point(const Offset(640, 475), 70, shape: PointShape.uglyegg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+
     // drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidth: 1);
     // drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
     // drawOn.point3d(const Offset(400, 400), 10, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);

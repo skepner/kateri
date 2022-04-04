@@ -49,6 +49,7 @@ class DrawOnCanvas extends DrawOn {
       case PointShape.circle:
         canvas.drawCircle(Offset.zero, radius, paint);
         break;
+
       case PointShape.egg:
         // https://books.google.de/books?id=StdwgT34RCwC&pg=PA107
         canvas.drawPath(
@@ -59,10 +60,25 @@ class DrawOnCanvas extends DrawOn {
               ..close(),
             paint);
         break;
+
       case PointShape.box:
-      case PointShape.uglyegg:
         canvas.drawRect(Rect.fromCircle(center: Offset.zero, radius: radius), paint);
         break;
+
+      case PointShape.uglyegg:
+        final c1x = radius * 1.0, c1y = radius * 0.6, c2x = radius * 0.8, c2y = -radius * 0.6;
+        canvas.drawPath(
+            Path()
+              ..moveTo(0.0, radius)
+              ..lineTo(c1x, c1y)
+              ..lineTo(c2x, c2y)
+              ..lineTo(0.0, -radius)
+              ..lineTo(-c2x, c2y)
+              ..lineTo(-c1x, c1y)
+              ..close(),
+            paint);
+        break;
+
       case PointShape.triangle:
         final cosPi6 = math.cos(math.pi / 6);
         canvas.drawPath(
