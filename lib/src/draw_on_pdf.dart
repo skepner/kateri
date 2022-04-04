@@ -6,6 +6,8 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
 
+// ----------------------------------------------------------------------
+
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
@@ -24,8 +26,7 @@ class DrawOnPdf extends DrawOn {
     final scale = canvasSize.width / viewport.width;
     _canvas.setTransform(Matrix4.identity()
       ..scale(scale, -scale)
-      ..translate(-viewport.left, viewport.top, 0.0)
-    );
+      ..translate(-viewport.left, viewport.top, 0.0));
   }
 
   void draw(Function painter) {
@@ -43,6 +44,23 @@ class DrawOnPdf extends DrawOn {
   // ----------------------------------------------------------------------
   // 2D
   // ----------------------------------------------------------------------
+
+  @override
+  void path(List<Offset> vertices, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0, bool close = true}) {
+    final colorc = PdfColor.fromInt(color.value);
+    _canvas
+      ..saveContext()
+      ..setStrokeColor(colorc)
+      ..setLineWidth(lineWidthPixels * pixelSize)
+      ..moveTo(vertices[0].dx, vertices[0].dy);
+    for (var vertix in vertices.getRange(1, vertices.length)) {
+      _canvas.lineTo(vertix.dx, vertix.dy);
+    }
+    _canvas
+      ..closePath()
+      ..strokePath()
+      ..restoreContext();
+  }
 
   @override
   void point(
@@ -111,6 +129,28 @@ class DrawOnPdf extends DrawOn {
           ..closePath();
         break;
     }
+  }
+
+  @override
+  void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {
+    final colorc = PdfColor.fromInt(color.value);
+    _canvas
+      ..saveContext()
+      ..setStrokeColor(colorc)
+      ..setLineWidth(lineWidthPixels * pixelSize);
+    for (var x = viewport.left.ceilToDouble(); x < viewport.right; x += step) {
+      _canvas
+        ..moveTo(x, viewport.top)
+        ..lineTo(x, viewport.bottom);
+    }
+    for (var y = viewport.top.ceilToDouble(); y < viewport.bottom; y += step) {
+      _canvas
+        ..moveTo(viewport.left, y)
+        ..lineTo(viewport.right, y);
+    }
+    _canvas
+      ..strokePath()
+      ..restoreContext();
   }
 
   // ----------------------------------------------------------------------

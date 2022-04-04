@@ -86,7 +86,6 @@ class AntigenicMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
     _draw_points(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
 
     DrawOnPdf(viewport: viewport)
@@ -95,6 +94,8 @@ class AntigenicMapPainter extends CustomPainter {
   }
 
   void _draw_points(DrawOn drawOn) {
+    drawOn.grid();
+
     drawOn.point(center: viewport.topLeft, sizePixels: 10, fill: Colors.red, outlineWidthPixels: 0);
     drawOn.point(center: viewport.topRight, sizePixels: 10, fill: Colors.green, outlineWidthPixels: 0);
     drawOn.point(center: viewport.bottomLeft, sizePixels: 10, fill: Colors.blue, outlineWidthPixels: 0);
@@ -133,6 +134,9 @@ class AntigenicMapPainter extends CustomPainter {
     drawOn.point3d(center: const Offset(-1, 1), sizePixels: 150, fill: Colors.green, outline: Colors.red, outlineWidthPixels: 1);
     drawOn.point3d(center: const Offset(-1, 2.5), sizePixels: 50, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
     drawOn.point3d(center: const Offset(-1, 3.5), sizePixels: 10, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
+
+    drawOn.line(const Offset(-3.1, -0.2), const Offset(3.1, 2.1));
+    drawOn.path([const Offset(-4.1, -1.2), const Offset(3.2, 1.1), const Offset(-4.5, 2.5)], color: Colors.cyan, lineWidthPixels: 3.0);
   }
 
   @override
