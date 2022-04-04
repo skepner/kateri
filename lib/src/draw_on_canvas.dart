@@ -12,7 +12,7 @@ class DrawOnCanvas extends DrawOn {
 
   DrawOnCanvas(this.canvas, {required this.canvasSize, required this.viewport}) : pixelSize = viewport.width / canvasSize.width {
     canvas.scale(canvasSize.width / viewport.width);
-    canvas.translate(-viewport.top, -viewport.left);
+    canvas.translate(-viewport.left, -viewport.top);
   }
 
   // ----------------------------------------------------------------------

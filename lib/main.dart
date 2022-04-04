@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: CustomPaint(
-        painter: AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(10.0)),
+        painter: AntigenicMapPainter(const Offset(-6.0, -5.0) & const Size.square(10.0)),
         size: const Size(99999, 99999),
       ),
       // body: ListView(children: <Widget>[
@@ -81,28 +81,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class AntigenicMapPainter extends CustomPainter {
   Rect viewport;
-  late Size rawCanvasSize;
 
   AntigenicMapPainter(this.viewport);
 
   @override
   void paint(Canvas canvas, Size size) {
-    this.rawCanvasSize = size;
 
     _draw_points(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
 
-    // DrawOnPdf()
-    //   ..draw(_draw_points)
-    //   ..write("/r/a.pdf", open: true);
+    DrawOnPdf(viewport: viewport)
+      ..draw(_draw_points)
+      ..write("/r/a.pdf", open: true);
   }
 
   void _draw_points(DrawOn drawOn) {
-    drawOn.point(center: viewport.topLeft, sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
-    // drawOn.point(center: Offset(size.width, 0), sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
-    drawOn.point(center: viewport.bottomRight, sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
-    // drawOn.point(center: Offset(0, size.height), sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
-
-    drawOn.point(center: Offset.zero, sizePixels: 10, fill: Color(0xFFFF0000), outlineWidthPixels: 0);
+    drawOn.point(center: viewport.topLeft, sizePixels: 10, fill: Colors.red, outlineWidthPixels: 0);
+    drawOn.point(center: viewport.topRight, sizePixels: 10, fill: Colors.green, outlineWidthPixels: 0);
+    drawOn.point(center: viewport.bottomLeft, sizePixels: 10, fill: Colors.blue, outlineWidthPixels: 0);
+    drawOn.point(center: viewport.bottomRight, sizePixels: 10, fill: Colors.yellow, outlineWidthPixels: 0);
+    drawOn.point(center: Offset.zero, sizePixels: 20, outline: Color(0xFFFF0000), outlineWidthPixels: 5);
 
     drawOn.point(center: const Offset(-3.5, -3.5), sizePixels: 200, fill: Color(0xFFFFA500), outlineWidthPixels: 10, rotation: math.pi / 4, aspect: 0.7);
     drawOn.point(center: const Offset(-4.1, -2.9), sizePixels: 70, fill: Color(0x80FFA500), outlineWidthPixels: 10);

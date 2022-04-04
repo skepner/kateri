@@ -9,14 +9,23 @@ import 'draw_on.dart';
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
+  final Rect viewport;
+  final double pixelSize;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
-  DrawOnPdf({double width = 1000.0, double aspect = 1.0}) : doc = PdfDocument(), canvasSize = Size(width, width / aspect) {
+  DrawOnPdf({double width = 1000.0, double aspect = 1.0, required this.viewport})
+      : doc = PdfDocument(),
+        canvasSize = Size(width, width / aspect),
+        pixelSize = viewport.width / width {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
-    _canvas.setTransform(Matrix4.translationValues(0.0, canvasSize.height, 0.0)..scale(1.0, -1.0));
+    final scale = canvasSize.width / viewport.width;
+    _canvas.setTransform(Matrix4.identity()
+      ..scale(scale, -scale)
+      ..translate(-viewport.left, viewport.top, 0.0)
+    );
   }
 
   void draw(Function painter) {
@@ -54,7 +63,7 @@ class DrawOnPdf extends DrawOn {
       ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
       ..setFillColor(fillc)
       ..setStrokeColor(outlinec)
-      ..setLineWidth(outlineWidthPixels);
+      ..setLineWidth(outlineWidthPixels * pixelSize);
     _drawShape(shape, sizePixels);
     _canvas
       ..fillAndStrokePath()
@@ -62,6 +71,7 @@ class DrawOnPdf extends DrawOn {
   }
 
   void _drawShape(PointShape shape, double sizePixels) {
+    sizePixels *= pixelSize;
     final radius = sizePixels / 2;
     switch (shape) {
       case PointShape.circle:
