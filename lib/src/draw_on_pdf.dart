@@ -8,14 +8,15 @@ import 'draw_on.dart';
 
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
-  Size size;
-  late final _canvas;
+  final Size canvasSize;
+  late final PdfGraphics _canvas;
 
-  DrawOnPdf(this.size) : doc = PdfDocument() {
-    PdfPage(doc, pageFormat: PdfPageFormat(size.width, size.height));
+  // aspect: width / height
+  DrawOnPdf({double width = 1000.0, double aspect = 1.0}) : doc = PdfDocument(), canvasSize = Size(width, width / aspect) {
+    PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
-    _canvas.setTransform(Matrix4.translationValues(0.0, size.height, 0.0)..scale(1.0, -1.0));
+    _canvas.setTransform(Matrix4.translationValues(0.0, canvasSize.height, 0.0)..scale(1.0, -1.0));
   }
 
   void draw(Function painter) {
@@ -35,8 +36,15 @@ class DrawOnPdf extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void point({required Offset center, required double sizePixels,
-      PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
+  void point(
+      {required Offset center,
+      required double sizePixels,
+      PointShape shape = PointShape.circle,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidth = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
     final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas
       ..saveContext()
@@ -101,8 +109,15 @@ class DrawOnPdf extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void point3d({required Offset center, required double sizePixels,
-      PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
+  void point3d(
+      {required Offset center,
+      required double sizePixels,
+      PointShape shape = PointShape.circle,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidth = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
     point(center: center, sizePixels: sizePixels, shape: shape, fill: fill, outline: outline, outlineWidth: outlineWidth, rotation: rotation, aspect: aspect);
   }
 }

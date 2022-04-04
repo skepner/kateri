@@ -67,7 +67,7 @@ class OpenPainter extends CustomPainter {
 
     _draw_points(DrawOnCanvas(canvas, size));
 
-    DrawOnPdf(size)
+    DrawOnPdf()
       ..draw(_draw_points)
       ..write("/r/a.pdf", open: true);
   }
@@ -100,6 +100,12 @@ class OpenPainter extends CustomPainter {
     drawOn.point(center: const Offset(640, 275), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
     drawOn.point(center: const Offset(640, 375), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
     drawOn.point(center: const Offset(640, 475), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+
+    drawOn.point(center: const Offset(760,  75), sizePixels: 70, shape: PointShape.box, fill: Colors.red, outlineWidth: 2);
+    drawOn.point(center: const Offset(760, 175), sizePixels: 70, shape: PointShape.box, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
+    drawOn.point(center: const Offset(760, 275), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
+    drawOn.point(center: const Offset(760, 375), sizePixels: 70, shape: PointShape.box, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
+    drawOn.point(center: const Offset(760, 475), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
 
     // drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidth: 1);
     // drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
