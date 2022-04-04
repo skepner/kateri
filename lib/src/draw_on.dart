@@ -20,11 +20,11 @@ abstract class DrawOn {
   // 2D
   // ----------------------------------------------------------------------
 
-  void line(Offset p1, Offset p2, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
-    path([p1, p2], color: color, lineWidthPixels: lineWidthPixels, close: false);
+  void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
+    path([p1, p2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
   }
 
-  void path(List<Offset> vertices, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0, bool close = true});
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
   // arrow
   // circle

@@ -20,7 +20,7 @@ class DrawOnCanvas extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void path(List<Offset> vertices, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0, bool close = true}) {
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
     var path = Path()..moveTo(vertices[0].dx, vertices[0].dy);
     for (var vertix in vertices.getRange(1, vertices.length)) {
       path.lineTo(vertix.dx, vertix.dy);
@@ -34,11 +34,19 @@ class DrawOnCanvas extends DrawOn {
       ..drawPath(
           path,
           Paint()
+            ..style = PaintingStyle.fill
+            ..color = fill
+            ..isAntiAlias = true);
+    if (lineWidthPixels > 0) {
+      canvas.drawPath(
+          path,
+          Paint()
             ..style = PaintingStyle.stroke
-            ..color = color
+            ..color = outline
             ..strokeWidth = lineWidthPixels * pixelSize
-            ..isAntiAlias = true)
-      ..restore();
+            ..isAntiAlias = true);
+    }
+    canvas.restore();
   }
 
   @override

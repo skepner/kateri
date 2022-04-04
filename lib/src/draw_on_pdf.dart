@@ -46,20 +46,17 @@ class DrawOnPdf extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void path(List<Offset> vertices, {Color color = const Color(0xFF000000), double lineWidthPixels = 1.0, bool close = true}) {
-    final colorc = PdfColor.fromInt(color.value);
-    _canvas
-      ..saveContext()
-      ..setStrokeColor(colorc)
-      ..setLineWidth(lineWidthPixels * pixelSize)
-      ..moveTo(vertices[0].dx, vertices[0].dy);
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
+    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
+    _canvas.saveContext();
+    _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: lineWidthPixels);
+    _canvas.moveTo(vertices[0].dx, vertices[0].dy);
     for (var vertix in vertices.getRange(1, vertices.length)) {
       _canvas.lineTo(vertix.dx, vertix.dy);
     }
-    _canvas
-      ..closePath()
-      ..strokePath()
-      ..restoreContext();
+    _canvas.closePath();
+    _fillAndStroke(lineWidthPixels);
+    _canvas.restoreContext();
   }
 
   @override
@@ -72,22 +69,15 @@ class DrawOnPdf extends DrawOn {
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
-    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
+    // final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
         ..rotateZ(rotation)
-        ..scale(aspect, 1.0))
-      ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
-      ..setFillColor(fillc)
-      ..setStrokeColor(outlinec)
-      ..setLineWidth(outlineWidthPixels * pixelSize);
+        ..scale(aspect, 1.0));
+    _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels);
     _drawShape(shape, sizePixels * pixelSize);
-    if (outlineWidthPixels > 0) {
-      _canvas.fillAndStrokePath();
-    } else {
-      _canvas.fillPath();
-    }
+    _fillAndStroke(outlineWidthPixels);
     _canvas.restoreContext();
   }
 
@@ -131,6 +121,23 @@ class DrawOnPdf extends DrawOn {
           ..lineTo(radius * cosPi6, size / 4)
           ..closePath();
         break;
+    }
+  }
+
+  void _setColorsLineWidth({required Color fill, required Color outline, required lineWidthPixels}) {
+    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
+    _canvas
+      ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
+      ..setFillColor(fillc)
+      ..setStrokeColor(outlinec)
+      ..setLineWidth(lineWidthPixels * pixelSize);
+  }
+
+  void _fillAndStroke(double lineWidthPixels) {
+    if (lineWidthPixels > 0) {
+      _canvas.fillAndStrokePath();
+    } else {
+      _canvas.fillPath();
     }
   }
 
