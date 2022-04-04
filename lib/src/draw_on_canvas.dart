@@ -16,7 +16,12 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void point(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidth = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotation);
@@ -39,22 +44,32 @@ class DrawOnCanvas extends DrawOn {
   }
 
   void _drawShape(Paint paint, PointShape shape, double size) {
+    final radius = size / 2;
     switch (shape) {
       case PointShape.circle:
+        canvas.drawCircle(Offset.zero, radius, paint);
+        break;
       case PointShape.egg:
-        canvas.drawCircle(Offset.zero, size / 2, paint);
+        // https://books.google.de/books?id=StdwgT34RCwC&pg=PA107
+        canvas.drawPath(
+            Path()
+              ..moveTo(0.0, radius)
+              ..cubicTo(radius * 1.4, radius * 0.95, radius * 0.8, -radius * 0.98, 0.0, -radius)
+              ..cubicTo(-radius * 0.8, -radius * 0.98, -radius * 1.4, radius * 0.95, 0.0, radius)
+              ..close(),
+            paint);
         break;
       case PointShape.box:
       case PointShape.uglyegg:
-        canvas.drawRect(Rect.fromCircle(center: Offset.zero, radius: size / 2), paint);
+        canvas.drawRect(Rect.fromCircle(center: Offset.zero, radius: radius), paint);
         break;
       case PointShape.triangle:
         final cosPi6 = math.cos(math.pi / 6);
         canvas.drawPath(
             Path()
-              ..moveTo(0.0, -size / 2)
-              ..lineTo(-size / 2 * cosPi6, size / 4)
-              ..lineTo(size / 2 * cosPi6, size / 4)
+              ..moveTo(0.0, -radius)
+              ..lineTo(-radius * cosPi6, size / 4)
+              ..lineTo(radius * cosPi6, size / 4)
               ..close(),
             paint);
         break;
@@ -67,13 +82,18 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void point3d(Offset center, double size,
-      {PointShape shape = PointShape.circle, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidth = 1.0, double rotation = NoRotation, double aspect = 1.0}) {
+      {PointShape shape = PointShape.circle,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidth = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     // canvas.rotate(rotation);
     // canvas.scale(aspect, 1.0);
 
-    final rect = Offset(-size * 0.7, - size * 0.7) & Size.square(size * 1.1);
+    final rect = Offset(-size * 0.7, -size * 0.7) & Size.square(size * 1.1);
     final shader = RadialGradient(
       // colors: [
       //   const Color(0xFFC0C0FF),
