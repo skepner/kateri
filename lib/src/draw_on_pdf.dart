@@ -64,15 +64,14 @@ class DrawOnPdf extends DrawOn {
       ..setFillColor(fillc)
       ..setStrokeColor(outlinec)
       ..setLineWidth(outlineWidthPixels * pixelSize);
-    _drawShape(shape, sizePixels);
+    _drawShape(shape, sizePixels * pixelSize);
     _canvas
       ..fillAndStrokePath()
       ..restoreContext();
   }
 
-  void _drawShape(PointShape shape, double sizePixels) {
-    sizePixels *= pixelSize;
-    final radius = sizePixels / 2;
+  void _drawShape(PointShape shape, double size) {
+    final radius = size / 2;
     switch (shape) {
       case PointShape.circle:
         _canvas.drawEllipse(0.0, 0.0, radius, radius);
@@ -88,7 +87,7 @@ class DrawOnPdf extends DrawOn {
         break;
 
       case PointShape.box:
-        _canvas.drawRect(-radius, -radius, sizePixels, sizePixels);
+        _canvas.drawRect(-radius, -radius, size, size);
         break;
 
       case PointShape.uglyegg:
@@ -107,8 +106,8 @@ class DrawOnPdf extends DrawOn {
         final cosPi6 = math.cos(math.pi / 6);
         _canvas
           ..moveTo(0.0, -radius)
-          ..lineTo(-radius * cosPi6, sizePixels / 4)
-          ..lineTo(radius * cosPi6, sizePixels / 4)
+          ..lineTo(-radius * cosPi6, size / 4)
+          ..lineTo(radius * cosPi6, size / 4)
           ..closePath();
         break;
     }

@@ -130,9 +130,9 @@ class AntigenicMapPainter extends CustomPainter {
     drawOn.point(center: const Offset(1.0, -1.6), sizePixels: 70, shape: PointShape.box, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
     drawOn.point(center: const Offset(1.0, -0.8), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
-    // drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidthPixels: 1);
-    // drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
-    // drawOn.point3d(const Offset(400, 400), 10, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
+    drawOn.point3d(center: const Offset(-1, 1), sizePixels: 150, fill: Colors.green, outline: Colors.red, outlineWidthPixels: 1);
+    drawOn.point3d(center: const Offset(-1, 2.5), sizePixels: 50, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
+    drawOn.point3d(center: const Offset(-1, 3.5), sizePixels: 10, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
   }
 
   @override
