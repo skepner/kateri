@@ -2,8 +2,10 @@ import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
 
-// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart' as cupertino;
 import 'package:flutter/material.dart';
+
+import 'package:intl/intl.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -38,78 +40,102 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Kateri ${DateTime.now()}'),
-      //   backgroundColor: Colors.pink,
-      // ),
-      body: ListView(children: <Widget>[
-        Container(
-          width: 1000,
-          height: 1000,
-          child: CustomPaint(
-            painter: OpenPainter(),
+      appBar: AppBar(
+        title: Text('Kateri ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now())}'),
+        backgroundColor: Colors.green,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Pdf',
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+            },
           ),
-        ),
-      ]),
+        ],
+      ),
+      body: CustomPaint(
+        painter: AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(10.0)),
+        size: const Size(99999, 99999),
+      ),
+      // body: ListView(children: <Widget>[
+      //   CustomPaint(
+      //     painter: AntigenicMapPainter(),
+      //     size: const Size(1000, 1000),
+      //   ),
+      // ]),
+      // body: ListView(children: <Widget>[
+      //   Container(
+      //     // width: 1000,
+      //     // height: 1000,
+      //     child: CustomPaint(
+      //       painter: AntigenicMapPainter(),
+      //       size: Size(1000, 1000),
+      //     ),
+      //   ),
+      // ]),
     );
   }
 }
 
 // ----------------------------------------------------------------------
 
-class OpenPainter extends CustomPainter {
-  late Size size;
+class AntigenicMapPainter extends CustomPainter {
+  Rect viewport;
+  late Size rawCanvasSize;
+
+  AntigenicMapPainter(this.viewport);
 
   @override
   void paint(Canvas canvas, Size size) {
-    this.size = size;
-    print("paint ${size}");
+    this.rawCanvasSize = size;
 
-    _draw_points(DrawOnCanvas(canvas, size));
+    _draw_points(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
 
-    DrawOnPdf()
-      ..draw(_draw_points)
-      ..write("/r/a.pdf", open: true);
+    // DrawOnPdf()
+    //   ..draw(_draw_points)
+    //   ..write("/r/a.pdf", open: true);
   }
 
   void _draw_points(DrawOn drawOn) {
-    drawOn.point(center: const Offset(0, 0), sizePixels: 10, fill: Colors.pink, outlineWidth: 0);
-    drawOn.point(center: Offset(size.width, 0), sizePixels: 10, fill: Colors.pink, outlineWidth: 0);
-    drawOn.point(center: Offset(size.width, size.height), sizePixels: 10, fill: Colors.pink, outlineWidth: 0);
-    drawOn.point(center: Offset(0, size.height), sizePixels: 10, fill: Colors.pink, outlineWidth: 0);
+    drawOn.point(center: viewport.topLeft, sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
+    // drawOn.point(center: Offset(size.width, 0), sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
+    drawOn.point(center: viewport.bottomRight, sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
+    // drawOn.point(center: Offset(0, size.height), sizePixels: 10, fill: Colors.pink, outlineWidthPixels: 0);
 
-    drawOn.point(center: const Offset(150, 150), sizePixels: 200, fill: Color(0xFFFFA500), outlineWidth: 10, rotation: math.pi / 4, aspect: 0.7);
-    drawOn.point(center: const Offset(75, 220),  sizePixels:  70, fill: Color(0x80FFA500), outlineWidth: 10);
-    drawOn.point(center: const Offset(220, 75),  sizePixels:  70, fill: Color(0x80FF0000), outlineWidth: 5);
-    drawOn.point(center: const Offset(220, 75),  sizePixels:  70, shape: PointShape.box, fill: Color(0x80FF0000), outlineWidth: 5);
+    drawOn.point(center: Offset.zero, sizePixels: 10, fill: Color(0xFFFF0000), outlineWidthPixels: 0);
 
-    drawOn.point(center: const Offset(400,  75), sizePixels: 70, shape: PointShape.triangle, fill: Colors.red, outlineWidth: 2);
-    drawOn.point(center: const Offset(400, 175), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
-    drawOn.point(center: const Offset(400, 275), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
-    drawOn.point(center: const Offset(400, 375), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
-    drawOn.point(center: const Offset(400, 475), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+    drawOn.point(center: const Offset(-3.5, -3.5), sizePixels: 200, fill: Color(0xFFFFA500), outlineWidthPixels: 10, rotation: math.pi / 4, aspect: 0.7);
+    drawOn.point(center: const Offset(-4.1, -2.9), sizePixels: 70, fill: Color(0x80FFA500), outlineWidthPixels: 10);
+    drawOn.point(center: const Offset(-2.9, -4.1), sizePixels: 70, fill: Color(0x80FF0000), outlineWidthPixels: 5);
+    drawOn.point(center: const Offset(-2.9, -4.1), sizePixels: 70, shape: PointShape.box, fill: Color(0x80FF0000), outlineWidthPixels: 5);
 
-    drawOn.point(center: const Offset(520,  75), sizePixels: 70, shape: PointShape.egg, fill: Colors.red, outlineWidth: 2);
-    drawOn.point(center: const Offset(520, 175), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
-    drawOn.point(center: const Offset(520, 275), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
-    drawOn.point(center: const Offset(520, 375), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
-    drawOn.point(center: const Offset(520, 475), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+    drawOn.point(center: const Offset(-2, -4.0), sizePixels: 70, shape: PointShape.triangle, fill: Colors.red, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-2, -3.2), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-2, -2.4), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-2, -1.6), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-2, -0.8), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
-    drawOn.point(center: const Offset(640,  75), sizePixels: 70, shape: PointShape.uglyegg, fill: Colors.red, outlineWidth: 2);
-    drawOn.point(center: const Offset(640, 175), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
-    drawOn.point(center: const Offset(640, 275), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
-    drawOn.point(center: const Offset(640, 375), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
-    drawOn.point(center: const Offset(640, 475), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+    drawOn.point(center: const Offset(-1, -4.0), sizePixels: 70, shape: PointShape.egg, fill: Colors.red, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-1, -3.2), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-1, -2.4), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-1, -1.6), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(-1, -0.8), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
-    drawOn.point(center: const Offset(760,  75), sizePixels: 70, shape: PointShape.box, fill: Colors.red, outlineWidth: 2);
-    drawOn.point(center: const Offset(760, 175), sizePixels: 70, shape: PointShape.box, rotation: RotationRight30, fill: Colors.green, outlineWidth: 2);
-    drawOn.point(center: const Offset(760, 275), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft30, fill: Colors.blue, outlineWidth: 2);
-    drawOn.point(center: const Offset(760, 375), sizePixels: 70, shape: PointShape.box, rotation: RotationRight45, fill: Colors.orange, outlineWidth: 2);
-    drawOn.point(center: const Offset(760, 475), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft45, fill: Colors.yellow, outlineWidth: 2);
+    drawOn.point(center: const Offset(0.0, -4.0), sizePixels: 70, shape: PointShape.uglyegg, fill: Colors.red, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(0.0, -3.2), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(0.0, -2.4), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(0.0, -1.6), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(0.0, -0.8), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
-    // drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidth: 1);
-    // drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
-    // drawOn.point3d(const Offset(400, 400), 10, fill: Colors.blue, outline: Colors.red, outlineWidth: 1);
+    drawOn.point(center: const Offset(1.0, -4.0), sizePixels: 70, shape: PointShape.box, fill: Colors.red, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(1.0, -3.2), sizePixels: 70, shape: PointShape.box, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(1.0, -2.4), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(1.0, -1.6), sizePixels: 70, shape: PointShape.box, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    drawOn.point(center: const Offset(1.0, -0.8), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
+
+    // drawOn.point3d(const Offset(400, 200), 150, fill: Colors.green, outline: Colors.red, outlineWidthPixels: 1);
+    // drawOn.point3d(const Offset(400, 350), 50, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
+    // drawOn.point3d(const Offset(400, 400), 10, fill: Colors.blue, outline: Colors.red, outlineWidthPixels: 1);
   }
 
   @override

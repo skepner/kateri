@@ -42,7 +42,7 @@ class DrawOnPdf extends DrawOn {
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
-      double outlineWidth = 1.0,
+      double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
     final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
@@ -54,7 +54,7 @@ class DrawOnPdf extends DrawOn {
       ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
       ..setFillColor(fillc)
       ..setStrokeColor(outlinec)
-      ..setLineWidth(outlineWidth);
+      ..setLineWidth(outlineWidthPixels);
     _drawShape(shape, sizePixels);
     _canvas
       ..fillAndStrokePath()
@@ -115,9 +115,9 @@ class DrawOnPdf extends DrawOn {
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
-      double outlineWidth = 1.0,
+      double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
-    point(center: center, sizePixels: sizePixels, shape: shape, fill: fill, outline: outline, outlineWidth: outlineWidth, rotation: rotation, aspect: aspect);
+    point(center: center, sizePixels: sizePixels, shape: shape, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, rotation: rotation, aspect: aspect);
   }
 }

@@ -5,21 +5,28 @@ import 'package:flutter/material.dart';
 import 'draw_on.dart';
 
 class DrawOnCanvas extends DrawOn {
-  Canvas canvas;
-  Size size;
+  final Canvas canvas;
+  final Size canvasSize;
+  final Rect viewport;
+  final double pixelSize;
 
-  DrawOnCanvas(this.canvas, this.size);
+  DrawOnCanvas(this.canvas, {required this.canvasSize, required this.viewport}) : pixelSize = viewport.width / canvasSize.width {
+    canvas.scale(canvasSize.width / viewport.width);
+    canvas.translate(-viewport.top, -viewport.left);
+  }
 
   // ----------------------------------------------------------------------
   // 2D
   // ----------------------------------------------------------------------
 
   @override
-  void point({required Offset center, required double sizePixels,
+  void point(
+      {required Offset center,
+      required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
-      double outlineWidth = 1.0,
+      double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
     canvas.save();
@@ -30,15 +37,15 @@ class DrawOnCanvas extends DrawOn {
     var paint = Paint()
       ..style = PaintingStyle.fill
       ..color = fill
-      ..strokeWidth = outlineWidth
+      ..strokeWidth = outlineWidthPixels * pixelSize
       ..isAntiAlias = true;
-    _drawShape(paint, shape, sizePixels);
+    _drawShape(paint, shape, sizePixels * pixelSize);
 
     paint
       ..color = outline
-      ..strokeWidth = outlineWidth
+      ..strokeWidth = outlineWidthPixels * pixelSize
       ..style = PaintingStyle.stroke;
-    _drawShape(paint, shape, sizePixels);
+    _drawShape(paint, shape, sizePixels * pixelSize);
 
     canvas.restore();
   }
@@ -97,11 +104,13 @@ class DrawOnCanvas extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void point3d({required Offset center, required double sizePixels,
+  void point3d(
+      {required Offset center,
+      required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
-      double outlineWidth = 1.0,
+      double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
     canvas.save();
@@ -129,14 +138,14 @@ class DrawOnCanvas extends DrawOn {
     var paint = Paint()
       ..style = PaintingStyle.fill
       ..color = fill
-      ..strokeWidth = outlineWidth
+      ..strokeWidth = outlineWidthPixels
       ..shader = shader
       ..isAntiAlias = true;
     _drawShape(paint, shape, sizePixels);
 
     paint
       ..color = outline
-      ..strokeWidth = outlineWidth
+      ..strokeWidth = outlineWidthPixels
       ..shader = null
       ..style = PaintingStyle.stroke;
     _drawShape(paint, shape, sizePixels);
