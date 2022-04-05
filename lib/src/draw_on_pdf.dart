@@ -215,7 +215,7 @@ class DrawOnPdf extends DrawOn {
   }
 
   @override
-  void text(String text, Offset origin, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {}
+  void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {}
 
   @override
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {
