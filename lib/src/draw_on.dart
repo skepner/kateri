@@ -13,6 +13,16 @@ const RotationLeft60 = -math.pi / 3;
 
 // ----------------------------------------------------------------------
 
+class LabelStyle {
+  final Color color;
+  final String fontFamily;
+  final FontWeight fontWeight;
+
+  const LabelStyle({this.color = const Color(0xFF000000), this.fontFamily = "Helvetica", this.fontWeight = FontWeight.normal});
+}
+
+// ----------------------------------------------------------------------
+
 abstract class DrawOn {
   double get pixelSize;
 
@@ -89,13 +99,7 @@ abstract class DrawOn {
     double rotation = NoRotation, // NoRotation - first radius in upright
   });
 
-  void text(
-    String text,
-    Offset origin, {
-    double sizePixels = 20.0,
-    Color color = const Color(0xFF000000),
-    FontWeight fontWeight = FontWeight.normal,
-  });
+  void text(String text, Offset origin, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()});
 
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0});
 

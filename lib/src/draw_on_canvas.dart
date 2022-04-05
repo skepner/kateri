@@ -222,15 +222,10 @@ class DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void text(
-    String text,
-    Offset origin, {
-    double sizePixels = 20.0,
-    Color color = const Color(0xFF000000),
-    FontWeight fontWeight = FontWeight.normal,
-  }) {
+  void text(String text, Offset origin, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()})
+  {
     final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontSize: sizePixels * pixelSize))
-      ..pushStyle(ui.TextStyle(color: color, fontWeight: fontWeight))
+      ..pushStyle(ui.TextStyle(color: textStyle.color, fontFamily: textStyle.fontFamily, fontWeight: textStyle.fontWeight))
       ..addText(text);
     final Paragraph paragraph = paragraphBuilder.build()..layout(const ParagraphConstraints(width: 99999.0));
     canvas
