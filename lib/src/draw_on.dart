@@ -13,13 +13,15 @@ const RotationLeft60 = -math.pi / 3;
 
 // ----------------------------------------------------------------------
 
+enum LabelFontFamily { monospace, sansSerif, serif, helvetica, courier, times, symbol /*, zapf */ }
+
 class LabelStyle {
   final Color color;
-  final String fontFamily;
+  final LabelFontFamily fontFamily;
   final FontWeight fontWeight;
   final FontStyle fontStyle;
 
-  const LabelStyle({this.color = const Color(0xFF000000), this.fontFamily = "Helvetica", this.fontStyle = FontStyle.normal, this.fontWeight = FontWeight.normal});
+  const LabelStyle({this.color = const Color(0xFF000000), this.fontFamily = LabelFontFamily.helvetica, this.fontStyle = FontStyle.normal, this.fontWeight = FontWeight.normal});
 }
 
 // ----------------------------------------------------------------------

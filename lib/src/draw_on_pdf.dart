@@ -215,7 +215,17 @@ class DrawOnPdf extends DrawOn {
   }
 
   @override
-  void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {}
+  void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
+    final colorC = PdfColor.fromInt(textStyle.color.value);
+    _canvas
+    ..saveContext()
+    ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)
+      ..rotateZ(rotation))
+    ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha))
+    ..setStrokeColor(colorC)
+    // ..drawString(PdfStandardFont(), sizePixels * pixelSize, text, 0.0, 0.0)
+    ..restoreContext();
+  }
 
   @override
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {

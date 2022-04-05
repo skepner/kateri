@@ -221,10 +221,31 @@ class DrawOnCanvas extends DrawOn {
     canvas.restore();
   }
 
+  static String _labelFont(LabelFontFamily fontFamily) {
+    switch (fontFamily) {
+      case LabelFontFamily.monospace:
+        return "Courier";
+      case LabelFontFamily.sansSerif:
+        return "Helvetica";
+      case LabelFontFamily.serif:
+        return "Times";
+      case LabelFontFamily.helvetica:
+        return "Helvetica";
+      case LabelFontFamily.courier:
+        return "Courier";
+      case LabelFontFamily.times:
+        return "Times";
+      case LabelFontFamily.symbol:
+        return "Symbol";
+      // case LabelFontFamily.zapf:
+      //   return "Zapf";
+    }
+  }
+
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontSize: sizePixels * pixelSize))
-      ..pushStyle(ui.TextStyle(color: textStyle.color, fontFamily: textStyle.fontFamily, fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight))
+      ..pushStyle(ui.TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight))
       ..addText(text);
     final Paragraph paragraph = paragraphBuilder.build()..layout(const ParagraphConstraints(width: 99999.0));
     canvas
