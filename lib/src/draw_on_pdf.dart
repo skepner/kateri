@@ -9,12 +9,25 @@ import 'draw_on.dart';
 
 // ----------------------------------------------------------------------
 
+class _FontKey {
+  final LabelFontFamily fontFamily;
+  final FontWeight fontWeight;
+  final FontStyle fontStyle;
+
+  const _FontKey(this.fontFamily, this.fontWeight, this.fontStyle);
+
+  _FontKey.fromLabelStyle(LabelStyle style)
+      : fontFamily = style.fontFamily,
+        fontWeight = style.fontWeight,
+        fontStyle = style.fontStyle;
+}
+
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
   final Rect viewport;
   final double _pixelSize;
-  Map<LabelFontFamily, PdfFont> _fonts;
+  Map<_FontKey, PdfFont> _fonts;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
@@ -22,7 +35,7 @@ class DrawOnPdf extends DrawOn {
       : doc = PdfDocument(),
         canvasSize = Size(width, width / aspect),
         _pixelSize = viewport.width / width,
-        _fonts = <LabelFontFamily, PdfFont>{} {
+        _fonts = <_FontKey, PdfFont>{} {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
@@ -217,33 +230,34 @@ class DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
-  PdfFont _getFont(LabelFontFamily fontFamily) {
-    var font = _fonts[fontFamily];
+  PdfFont _getFont(_FontKey key) {
+    var font = _fonts[key];
     if (font == null) {
-      switch (fontFamily) {
-        case LabelFontFamily.monospace:
+      switch (key) {
+        case _FontKey(LabelFontFamily.monospace, FontWeight.normal, FontStyle.normal):
           font = PdfFont.courier(doc);
           break;
-        case LabelFontFamily.sansSerif:
-          font = PdfFont.helvetica(doc);
-          break;
-        case LabelFontFamily.serif:
-          font = PdfFont.times(doc);
-          break;
-        case LabelFontFamily.helvetica:
-          font = PdfFont.helvetica(doc);
-          break;
-        case LabelFontFamily.courier:
-          font = PdfFont.courier(doc);
-          break;
-        case LabelFontFamily.times:
-          font = PdfFont.times(doc);
-          break;
+        // case LabelFontFamily.sansSerif:
+        //   font = PdfFont.helvetica(doc);
+        //   break;
+        // case LabelFontFamily.serif:
+        //   font = PdfFont.times(doc);
+        //   break;
+        // case LabelFontFamily.helvetica:
+        //   font = PdfFont.helvetica(doc);
+        //   break;
+        // case LabelFontFamily.courier:
+        //   font = PdfFont.courier(doc);
+        //   break;
+        // case LabelFontFamily.times:
+        //   font = PdfFont.times(doc);
+        //   break;
         // case LabelFontFamily.symbol:
         //   font = PdfFont.symbol(doc);
         //   break;
       }
-      _fonts[fontFamily] = font;
+      font ??= PdfFont.helvetica(doc);
+      _fonts[key] = font;
     }
     return font;
   }
@@ -258,7 +272,7 @@ class DrawOnPdf extends DrawOn {
         ..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
       ..setFillColor(colorC)
-      ..drawString(_getFont(textStyle.fontFamily), sizePixels * pixelSize, text, 0.0, 0.0)
+      ..drawString(_getFont(_FontKey.fromLabelStyle(textStyle)), sizePixels * pixelSize, text, 0.0, 0.0)
       ..restoreContext();
   }
 
