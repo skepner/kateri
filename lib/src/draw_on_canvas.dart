@@ -209,7 +209,7 @@ class DrawOnCanvas extends DrawOn {
           Path()
             ..moveTo(0.0, - radius)
             ..lineTo(0.0, 0.0)
-            ..lineTo(math.sin(angle), - radius * math.cos(angle)),
+            ..lineTo(math.sin(angle) * radius, - math.cos(angle) * radius),
           Paint()
             ..style = PaintingStyle.stroke
             ..color = outlineRadius

@@ -127,11 +127,11 @@ class DrawOnPdf extends DrawOn {
   }
 
   void _setColorsLineWidth({required Color fill, required Color outline, required lineWidthPixels}) {
-    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
+    final fillC = PdfColor.fromInt(fill.value), outlineC = PdfColor.fromInt(outline.value);
     _canvas
-      ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha, strokeOpacity: outlinec.alpha))
-      ..setFillColor(fillc)
-      ..setStrokeColor(outlinec)
+      ..setGraphicState(PdfGraphicState(fillOpacity: fillC.alpha, strokeOpacity: outlineC.alpha))
+      ..setFillColor(fillC)
+      ..setStrokeColor(outlineC)
       ..setLineWidth(lineWidthPixels * pixelSize);
   }
 
@@ -158,7 +158,7 @@ class DrawOnPdf extends DrawOn {
         ..rotateZ(rotation)
         ..scale(aspect, 1.0));
     _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels);
-    _drawShape(PointShape.circle, size);
+    _canvas.drawEllipse(0.0, 0.0, size / 2, size / 2);
     _fillAndStroke(outlineWidthPixels);
     _canvas.restoreContext();
   }
@@ -175,6 +175,43 @@ class DrawOnPdf extends DrawOn {
     double outlineRadiusWidthPixels = 1.0,
     double rotation = NoRotation, // NoRotation - first radius in upright
   }) {
+    _canvas
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)..rotateZ(rotation));
+    final otherPointOnArc = Offset(math.sin(angle) * radius, -math.cos(angle) * radius);
+    if (fill.alpha > 0) {
+      final fillc = PdfColor.fromInt(fill.value);
+      _canvas
+        ..moveTo(0.0, 0.0)
+        ..lineTo(0.0, -radius)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: angle > math.pi, sweep: true)
+        ..lineTo(0.0, 0.0)
+        ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha))
+        ..setFillColor(fillc)
+        ..fillPath();
+    }
+    if (outlineCircleWidthPixels > 0 && outlineCircle.alpha > 0) {
+      final outlineCircleC = PdfColor.fromInt(outlineCircle.value);
+      _canvas
+        ..moveTo(0.0, -radius)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: angle > math.pi, sweep: true)
+        ..setGraphicState(PdfGraphicState(strokeOpacity: outlineCircleC.alpha))
+        ..setStrokeColor(outlineCircleC)
+        ..setLineWidth(outlineCircleWidthPixels * pixelSize)
+        ..strokePath();
+    }
+    if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
+      final outlineRadiusC = PdfColor.fromInt(outlineRadius.value);
+      _canvas
+        ..moveTo(0.0, -radius)
+        ..lineTo(0.0, 0.0)
+        ..lineTo(otherPointOnArc.dx, otherPointOnArc.dy)
+        ..setGraphicState(PdfGraphicState(strokeOpacity: outlineRadiusC.alpha))
+        ..setStrokeColor(outlineRadiusC)
+        ..setLineWidth(outlineRadiusWidthPixels * pixelSize)
+        ..strokePath();
+    }
+    _canvas.restoreContext();
   }
 
   @override
