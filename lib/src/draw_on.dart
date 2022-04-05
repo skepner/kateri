@@ -22,7 +22,6 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
-  // circle (filled)
   // sector
   // rectangle (filled) -> path
   // text
@@ -66,6 +65,15 @@ abstract class DrawOn {
         rotation: headRotation,
         aspect: headAspect);
   }
+
+  void circle(
+      {required Offset center,
+      required double size,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0});
 
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0});
 

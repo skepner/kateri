@@ -150,6 +150,8 @@ class AntigenicMapPainter extends CustomPainter {
     drawOn.arrow(const Offset(2.9, 4.1), const Offset(1.1, 2.2));
     drawOn.arrow(const Offset(3.2, 2.2), const Offset(0.5, 4.1));
     drawOn.arrow(const Offset(0.9, 4.1), const Offset(3.7, 2.2));
+
+    drawOn.circle(center: const Offset(-3.1, 3.1), size: 3.2, fill: const Color(0x200080FF), outline: Colors.orange);
   }
 
   @override

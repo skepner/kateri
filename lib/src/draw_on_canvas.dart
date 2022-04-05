@@ -159,6 +159,38 @@ class DrawOnCanvas extends DrawOn {
       ..restore();
   }
 
+  @override
+  void circle(
+      {required Offset center,
+      required double size,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
+    canvas
+      ..save()
+      ..translate(center.dx, center.dy)
+      ..rotate(rotation)
+      ..scale(aspect, 1.0);
+
+    var paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = fill
+      ..isAntiAlias = true;
+    _drawShape(paint, PointShape.circle, size);
+
+    if (outlineWidthPixels > 0) {
+      paint
+        ..color = outline
+        ..strokeWidth = outlineWidthPixels * pixelSize
+        ..style = PaintingStyle.stroke;
+        _drawShape(paint, PointShape.circle, size);
+    }
+
+    canvas.restore();
+  }
+
   // ----------------------------------------------------------------------
   // 3D
   // ----------------------------------------------------------------------

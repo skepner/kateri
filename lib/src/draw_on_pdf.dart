@@ -72,7 +72,6 @@ class DrawOnPdf extends DrawOn {
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
-    // final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
@@ -142,6 +141,26 @@ class DrawOnPdf extends DrawOn {
     } else {
       _canvas.fillPath();
     }
+  }
+
+  @override
+  void circle(
+      {required Offset center,
+      required double size,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
+    _canvas
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
+        ..rotateZ(rotation)
+        ..scale(aspect, 1.0));
+    _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels);
+    _drawShape(PointShape.circle, size);
+    _fillAndStroke(outlineWidthPixels);
+    _canvas.restoreContext();
   }
 
   @override
