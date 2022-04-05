@@ -225,22 +225,22 @@ class DrawOnPdf extends DrawOn {
           font = PdfFont.courier(doc);
           break;
         case LabelFontFamily.sansSerif:
-          font = PdfFont.courier(doc);
+          font = PdfFont.helvetica(doc);
           break;
         case LabelFontFamily.serif:
-          font = PdfFont.courier(doc);
+          font = PdfFont.times(doc);
           break;
         case LabelFontFamily.helvetica:
-          font = PdfFont.courier(doc);
+          font = PdfFont.helvetica(doc);
           break;
         case LabelFontFamily.courier:
           font = PdfFont.courier(doc);
           break;
         case LabelFontFamily.times:
-          font = PdfFont.courier(doc);
+          font = PdfFont.times(doc);
           break;
         case LabelFontFamily.symbol:
-          font = PdfFont.courier(doc);
+          font = PdfFont.symbol(doc);
           break;
       }
     }
@@ -252,7 +252,7 @@ class DrawOnPdf extends DrawOn {
     final colorC = PdfColor.fromInt(textStyle.color.value);
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)..rotateZ(rotation))
+      ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)..rotateZ(rotation)..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha))
       ..setStrokeColor(colorC)
       ..drawString(_getFont(textStyle.fontFamily), sizePixels * pixelSize, text, 0.0, 0.0)
