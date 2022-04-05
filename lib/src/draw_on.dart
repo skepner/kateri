@@ -13,7 +13,7 @@ const RotationLeft60 = -math.pi / 3;
 
 // ----------------------------------------------------------------------
 
-enum LabelFontFamily { monospace, sansSerif, serif, helvetica, courier, times, symbol /*, zapf */ }
+enum LabelFontFamily { monospace, sansSerif, serif, helvetica, courier, times /* , symbol, zapf */ }
 
 class LabelStyle {
   final Color color;

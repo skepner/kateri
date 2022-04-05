@@ -239,10 +239,11 @@ class DrawOnPdf extends DrawOn {
         case LabelFontFamily.times:
           font = PdfFont.times(doc);
           break;
-        case LabelFontFamily.symbol:
-          font = PdfFont.symbol(doc);
-          break;
+        // case LabelFontFamily.symbol:
+        //   font = PdfFont.symbol(doc);
+        //   break;
       }
+      _fonts[fontFamily] = font;
     }
     return font;
   }
@@ -252,9 +253,11 @@ class DrawOnPdf extends DrawOn {
     final colorC = PdfColor.fromInt(textStyle.color.value);
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)..rotateZ(rotation)..scale(1.0, -1.0))
-      ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha))
-      ..setStrokeColor(colorC)
+      ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)
+        ..rotateZ(rotation)
+        ..scale(1.0, -1.0))
+      ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
+      ..setFillColor(colorC)
       ..drawString(_getFont(textStyle.fontFamily), sizePixels * pixelSize, text, 0.0, 0.0)
       ..restoreContext();
   }

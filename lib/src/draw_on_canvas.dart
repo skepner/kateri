@@ -235,8 +235,8 @@ class DrawOnCanvas extends DrawOn {
         return "Courier";
       case LabelFontFamily.times:
         return "Times";
-      case LabelFontFamily.symbol:
-        return "Symbol";
+      // case LabelFontFamily.symbol:
+      //   return "Symbol";
       // case LabelFontFamily.zapf:
       //   return "Zapf";
     }
