@@ -141,6 +141,15 @@ class AntigenicMapPainter extends CustomPainter {
     drawOn.path([const Offset(-4.1, -1.2), const Offset(3.2, 1.1), const Offset(-4.5, 2.5)], outline: Colors.cyan, fill: Color(0x1000FF00), lineWidthPixels: 0.0);
     drawOn.path([const Offset(-4.6, -2.2), const Offset(3.2, -2.2), const Offset(-4.5, 2.5)], outline: Colors.pink, fill: Color(0x10000040), lineWidthPixels: 2.0);
     drawOn.path([const Offset(-4.8, -3.2), const Offset(3.2, -3.2), const Offset(-4.8, 3.5)], outline: Colors.blue, lineWidthPixels: 1.0);
+
+    drawOn.arrow(const Offset(0.1, 2.1), const Offset(0.1, 4.3));
+    drawOn.arrow(const Offset(0.3, 4.3), const Offset(0.3, 2.1));
+    drawOn.arrow(const Offset(-0.5, 3.1), const Offset(3.5, 3.1));
+    drawOn.arrow(const Offset(3.5, 3.3), const Offset(-0.5, 3.3));
+    drawOn.arrow(const Offset(0.7, 2.2), const Offset(2.5, 4.1));
+    drawOn.arrow(const Offset(2.9, 4.1), const Offset(1.1, 2.2));
+    drawOn.arrow(const Offset(3.2, 2.2), const Offset(0.5, 4.1));
+    drawOn.arrow(const Offset(0.9, 4.1), const Offset(3.7, 2.2));
   }
 
   @override

@@ -8,12 +8,15 @@ class DrawOnCanvas extends DrawOn {
   final Canvas canvas;
   final Size canvasSize;
   final Rect viewport;
-  final double pixelSize;
+  final double _pixelSize;
 
-  DrawOnCanvas(this.canvas, {required this.canvasSize, required this.viewport}) : pixelSize = viewport.width / canvasSize.width {
+  DrawOnCanvas(this.canvas, {required this.canvasSize, required this.viewport}) : _pixelSize = viewport.width / canvasSize.width {
     canvas.scale(canvasSize.width / viewport.width);
     canvas.translate(-viewport.left, -viewport.top);
   }
+
+  @override
+  double get pixelSize => _pixelSize;
 
   // ----------------------------------------------------------------------
   // 2D

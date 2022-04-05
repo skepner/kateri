@@ -12,14 +12,14 @@ class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
   final Rect viewport;
-  final double pixelSize;
+  final double _pixelSize;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
   DrawOnPdf({double width = 1000.0, double aspect = 1.0, required this.viewport})
       : doc = PdfDocument(),
         canvasSize = Size(width, width / aspect),
-        pixelSize = viewport.width / width {
+        _pixelSize = viewport.width / width {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
@@ -40,6 +40,9 @@ class DrawOnPdf extends DrawOn {
       await Process.run("open-and-back-to-emacs", [filename]);
     }
   }
+
+  @override
+  double get pixelSize => _pixelSize;
 
   // ----------------------------------------------------------------------
   // 2D
