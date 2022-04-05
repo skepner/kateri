@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/obj/type1_font.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
@@ -13,13 +14,15 @@ class DrawOnPdf extends DrawOn {
   final Size canvasSize;
   final Rect viewport;
   final double _pixelSize;
+  Map<LabelFontFamily, PdfFont> _fonts;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
   DrawOnPdf({double width = 1000.0, double aspect = 1.0, required this.viewport})
       : doc = PdfDocument(),
         canvasSize = Size(width, width / aspect),
-        _pixelSize = viewport.width / width {
+        _pixelSize = viewport.width / width,
+        _fonts = <LabelFontFamily, PdfFont>{} {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
@@ -214,17 +217,46 @@ class DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
+  PdfFont _getFont(LabelFontFamily fontFamily) {
+    var font = _fonts[fontFamily];
+    if (font == null) {
+      switch (fontFamily) {
+        case LabelFontFamily.monospace:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.sansSerif:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.serif:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.helvetica:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.courier:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.times:
+          font = PdfFont.courier(doc);
+          break;
+        case LabelFontFamily.symbol:
+          font = PdfFont.courier(doc);
+          break;
+      }
+    }
+    return font;
+  }
+
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     final colorC = PdfColor.fromInt(textStyle.color.value);
     _canvas
-    ..saveContext()
-    ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)
-      ..rotateZ(rotation))
-    ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha))
-    ..setStrokeColor(colorC)
-    // ..drawString(PdfStandardFont(), sizePixels * pixelSize, text, 0.0, 0.0)
-    ..restoreContext();
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(origin.dx, origin.dy, 0)..rotateZ(rotation))
+      ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha))
+      ..setStrokeColor(colorC)
+      ..drawString(_getFont(textStyle.fontFamily), sizePixels * pixelSize, text, 0.0, 0.0)
+      ..restoreContext();
   }
 
   @override
