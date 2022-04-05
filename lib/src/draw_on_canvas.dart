@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
@@ -172,9 +173,9 @@ class DrawOnCanvas extends DrawOn {
     required double radius,
     required double angle,
     Color fill = const Color(0x00000000),
-    Color outlineCircle = const Color(0xFF000000),
+    Color outlineCircle = Colors.black,
     double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = const Color(0xFF000000),
+    Color outlineRadius = Colors.black,
     double outlineRadiusWidthPixels = 1.0,
     double rotation = NoRotation, // NoRotation - first radius in upright
   }) {
@@ -207,9 +208,9 @@ class DrawOnCanvas extends DrawOn {
     if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
       canvas.drawPath(
           Path()
-            ..moveTo(0.0, - radius)
+            ..moveTo(0.0, -radius)
             ..lineTo(0.0, 0.0)
-            ..lineTo(math.sin(angle) * radius, - math.cos(angle) * radius),
+            ..lineTo(math.sin(angle) * radius, -math.cos(angle) * radius),
           Paint()
             ..style = PaintingStyle.stroke
             ..color = outlineRadius
@@ -218,6 +219,24 @@ class DrawOnCanvas extends DrawOn {
     }
 
     canvas.restore();
+  }
+
+  @override
+  void text(
+    String text,
+    Offset origin, {
+    double sizePixels = 20.0,
+    Color color = const Color(0xFF000000),
+    FontWeight fontWeight = FontWeight.normal,
+  }) {
+    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontSize: sizePixels * pixelSize))
+      ..pushStyle(ui.TextStyle(color: color, fontWeight: fontWeight))
+      ..addText(text);
+    final Paragraph paragraph = paragraphBuilder.build()..layout(const ParagraphConstraints(width: 99999.0));
+    canvas
+      ..save()
+      ..drawParagraph(paragraph, origin)
+      ..restore();
   }
 
   @override

@@ -22,7 +22,6 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
-  // sector
   // text
   // label
   // legend
@@ -88,6 +87,14 @@ abstract class DrawOn {
     Color outlineRadius = const Color(0xFF000000),
     double outlineRadiusWidthPixels = 1.0,
     double rotation = NoRotation, // NoRotation - first radius in upright
+  });
+
+  void text(
+    String text,
+    Offset origin, {
+    double sizePixels = 20.0,
+    Color color = const Color(0xFF000000),
+    FontWeight fontWeight = FontWeight.normal,
   });
 
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0});
