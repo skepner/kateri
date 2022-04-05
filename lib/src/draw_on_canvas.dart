@@ -135,6 +135,92 @@ class DrawOnCanvas extends DrawOn {
   }
 
   @override
+  void circle(
+      {required Offset center,
+      required double size,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = NoRotation,
+      double aspect = 1.0}) {
+    canvas
+      ..save()
+      ..translate(center.dx, center.dy)
+      ..rotate(rotation)
+      ..scale(aspect, 1.0);
+
+    var paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = fill
+      ..isAntiAlias = true;
+    canvas.drawCircle(Offset.zero, size / 2, paint);
+
+    if (outlineWidthPixels > 0) {
+      paint
+        ..color = outline
+        ..strokeWidth = outlineWidthPixels * pixelSize
+        ..style = PaintingStyle.stroke;
+      canvas.drawCircle(Offset.zero, size / 2, paint);
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  void sector({
+    required Offset center,
+    required double radius,
+    required double angle,
+    Color fill = const Color(0x00000000),
+    Color outlineCircle = const Color(0xFF000000),
+    double outlineCircleWidthPixels = 1.0,
+    Color outlineRadius = const Color(0xFF000000),
+    double outlineRadiusWidthPixels = 1.0,
+    double rotation = NoRotation, // NoRotation - first radius in upright
+  }) {
+    canvas
+      ..save()
+      ..translate(center.dx, center.dy)
+      ..rotate(rotation);
+    final arc = (-Offset(radius, radius)) & Size(radius * 2, radius * 2);
+    if (fill.alpha > 0) {
+      canvas.drawPath(
+          Path()
+            ..moveTo(0.0, 0.0)
+            ..lineTo(0.0, -radius)
+            ..arcTo(arc, -math.pi / 2, angle, true)
+            ..lineTo(0.0, 0.0),
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = fill
+            ..isAntiAlias = true);
+    }
+    if (outlineCircleWidthPixels > 0 && outlineCircle.alpha > 0) {
+      canvas.drawPath(
+          Path()..arcTo(arc, -math.pi / 2, angle, true),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = outlineCircle
+            ..strokeWidth = outlineCircleWidthPixels * pixelSize
+            ..isAntiAlias = true);
+    }
+    if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
+      canvas.drawPath(
+          Path()
+            ..moveTo(0.0, - radius)
+            ..lineTo(0.0, 0.0)
+            ..lineTo(math.sin(angle), - radius * math.cos(angle)),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = outlineRadius
+            ..strokeWidth = outlineRadiusWidthPixels * pixelSize
+            ..isAntiAlias = true);
+    }
+
+    canvas.restore();
+  }
+
+  @override
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {
     var path = Path();
     for (var x = viewport.left.ceilToDouble(); x < viewport.right; x += step) {
@@ -157,38 +243,6 @@ class DrawOnCanvas extends DrawOn {
             ..strokeWidth = lineWidthPixels * pixelSize
             ..isAntiAlias = true)
       ..restore();
-  }
-
-  @override
-  void circle(
-      {required Offset center,
-      required double size,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
-      double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
-      double aspect = 1.0}) {
-    canvas
-      ..save()
-      ..translate(center.dx, center.dy)
-      ..rotate(rotation)
-      ..scale(aspect, 1.0);
-
-    var paint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = fill
-      ..isAntiAlias = true;
-    _drawShape(paint, PointShape.circle, size);
-
-    if (outlineWidthPixels > 0) {
-      paint
-        ..color = outline
-        ..strokeWidth = outlineWidthPixels * pixelSize
-        ..style = PaintingStyle.stroke;
-        _drawShape(paint, PointShape.circle, size);
-    }
-
-    canvas.restore();
   }
 
   // ----------------------------------------------------------------------

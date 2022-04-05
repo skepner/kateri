@@ -153,6 +153,8 @@ class AntigenicMapPainter extends CustomPainter {
 
     drawOn.circle(center: const Offset(-3.1, 3.1), size: 3.2, fill: const Color(0x200080FF), outline: Colors.orange);
     drawOn.rectangle(rect: const Offset(-1.2, 4.1) & const Size(3.2, 0.5), fill: const Color(0x2000FF80), outline: Colors.red);
+    drawOn.point(center: const Offset(2.0, 0.0), sizePixels: 5);
+    drawOn.sector(center: const Offset(2.0, 0.0), radius: 1.0, fill: const Color(0x200080FF), outlineCircle: Colors.orange, outlineCircleWidthPixels: 5.0, angle: math.pi * 1.2, rotation: RotationRight30, outlineRadiusWidthPixels: 5.0);
   }
 
   @override
