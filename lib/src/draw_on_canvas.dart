@@ -25,36 +25,6 @@ class DrawOnCanvas extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
-    var path = Path()..moveTo(vertices[0].dx, vertices[0].dy);
-    for (var vertix in vertices.getRange(1, vertices.length)) {
-      path.lineTo(vertix.dx, vertix.dy);
-    }
-    if (close) {
-      path.close();
-    }
-
-    canvas
-      ..save()
-      ..drawPath(
-          path,
-          Paint()
-            ..style = PaintingStyle.fill
-            ..color = fill
-            ..isAntiAlias = true);
-    if (lineWidthPixels > 0) {
-      canvas.drawPath(
-          path,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = outline
-            ..strokeWidth = lineWidthPixels * pixelSize
-            ..isAntiAlias = true);
-    }
-    canvas.restore();
-  }
-
-  @override
   void point(
       {required Offset center,
       required double sizePixels,
@@ -63,7 +33,8 @@ class DrawOnCanvas extends DrawOn {
       Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
-      double aspect = 1.0}) {
+      double aspect = 1.0,
+      PointLabel? label}) {
     canvas
       ..save()
       ..translate(center.dx, center.dy)
@@ -82,6 +53,12 @@ class DrawOnCanvas extends DrawOn {
         ..strokeWidth = outlineWidthPixels * pixelSize
         ..style = PaintingStyle.stroke;
       _drawShape(paint, shape, sizePixels * pixelSize);
+    }
+
+    if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
+      final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
+      final offset = Offset(pointSize * label.offset.dx, pointSize * label.offset.dy);
+      delayedText(label.text, offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
     }
 
     canvas.restore();
@@ -134,6 +111,36 @@ class DrawOnCanvas extends DrawOn {
             paint);
         break;
     }
+  }
+
+  @override
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
+    var path = Path()..moveTo(vertices[0].dx, vertices[0].dy);
+    for (var vertix in vertices.getRange(1, vertices.length)) {
+      path.lineTo(vertix.dx, vertix.dy);
+    }
+    if (close) {
+      path.close();
+    }
+
+    canvas
+      ..save()
+      ..drawPath(
+          path,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = fill
+            ..isAntiAlias = true);
+    if (lineWidthPixels > 0) {
+      canvas.drawPath(
+          path,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = outline
+            ..strokeWidth = lineWidthPixels * pixelSize
+            ..isAntiAlias = true);
+    }
+    canvas.restore();
   }
 
   @override
@@ -245,16 +252,10 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
-    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontSize: sizePixels * pixelSize))
-      ..pushStyle(ui.TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight))
-      ..addText(text);
-    final Paragraph paragraph = paragraphBuilder.build()..layout(const ParagraphConstraints(width: 99999.0));
-    canvas
-      ..save()
-      ..translate(origin.dx, origin.dy)
-      ..rotate(rotation)
-      ..drawParagraph(paragraph, Offset.zero)
-      ..restore();
+    final span = TextSpan(text: text, style: TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight));
+    final painter = TextPainter(text: span, textScaleFactor: sizePixels * pixelSize * 0.1, textDirection: TextDirection.ltr)
+    ..layout();
+    painter.paint(canvas, origin);
   }
 
   @override

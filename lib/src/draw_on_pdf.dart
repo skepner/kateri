@@ -54,20 +54,6 @@ class DrawOnPdf extends DrawOn {
   // ----------------------------------------------------------------------
 
   @override
-  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
-    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
-    _canvas.saveContext();
-    _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: lineWidthPixels);
-    _canvas.moveTo(vertices[0].dx, vertices[0].dy);
-    for (var vertix in vertices.getRange(1, vertices.length)) {
-      _canvas.lineTo(vertix.dx, vertix.dy);
-    }
-    _canvas.closePath();
-    _fillAndStroke(lineWidthPixels);
-    _canvas.restoreContext();
-  }
-
-  @override
   void point(
       {required Offset center,
       required double sizePixels,
@@ -76,7 +62,8 @@ class DrawOnPdf extends DrawOn {
       Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
-      double aspect = 1.0}) {
+      double aspect = 1.0,
+      PointLabel? label}) {
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
@@ -129,6 +116,20 @@ class DrawOnPdf extends DrawOn {
           ..closePath();
         break;
     }
+  }
+
+  @override
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
+    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
+    _canvas.saveContext();
+    _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: lineWidthPixels);
+    _canvas.moveTo(vertices[0].dx, vertices[0].dy);
+    for (var vertix in vertices.getRange(1, vertices.length)) {
+      _canvas.lineTo(vertix.dx, vertix.dy);
+    }
+    _canvas.closePath();
+    _fillAndStroke(lineWidthPixels);
+    _canvas.restoreContext();
   }
 
   void _setColorsLineWidth({required Color fill, required Color outline, required lineWidthPixels}) {

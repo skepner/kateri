@@ -26,6 +26,25 @@ class LabelStyle {
 
 // ----------------------------------------------------------------------
 
+class PointLabel extends LabelStyle {
+  final Offset offset;
+  final String text;
+  final double sizePixels;
+  final double rotation;
+
+  const PointLabel(this.text,
+      {this.offset = const Offset(0.0, 1.0),
+      this.sizePixels = 24,
+      this.rotation = 0.0,
+      Color color = const Color(0xFF000000),
+      LabelFontFamily fontFamily = LabelFontFamily.helvetica,
+      FontStyle fontStyle = FontStyle.normal,
+      FontWeight fontWeight = FontWeight.normal})
+      : super(color: color, fontFamily: fontFamily, fontStyle: fontStyle, fontWeight: fontWeight);
+}
+
+// ----------------------------------------------------------------------
+
 abstract class DrawOn {
   final Rect viewport;
 
@@ -39,7 +58,6 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
-  // text
   // label
   // legend
 
@@ -51,7 +69,8 @@ abstract class DrawOn {
       Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
-      double aspect = 1.0});
+      double aspect = 1.0,
+      PointLabel? label});
 
   void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
     path([p1, p2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
@@ -107,6 +126,11 @@ abstract class DrawOn {
   });
 
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()});
+
+  /// Text to be written by drawDelayedText(), i.e. on top of everything
+  void delayedText(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
+    this.text(text, origin, sizePixels: sizePixels, rotation: rotation, textStyle: textStyle);
+  }
 
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0});
 
