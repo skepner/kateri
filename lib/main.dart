@@ -16,7 +16,8 @@ import 'package:intl/intl.dart';
 import 'src/draw_on_canvas.dart';
 import 'src/draw_on_pdf.dart';
 
-import 'src/sample/drawings1.dart' as sample_drawings1;
+// import 'src/sample/drawings1.dart' as sample_drawings1;
+import 'src/sample/drawings2.dart' as sample_drawings2;
 
 // ----------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: CustomPaint(
-        painter: AntigenicMapPainter(const Offset(-6.0, -5.0) & const Size.square(10.0)),
+        painter: AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(10.0)),
         size: const Size(99999, 99999),
       ),
       // body: ListView(children: <Widget>[
@@ -89,10 +90,10 @@ class AntigenicMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    sample_drawings1.draw(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
+    sample_drawings2.draw(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
 
     DrawOnPdf(viewport: viewport)
-      ..draw(sample_drawings1.draw)
+      ..draw(sample_drawings2.draw)
       ..write("/r/a.pdf", open: true);
   }
 
