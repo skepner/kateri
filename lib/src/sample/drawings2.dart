@@ -17,7 +17,7 @@ void draw(DrawOn drawOn) {
     drawOn.point(center: const Offset( 2.0,  0.0), sizePixels: 100, label: const PointLabel("Gilberte", offset: Offset(-1.0,  0.0)), shape: PointShape.egg,      fill: Colors.yellow, outline: Colors.orange, outlineWidthPixels: 20);
     drawOn.point(center: const Offset( 3.0,  1.0), sizePixels: 100, label: const PointLabel("Gilberte", offset: Offset( 1.0,  0.0)), shape: PointShape.egg,      fill: Colors.yellow, outline: Colors.orange, outlineWidthPixels: 20);
     drawOn.point(center: const Offset( 0.0,  2.0), sizePixels: 100, label: const PointLabel("KS/17-cell", color: Colors.blue), shape: PointShape.egg,      fill: Colors.yellow, outline: Colors.orange, outlineWidthPixels: 1);
-    drawOn.point(center: const Offset( 2.0,  3.0), sizePixels: 40, label: const PointLabel("Bjork"), shape: PointShape.uglyegg,  fill: Colors.cyan, outlineWidthPixels: 1);
+    drawOn.point(center: const Offset( 2.0,  3.0), sizePixels: 40, label: const PointLabel("Bjork", rotation: RotationLeft45), shape: PointShape.uglyegg,  fill: Colors.cyan, outlineWidthPixels: 1, rotation: RotationRight30);
 }
 
 // ----------------------------------------------------------------------

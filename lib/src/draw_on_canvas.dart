@@ -54,14 +54,13 @@ class DrawOnCanvas extends DrawOn {
         ..style = PaintingStyle.stroke;
       _drawShape(paint, shape, sizePixels * pixelSize);
     }
+    canvas.restore();
 
     if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
       final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
-      final offset = Offset(pointSize * label.offset.dx, pointSize * label.offset.dy);
+      final offset = center + Offset(pointSize * label.offset.dx, pointSize * label.offset.dy);
       delayedText(label.text, offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
     }
-
-    canvas.restore();
   }
 
   void _drawShape(Paint paint, PointShape shape, double size) {
@@ -252,10 +251,25 @@ class DrawOnCanvas extends DrawOn {
 
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
-    final span = TextSpan(text: text, style: TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight));
-    final painter = TextPainter(text: span, textScaleFactor: sizePixels * pixelSize * 0.1, textDirection: TextDirection.ltr)
-    ..layout();
-    painter.paint(canvas, origin);
+    canvas
+      ..save()
+      ..translate(origin.dx, origin.dy)
+      ..rotate(rotation);
+    _textPainter(text, sizePixels, textStyle).paint(canvas, Offset.zero);
+    canvas.restore();
+  }
+
+  Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
+    final painter = _textPainter(text, sizePixels, textStyle);
+    return Size(painter.width, painter.height);
+  }
+
+  TextPainter _textPainter(String text, double sizePixels, LabelStyle textStyle) {
+    return TextPainter(
+        text: TextSpan(text: text, style: TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight)),
+        textScaleFactor: sizePixels * pixelSize * 0.1,
+        textDirection: TextDirection.ltr)
+      ..layout();
   }
 
   @override
