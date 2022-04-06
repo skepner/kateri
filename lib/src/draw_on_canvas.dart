@@ -57,9 +57,20 @@ class DrawOnCanvas extends DrawOn {
     canvas.restore();
 
     if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
+      double labelOffset(double loffs, double ps, double ts, bool vertical) {
+        if (loffs >= 1.0) {
+          return ps * loffs + (vertical ? ts : 0.0);
+        } else if (loffs > -1.0) {
+          return 0.0;
+        } else {
+          return ps * loffs - (vertical ? 0.0 : ts);
+        }
+      }
+
       final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
-      final offset = center + Offset(pointSize * label.offset.dx, pointSize * label.offset.dy);
-      delayedText(label.text, offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
+      final textSize = this.textSize(label.text, sizePixels: label.sizePixels, textStyle: label);
+      final Offset offset = Offset(labelOffset(label.offset.dx, pointSize, textSize.width, false), labelOffset(label.offset.dy, pointSize, textSize.height, true));
+      delayedText(label.text, center + offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
     }
   }
 
@@ -252,22 +263,26 @@ class DrawOnCanvas extends DrawOn {
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     canvas
-      ..save()
-      ..translate(origin.dx, origin.dy)
-      ..rotate(rotation);
-    _textPainter(text, sizePixels, textStyle).paint(canvas, Offset.zero);
+          ..save()
+          ..translate(origin.dx, origin.dy)
+          ..rotate(rotation)
+        // ..scale(sizePixels)
+        ;
+    _textPainter(text, sizePixels * pixelSize, textStyle).paint(canvas, Offset.zero);
     canvas.restore();
   }
 
+  /// return size of text in the current scale units
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
-    final painter = _textPainter(text, sizePixels, textStyle);
-    return Size(painter.width, painter.height);
+    const precisionFactor = 1000.0; // TextPainter returns size in whole units, we increase precision
+    final painter = _textPainter(text, precisionFactor, textStyle);
+    return Size(painter.width, painter.height) * sizePixels * pixelSize / precisionFactor;
   }
 
-  TextPainter _textPainter(String text, double sizePixels, LabelStyle textStyle) {
+  TextPainter _textPainter(String text, double fontSize, LabelStyle textStyle) {
     return TextPainter(
-        text: TextSpan(text: text, style: TextStyle(color: textStyle.color, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight)),
-        textScaleFactor: sizePixels * pixelSize * 0.1,
+        text: TextSpan(
+            text: text, style: TextStyle(color: textStyle.color, fontSize: fontSize, fontFamily: _labelFont(textStyle.fontFamily), fontStyle: textStyle.fontStyle, fontWeight: textStyle.fontWeight)),
         textDirection: TextDirection.ltr)
       ..layout();
   }
