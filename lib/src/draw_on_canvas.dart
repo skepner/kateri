@@ -8,10 +8,11 @@ import 'draw_on.dart';
 class DrawOnCanvas extends DrawOn {
   final Canvas canvas;
   final Size canvasSize;
-  final Rect viewport;
   final double _pixelSize;
 
-  DrawOnCanvas(this.canvas, {required this.canvasSize, required this.viewport}) : _pixelSize = viewport.width / canvasSize.width {
+  DrawOnCanvas(this.canvas, {required this.canvasSize, required Rect viewport})
+      : _pixelSize = viewport.width / canvasSize.width,
+        super(viewport) {
     canvas.scale(canvasSize.width / viewport.width);
     canvas.translate(-viewport.left, -viewport.top);
   }

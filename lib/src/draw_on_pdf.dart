@@ -14,17 +14,17 @@ String fontKey(LabelStyle style) => "${style.fontFamily} ${style.fontWeight} ${s
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
-  final Rect viewport;
   final double _pixelSize;
   Map<String, PdfFont> _fonts;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
-  DrawOnPdf({double width = 1000.0, double aspect = 1.0, required this.viewport})
+  DrawOnPdf({double width = 1000.0, double aspect = 1.0, required Rect viewport})
       : doc = PdfDocument(),
         canvasSize = Size(width, width / aspect),
         _pixelSize = viewport.width / width,
-        _fonts = <String, PdfFont>{} {
+        _fonts = <String, PdfFont>{},
+        super(viewport) {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left

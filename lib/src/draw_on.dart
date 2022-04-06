@@ -27,6 +27,10 @@ class LabelStyle {
 // ----------------------------------------------------------------------
 
 abstract class DrawOn {
+  final Rect viewport;
+
+  DrawOn(this.viewport);
+
   double get pixelSize;
 
   // ----------------------------------------------------------------------
