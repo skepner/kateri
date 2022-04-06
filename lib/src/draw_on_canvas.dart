@@ -57,13 +57,13 @@ class DrawOnCanvas extends DrawOn {
     canvas.restore();
 
     if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
-      double labelOffset(double loffs, double ps, double ts, bool vertical) {
-        if (loffs >= 1.0) {
-          return ps * loffs + (vertical ? ts : 0.0);
-        } else if (loffs > -1.0) {
-          return ps * loffs + (vertical ? (ts * (loffs + 1) / 2) : (ts * (loffs - 1) / 2));
+      double labelOffset(double labelOffset, double pointSize, double textSize, bool vertical) {
+        if (labelOffset >= 1.0) {
+          return pointSize * labelOffset + (vertical ? textSize : 0.0);
+        } else if (labelOffset > -1.0) {
+          return pointSize * labelOffset + (vertical ? (textSize * (labelOffset + 1) / 2) : (textSize * (labelOffset - 1) / 2));
         } else {
-          return ps * loffs - (vertical ? 0.0 : ts);
+          return pointSize * labelOffset - (vertical ? 0.0 : textSize);
         }
       }
 
@@ -266,7 +266,6 @@ class DrawOnCanvas extends DrawOn {
           ..save()
           ..translate(origin.dx, origin.dy)
           ..rotate(rotation)
-        // ..scale(sizePixels)
         ;
     _textPainter(text, sizePixels * pixelSize, textStyle).paint(canvas, Offset.zero);
     canvas.restore();
