@@ -9,25 +9,14 @@ import 'draw_on.dart';
 
 // ----------------------------------------------------------------------
 
-class _FontKey {
-  final LabelFontFamily fontFamily;
-  final FontWeight fontWeight;
-  final FontStyle fontStyle;
-
-  const _FontKey(this.fontFamily, this.fontWeight, this.fontStyle);
-
-  _FontKey.fromLabelStyle(LabelStyle style)
-      : fontFamily = style.fontFamily,
-        fontWeight = style.fontWeight,
-        fontStyle = style.fontStyle;
-}
+String fontKey(LabelStyle style) => "${style.fontFamily} ${style.fontWeight} ${style.fontStyle}";
 
 class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
   final Rect viewport;
   final double _pixelSize;
-  Map<_FontKey, PdfFont> _fonts;
+  Map<String, PdfFont> _fonts;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
@@ -35,7 +24,7 @@ class DrawOnPdf extends DrawOn {
       : doc = PdfDocument(),
         canvasSize = Size(width, width / aspect),
         _pixelSize = viewport.width / width,
-        _fonts = <_FontKey, PdfFont>{} {
+        _fonts = <String, PdfFont>{} {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
     _canvas = doc.pdfPageList.pages[0].getGraphics();
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
@@ -230,31 +219,60 @@ class DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
-  PdfFont _getFont(_FontKey key) {
+  PdfFont _getFont(String key) {
     var font = _fonts[key];
     if (font == null) {
       switch (key) {
-        case _FontKey(LabelFontFamily.monospace, FontWeight.normal, FontStyle.normal):
+        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.courier FontWeight.w400 FontStyle.normal":
           font = PdfFont.courier(doc);
           break;
-        // case LabelFontFamily.sansSerif:
-        //   font = PdfFont.helvetica(doc);
-        //   break;
-        // case LabelFontFamily.serif:
-        //   font = PdfFont.times(doc);
-        //   break;
-        // case LabelFontFamily.helvetica:
-        //   font = PdfFont.helvetica(doc);
-        //   break;
-        // case LabelFontFamily.courier:
-        //   font = PdfFont.courier(doc);
-        //   break;
-        // case LabelFontFamily.times:
-        //   font = PdfFont.times(doc);
-        //   break;
-        // case LabelFontFamily.symbol:
-        //   font = PdfFont.symbol(doc);
-        //   break;
+        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.courier FontWeight.w700 FontStyle.normal":
+          font = PdfFont.courierBold(doc);
+          break;
+        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.courier FontWeight.w400 FontStyle.italic":
+          font = PdfFont.courierOblique(doc);
+          break;
+        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.courier FontWeight.w700 FontStyle.italic":
+          font = PdfFont.courierBoldOblique(doc);
+          break;
+
+        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.normal":
+          font = PdfFont.helvetica(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.normal":
+          font = PdfFont.helveticaBold(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.italic":
+          font = PdfFont.helveticaOblique(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.italic":
+          font = PdfFont.helveticaBoldOblique(doc);
+          break;
+
+        case "LabelFontFamily.serif FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.times FontWeight.w400 FontStyle.normal":
+          font = PdfFont.times(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.times FontWeight.w700 FontStyle.normal":
+          font = PdfFont.timesBold(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.times FontWeight.w400 FontStyle.italic":
+          font = PdfFont.timesItalic(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.times FontWeight.w700 FontStyle.italic":
+          font = PdfFont.timesBoldItalic(doc);
+          break;
       }
       font ??= PdfFont.helvetica(doc);
       _fonts[key] = font;
@@ -272,7 +290,7 @@ class DrawOnPdf extends DrawOn {
         ..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
       ..setFillColor(colorC)
-      ..drawString(_getFont(_FontKey.fromLabelStyle(textStyle)), sizePixels * pixelSize, text, 0.0, 0.0)
+      ..drawString(_getFont(fontKey(textStyle)), sizePixels * pixelSize, text, 0.0, 0.0)
       ..restoreContext();
   }
 

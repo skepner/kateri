@@ -175,7 +175,8 @@ class AntigenicMapPainter extends CustomPainter {
         outlineRadiusWidthPixels: 5.0);
 
     drawOn.text("Later ones", Offset.zero);
-    drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, textStyle: const LabelStyle(fontFamily: LabelFontFamily.monospace, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold));
+    drawOn.text("Later ones", const Offset(-4, 3.5), sizePixels: 50, textStyle: const LabelStyle(fontFamily: LabelFontFamily.monospace, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold));
+    drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, textStyle: const LabelStyle(fontFamily: LabelFontFamily.sansSerif, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold));
     drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, rotation: RotationRight30, textStyle: const LabelStyle(fontFamily: LabelFontFamily.serif, color: Colors.red));
   }
 
