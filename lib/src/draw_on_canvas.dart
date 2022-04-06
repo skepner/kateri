@@ -61,7 +61,7 @@ class DrawOnCanvas extends DrawOn {
         if (loffs >= 1.0) {
           return ps * loffs + (vertical ? ts : 0.0);
         } else if (loffs > -1.0) {
-          return 0.0;
+          return ps * loffs + (vertical ? (ts * (loffs + 1) / 2) : (ts * (loffs - 1) / 2));
         } else {
           return ps * loffs - (vertical ? 0.0 : ts);
         }
