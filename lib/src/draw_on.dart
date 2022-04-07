@@ -45,10 +45,23 @@ class PointLabel extends LabelStyle {
 
 // ----------------------------------------------------------------------
 
+class DelayedText {
+  final String text;
+  final Offset origin;
+  final double sizePixels;
+  final double rotation;
+  final LabelStyle textStyle;
+
+  DelayedText(this.text, this.origin, this.sizePixels, this.rotation, this.textStyle);
+}
+
+// ----------------------------------------------------------------------
+
 abstract class DrawOn {
   final Rect viewport;
+  final List<DelayedText> _delayedText;
 
-  DrawOn(this.viewport);
+  DrawOn(this.viewport) : _delayedText = <DelayedText>[];
 
   double get pixelSize;
 
@@ -149,7 +162,13 @@ abstract class DrawOn {
 
   /// Text to be written by drawDelayedText(), i.e. on top of everything
   void delayedText(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
-    this.text(text, origin, sizePixels: sizePixels, rotation: rotation, textStyle: textStyle);
+    _delayedText.add(DelayedText(text, origin, sizePixels, rotation, textStyle));
+  }
+
+  void drawDelayedText() {
+    for (var textData in _delayedText) {
+      text(textData.text, textData.origin, sizePixels: textData.sizePixels, rotation: textData.rotation, textStyle: textData.textStyle);
+    }
   }
 
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0});

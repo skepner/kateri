@@ -61,7 +61,10 @@ void draw(DrawOn drawOn) {
       outlineWidthPixels: 1,
       rotation: RotationRight30);
 
+  drawOn.point(center: const Offset(-2.2, 3.5), sizePixels: 100, label: const PointLabel("Bo/2/22", offset: Offset(-1.0, 0.0)), shape: PointShape.circle, fill: Colors.orange, outlineWidthPixels: 0);
   drawOn.point(center: const Offset(-3.5, 3.5), sizePixels: 100, label: const PointLabel("Bo/1/22"), shape: PointShape.circle, fill: Colors.orange, outlineWidthPixels: 0);
-  }
+
+  drawOn.drawDelayedText();
+}
 
 // ----------------------------------------------------------------------
