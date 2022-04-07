@@ -72,6 +72,23 @@ abstract class DrawOn {
       double aspect = 1.0,
       PointLabel? label});
 
+  void addPointLabel({required Offset center, required double sizePixels, required double outlineWidthPixels, required PointLabel label, required bool delayed}) {
+    double labelOffset(double labelOffset, double pointSize, double textSize, bool vertical) {
+      if (labelOffset >= 1.0) {
+        return pointSize * labelOffset + (vertical ? textSize : 0.0);
+      } else if (labelOffset > -1.0) {
+        return pointSize * labelOffset + (vertical ? (textSize * (labelOffset + 1) / 2) : (textSize * (labelOffset - 1) / 2));
+      } else {
+        return pointSize * labelOffset - (vertical ? 0.0 : textSize);
+      }
+    }
+
+    final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
+    final textSize = this.textSize(label.text, sizePixels: label.sizePixels, textStyle: label);
+    final Offset offset = Offset(labelOffset(label.offset.dx, pointSize, textSize.width, false), labelOffset(label.offset.dy, pointSize, textSize.height, true));
+    delayedText(label.text, center + offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
+  }
+
   void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
     path([p1, p2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
   }
@@ -126,6 +143,9 @@ abstract class DrawOn {
   });
 
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()});
+
+  /// return size of text in the current scale units
+  Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()});
 
   /// Text to be written by drawDelayedText(), i.e. on top of everything
   void delayedText(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {

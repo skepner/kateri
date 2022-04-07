@@ -73,6 +73,10 @@ class DrawOnPdf extends DrawOn {
     _drawShape(shape, sizePixels * pixelSize);
     _fillAndStroke(outlineWidthPixels);
     _canvas.restoreContext();
+
+    if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
+      addPointLabel(center: center, sizePixels: sizePixels, outlineWidthPixels: outlineWidthPixels, label: label, delayed: true);
+    }
   }
 
   void _drawShape(PointShape shape, double size) {
@@ -291,8 +295,14 @@ class DrawOnPdf extends DrawOn {
         ..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
       ..setFillColor(colorC)
-      ..drawString(_getFont(fontKey(textStyle)), sizePixels * pixelSize, text, 0.0, 0.0)
+      ..drawString(_getFont(fontKey(textStyle)), sizePixels * pixelSize * 1.0, text, 0.0, 0.0)
       ..restoreContext();
+  }
+
+  @override
+  Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
+    final metrics = _getFont(fontKey(textStyle)).stringMetrics(text);
+    return Size(metrics.width, metrics.height) * (sizePixels * pixelSize * 1.0);
   }
 
   @override

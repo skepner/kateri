@@ -57,20 +57,7 @@ class DrawOnCanvas extends DrawOn {
     canvas.restore();
 
     if (label != null && label.text.isNotEmpty && label.sizePixels > 0.0) {
-      double labelOffset(double labelOffset, double pointSize, double textSize, bool vertical) {
-        if (labelOffset >= 1.0) {
-          return pointSize * labelOffset + (vertical ? textSize : 0.0);
-        } else if (labelOffset > -1.0) {
-          return pointSize * labelOffset + (vertical ? (textSize * (labelOffset + 1) / 2) : (textSize * (labelOffset - 1) / 2));
-        } else {
-          return pointSize * labelOffset - (vertical ? 0.0 : textSize);
-        }
-      }
-
-      final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
-      final textSize = this.textSize(label.text, sizePixels: label.sizePixels, textStyle: label);
-      final Offset offset = Offset(labelOffset(label.offset.dx, pointSize, textSize.width, false), labelOffset(label.offset.dy, pointSize, textSize.height, true));
-      delayedText(label.text, center + offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
+      addPointLabel(center: center, sizePixels: sizePixels, outlineWidthPixels: outlineWidthPixels, label: label, delayed: true);
     }
   }
 
@@ -263,15 +250,15 @@ class DrawOnCanvas extends DrawOn {
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     canvas
-          ..save()
-          ..translate(origin.dx, origin.dy)
-          ..rotate(rotation)
-        ;
+      ..save()
+      ..translate(origin.dx, origin.dy)
+      ..rotate(rotation);
     _textPainter(text, sizePixels * pixelSize, textStyle).paint(canvas, Offset.zero);
     canvas.restore();
   }
 
   /// return size of text in the current scale units
+  @override
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
     const precisionFactor = 1000.0; // TextPainter returns size in whole units, we increase precision
     final painter = _textPainter(text, precisionFactor, textStyle);
