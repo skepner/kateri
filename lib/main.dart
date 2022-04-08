@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 
 // import 'package:path_provider/path_provider.dart';
 
-// import 'src/draw_on.dart';
+import 'src/draw_on.dart';
 import 'src/draw_on_canvas.dart';
 import 'src/draw_on_pdf.dart';
 
@@ -90,11 +90,17 @@ class AntigenicMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    sample_drawings2.draw(DrawOnCanvas(canvas, canvasSize: size, viewport: viewport));
+    paintOn(CanvasFlutter(canvas, size));
 
-    DrawOnPdf(viewport: viewport)
-      ..draw(sample_drawings2.draw)
-      ..write("/r/a.pdf", open: true);
+    // DrawOnPdf(viewport: viewport)
+    //   ..draw(sample_drawings2.draw)
+    //   ..write("/r/a.pdf", open: true);
+  }
+
+  void paintOn(CanvasRoot canvas) {
+    canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw);
+    canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw);
+    canvas.draw(Offset(0.0, canvas.size.height / 2) & canvas.size / 2, viewport, sample_drawings2.draw);
   }
 
   @override

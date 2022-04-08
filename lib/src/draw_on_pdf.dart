@@ -15,13 +15,13 @@ class DrawOnPdf extends DrawOn {
   final PdfDocument doc;
   final Size canvasSize;
   final double _pixelSize;
-  Map<String, PdfFont> _fonts;
+  final Map<String, PdfFont> _fonts;
   late final PdfGraphics _canvas;
 
   // aspect: width / height
-  DrawOnPdf({double width = 1000.0, double aspect = 1.0, required Rect viewport})
+  DrawOnPdf({double width = 1000.0, required Rect viewport})
       : doc = PdfDocument(),
-        canvasSize = Size(width, width / aspect),
+        canvasSize = Size(width, width / (viewport.width / viewport.height)),
         _pixelSize = viewport.width / width,
         _fonts = <String, PdfFont>{},
         super(viewport) {
@@ -124,7 +124,6 @@ class DrawOnPdf extends DrawOn {
 
   @override
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
-    final fillc = PdfColor.fromInt(fill.value), outlinec = PdfColor.fromInt(outline.value);
     _canvas.saveContext();
     _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: lineWidthPixels);
     _canvas.moveTo(vertices[0].dx, vertices[0].dy);

@@ -5,12 +5,31 @@ import 'package:flutter/material.dart';
 
 import 'draw_on.dart';
 
-class DrawOnCanvas extends DrawOn {
+// ----------------------------------------------------------------------
+
+class CanvasFlutter extends CanvasRoot {
+  CanvasFlutter(this.canvas, Size canvasSize) : super(canvasSize);
+
+  @override
+  void draw(Rect drawingArea, Rect viewport, Function doDraw) {
+    canvas
+      ..save()
+      ..translate(drawingArea.left, drawingArea.top);
+    doDraw(_DrawOnCanvas(canvas, drawingArea.size, viewport));
+    canvas.restore();
+  }
+
+  final Canvas canvas;
+}
+
+// ----------------------------------------------------------------------
+
+class _DrawOnCanvas extends DrawOn {
   final Canvas canvas;
   final Size canvasSize;
   final double _pixelSize;
 
-  DrawOnCanvas(this.canvas, {required this.canvasSize, required Rect viewport})
+  _DrawOnCanvas(this.canvas, this.canvasSize, Rect viewport)
       : _pixelSize = viewport.width / canvasSize.width,
         super(viewport) {
     canvas.scale(canvasSize.width / viewport.width);
@@ -121,7 +140,7 @@ class DrawOnCanvas extends DrawOn {
     }
 
     canvas
-      ..save()
+      // ..save()
       ..drawPath(
           path,
           Paint()
@@ -137,7 +156,7 @@ class DrawOnCanvas extends DrawOn {
             ..strokeWidth = lineWidthPixels * pixelSize
             ..isAntiAlias = true);
     }
-    canvas.restore();
+    // canvas.restore();
   }
 
   @override
@@ -287,15 +306,16 @@ class DrawOnCanvas extends DrawOn {
         ..lineTo(viewport.right, y);
     }
     canvas
-      ..save()
-      ..drawPath(
-          path,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = color
-            ..strokeWidth = lineWidthPixels * pixelSize
-            ..isAntiAlias = true)
-      ..restore();
+          // ..save()
+          ..drawPath(
+              path,
+              Paint()
+                ..style = PaintingStyle.stroke
+                ..color = color
+                ..strokeWidth = lineWidthPixels * pixelSize
+                ..isAntiAlias = true)
+        // ..restore()
+        ;
   }
 
   // ----------------------------------------------------------------------

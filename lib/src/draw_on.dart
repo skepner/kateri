@@ -57,6 +57,16 @@ class DelayedText {
 
 // ----------------------------------------------------------------------
 
+abstract class CanvasRoot {
+  CanvasRoot(this.size);
+
+  void draw(Rect drawingArea, Rect viewport, Function doDraw);
+
+  final Size size;
+}
+
+// ----------------------------------------------------------------------
+
 abstract class DrawOn {
   final Rect viewport;
   final List<DelayedText> _delayedText;
@@ -71,7 +81,6 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
-  // label
   // legend
 
   void point(
