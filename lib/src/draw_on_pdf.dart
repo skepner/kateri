@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:pdf/pdf.dart';
-import 'package:pdf/src/pdf/obj/type1_font.dart';
+// import 'package:pdf/src/pdf/obj/type1_font.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
@@ -162,7 +162,6 @@ class _DrawOnPdf extends DrawOn {
       double rotation = NoRotation,
       double aspect = 1.0,
       PointLabel? label}) {
-    print("pdf draw pixelSize:${pixelSize} size:${sizePixels}");
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
