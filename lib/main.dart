@@ -4,6 +4,7 @@
 
 // import 'package:flutter/cupertino.dart' as cupertino;
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart'; // MouseRegion
 
 import 'package:intl/intl.dart';
 
@@ -26,7 +27,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}): super(key: key);
+  const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -37,15 +38,21 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}): super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  void _updateLocation(PointerEvent details) {
+    // print("_updateLocation $details");
+  }
 
   @override
   Widget build(BuildContext context) {
+    final antigenicMapPainter = AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(20.0));
+
+    print("_MyHomePageState build");
     return Scaffold(
       appBar: AppBar(
         title: Text('Kateri ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now())}'),
@@ -55,14 +62,18 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: 'Pdf',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+              // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+              antigenicMapPainter.exportPdf();
             },
           ),
         ],
       ),
-      body: CustomPaint(
-        painter: AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(10.0)),
-        size: const Size(99999, 99999),
+      body: MouseRegion(
+        onHover: _updateLocation,
+        child: CustomPaint(
+          painter: antigenicMapPainter,
+          size: const Size(99999, 99999),
+        ),
       ),
       // body: ListView(children: <Widget>[
       //   CustomPaint(
@@ -95,12 +106,15 @@ class AntigenicMapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     paintOn(CanvasFlutter(canvas, size));
 
-    CanvasPdf(Size(1000.0, 1000.0 / size.width * size.height))
+    // CanvasPdf(Size(1000.0, 1000.0 / size.width * size.height))
+    //   ..paintBy(paintOn)
+    //   ..write("/r/a.pdf", open: true);
+  }
+
+  void exportPdf() {
+    CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
       ..paintBy(paintOn)
       ..write("/r/a.pdf", open: true);
-    // DrawOnPdf(viewport: viewport)
-    //   ..draw(sample_drawings2.draw)
-    //   ..write("/r/a.pdf", open: true);
   }
 
   void paintOn(CanvasRoot canvas) {
