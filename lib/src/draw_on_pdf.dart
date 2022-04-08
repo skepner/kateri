@@ -34,9 +34,11 @@ class CanvasPdf extends CanvasRoot {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(drawingArea.left, drawingArea.top, 0.0));
-    // if (clip) {
-    //   canvas.clipRect(Offset.zero & drawingArea.size);
-    // }
+    if (clip) {
+      canvas
+        ..drawRect(0.0, 0.0, drawingArea.width, drawingArea.height)
+        ..clipPath();
+    }
     canvas.saveContext();
     doDraw(_DrawOnPdf(this, drawingArea.size, viewport));
     canvas.restoreContext();
