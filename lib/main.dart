@@ -100,9 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
 // ----------------------------------------------------------------------
 
 class AntigenicMapPainter extends CustomPainter {
+  final String mapName;
   Rect viewport;
 
-  AntigenicMapPainter(this.viewport);
+  AntigenicMapPainter(this.viewport) : mapName = "mapp";
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -114,9 +115,11 @@ class AntigenicMapPainter extends CustomPainter {
   }
 
   void exportPdf() async {
-    // final String? path = await getSavePath();
-    // print("exportPdf $path");
-    final file = await openFile(acceptedTypeGroups: [XTypeGroup(label: 'pdfs', extensions: ['pdf'])]);
+    final String? path = await getSavePath(acceptedTypeGroups: [
+      XTypeGroup(label: 'pdfs', extensions: ['pdf'])
+    ], initialDirectory: "~/Downloads", suggestedName: mapName);
+    print("exportPdf $path");
+    // final file = await openFile(acceptedTypeGroups: [XTypeGroup(label: 'pdfs', extensions: ['pdf'])]);
     // await FolderFileSaver.getPermission().then((statusPermission) async {});
 
     // CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
