@@ -18,6 +18,9 @@ class CanvasFlutter extends CanvasRoot {
     if (clip) {
       canvas.clipRect(Offset.zero & drawingArea.size);
     }
+    canvas.save();
+    doDraw(_DrawOnCanvas(canvas, drawingArea.size, viewport));
+    canvas.restore();
     if (debuggingOutline != null) {
       canvas.drawRect(
           Offset.zero & drawingArea.size,
@@ -27,7 +30,6 @@ class CanvasFlutter extends CanvasRoot {
             ..strokeWidth = 3.0
             ..isAntiAlias = true);
     }
-    doDraw(_DrawOnCanvas(canvas, drawingArea.size, viewport));
     canvas.restore();
   }
 

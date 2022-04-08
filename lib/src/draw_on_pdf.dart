@@ -37,6 +37,9 @@ class CanvasPdf extends CanvasRoot {
     // if (clip) {
     //   canvas.clipRect(Offset.zero & drawingArea.size);
     // }
+    canvas.saveContext();
+    doDraw(_DrawOnPdf(this, drawingArea.size, viewport));
+    canvas.restoreContext();
     if (debuggingOutline != null) {
       canvas
         ..drawRect(0.0, 0.0, drawingArea.width, drawingArea.height)
@@ -44,7 +47,6 @@ class CanvasPdf extends CanvasRoot {
         ..setLineWidth(3.0)
         ..strokePath();
     }
-    doDraw(_DrawOnPdf(this, drawingArea.size, viewport));
     canvas.restoreContext();
   }
 
