@@ -98,9 +98,10 @@ class AntigenicMapPainter extends CustomPainter {
   }
 
   void paintOn(CanvasRoot canvas) {
-    canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw);
-    canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw);
-    canvas.draw(Offset(0.0, canvas.size.height / 2) & canvas.size / 2, viewport, sample_drawings2.draw);
+    canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.green, clip: true);
+    canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.red, clip: true);
+    canvas.draw(Offset(10.0, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
+    canvas.draw(Offset(canvas.size.width / 1.9, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
   }
 
   @override

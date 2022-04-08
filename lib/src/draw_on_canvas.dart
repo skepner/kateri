@@ -11,10 +11,22 @@ class CanvasFlutter extends CanvasRoot {
   CanvasFlutter(this.canvas, Size canvasSize) : super(canvasSize);
 
   @override
-  void draw(Rect drawingArea, Rect viewport, Function doDraw) {
+  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
     canvas
       ..save()
       ..translate(drawingArea.left, drawingArea.top);
+    if (clip) {
+      canvas.clipRect(Offset.zero & drawingArea.size);
+    }
+    if (debuggingOutline != null) {
+      canvas.drawRect(
+          Offset.zero & drawingArea.size,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = debuggingOutline
+            ..strokeWidth = 3.0
+            ..isAntiAlias = true);
+    }
     doDraw(_DrawOnCanvas(canvas, drawingArea.size, viewport));
     canvas.restore();
   }

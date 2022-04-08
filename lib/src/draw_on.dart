@@ -60,7 +60,7 @@ class DelayedText {
 abstract class CanvasRoot {
   CanvasRoot(this.size);
 
-  void draw(Rect drawingArea, Rect viewport, Function doDraw);
+  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false});
 
   final Size size;
 }
