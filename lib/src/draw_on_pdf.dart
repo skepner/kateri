@@ -11,31 +11,42 @@ import 'draw_on.dart';
 
 String fontKey(LabelStyle style) => "${style.fontFamily} ${style.fontWeight} ${style.fontStyle}";
 
-class DrawOnPdf extends DrawOn {
-  final PdfDocument doc;
-  final Size canvasSize;
-  final double _pixelSize;
-  final Map<String, PdfFont> _fonts;
-  late final PdfGraphics _canvas;
-
-  // aspect: width / height
-  DrawOnPdf({double width = 1000.0, required Rect viewport})
+class CanvasPdf extends CanvasRoot {
+  CanvasPdf(Size canvasSize)
       : doc = PdfDocument(),
-        canvasSize = Size(width, width / (viewport.width / viewport.height)),
-        _pixelSize = viewport.width / width,
         _fonts = <String, PdfFont>{},
-        super(viewport) {
+        super(canvasSize) {
     PdfPage(doc, pageFormat: PdfPageFormat(canvasSize.width, canvasSize.height));
-    _canvas = doc.pdfPageList.pages[0].getGraphics();
+    canvas = doc.pdfPageList.pages[0].getGraphics();
+
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
-    final scale = canvasSize.width / viewport.width;
-    _canvas.setTransform(Matrix4.identity()
-      ..scale(scale, -scale)
-      ..translate(-viewport.left, viewport.top, 0.0));
+    canvas.setTransform(Matrix4.identity()
+      ..scale(1.0, -1.0)
+      ..translate(0.0, -canvasSize.height, 0.0)
+    );
   }
 
-  void draw(Function painter) {
+  void paintBy(Function painter) {
     painter(this);
+  }
+
+  @override
+  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
+    canvas..saveContext()
+        ..setTransform(Matrix4.translationValues(drawingArea.left, drawingArea.top, 0.0))
+        ;
+    // if (clip) {
+    //   canvas.clipRect(Offset.zero & drawingArea.size);
+    // }
+    if (debuggingOutline != null) {
+      canvas
+        ..drawRect(0.0, 0.0, drawingArea.width, drawingArea.height)
+        ..setStrokeColor(PdfColor.fromInt(debuggingOutline.value))
+        ..setLineWidth(3.0)
+        ..strokePath();
+    }
+    doDraw(_DrawOnPdf(this, drawingArea.size, viewport));
+    canvas.restoreContext();
   }
 
   void write(String filename, {bool open = true}) async {
@@ -45,6 +56,86 @@ class DrawOnPdf extends DrawOn {
       await Process.run("open-and-back-to-emacs", [filename]);
     }
   }
+
+  PdfFont getFont(String key) {
+    var font = _fonts[key];
+    if (font == null) {
+      switch (key) {
+        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.courier FontWeight.w400 FontStyle.normal":
+          font = PdfFont.courier(doc);
+          break;
+        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.courier FontWeight.w700 FontStyle.normal":
+          font = PdfFont.courierBold(doc);
+          break;
+        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.courier FontWeight.w400 FontStyle.italic":
+          font = PdfFont.courierOblique(doc);
+          break;
+        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.courier FontWeight.w700 FontStyle.italic":
+          font = PdfFont.courierBoldOblique(doc);
+          break;
+
+        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.normal":
+          font = PdfFont.helvetica(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.normal":
+          font = PdfFont.helveticaBold(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.italic":
+          font = PdfFont.helveticaOblique(doc);
+          break;
+        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.italic":
+          font = PdfFont.helveticaBoldOblique(doc);
+          break;
+
+        case "LabelFontFamily.serif FontWeight.w400 FontStyle.normal":
+        case "LabelFontFamily.times FontWeight.w400 FontStyle.normal":
+          font = PdfFont.times(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w700 FontStyle.normal":
+        case "LabelFontFamily.times FontWeight.w700 FontStyle.normal":
+          font = PdfFont.timesBold(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w400 FontStyle.italic":
+        case "LabelFontFamily.times FontWeight.w400 FontStyle.italic":
+          font = PdfFont.timesItalic(doc);
+          break;
+        case "LabelFontFamily.serif FontWeight.w700 FontStyle.italic":
+        case "LabelFontFamily.times FontWeight.w700 FontStyle.italic":
+          font = PdfFont.timesBoldItalic(doc);
+          break;
+      }
+      font ??= PdfFont.helvetica(doc);
+      _fonts[key] = font;
+    }
+    return font;
+  }
+
+  final PdfDocument doc;
+  final Map<String, PdfFont> _fonts;
+  late final PdfGraphics canvas;
+}
+
+// ----------------------------------------------------------------------
+
+class _DrawOnPdf extends DrawOn {
+  final CanvasPdf _canvasPdf;
+  final PdfGraphics _canvas;
+  final Size canvasSize;
+  final double _pixelSize;
+
+  // aspect: width / height
+  _DrawOnPdf(this._canvasPdf, this.canvasSize, Rect viewport)
+      : _canvas = _canvasPdf.canvas,
+        _pixelSize = viewport.width / canvasSize.width,
+        super(viewport);
 
   @override
   double get pixelSize => _pixelSize;
@@ -223,67 +314,6 @@ class DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
-  PdfFont _getFont(String key) {
-    var font = _fonts[key];
-    if (font == null) {
-      switch (key) {
-        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.normal":
-        case "LabelFontFamily.courier FontWeight.w400 FontStyle.normal":
-          font = PdfFont.courier(doc);
-          break;
-        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.normal":
-        case "LabelFontFamily.courier FontWeight.w700 FontStyle.normal":
-          font = PdfFont.courierBold(doc);
-          break;
-        case "LabelFontFamily.monospace FontWeight.w400 FontStyle.italic":
-        case "LabelFontFamily.courier FontWeight.w400 FontStyle.italic":
-          font = PdfFont.courierOblique(doc);
-          break;
-        case "LabelFontFamily.monospace FontWeight.w700 FontStyle.italic":
-        case "LabelFontFamily.courier FontWeight.w700 FontStyle.italic":
-          font = PdfFont.courierBoldOblique(doc);
-          break;
-
-        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.normal":
-        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.normal":
-          font = PdfFont.helvetica(doc);
-          break;
-        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.normal":
-        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.normal":
-          font = PdfFont.helveticaBold(doc);
-          break;
-        case "LabelFontFamily.sansSerif FontWeight.w400 FontStyle.italic":
-        case "LabelFontFamily.helvetica FontWeight.w400 FontStyle.italic":
-          font = PdfFont.helveticaOblique(doc);
-          break;
-        case "LabelFontFamily.sansSerif FontWeight.w700 FontStyle.italic":
-        case "LabelFontFamily.helvetica FontWeight.w700 FontStyle.italic":
-          font = PdfFont.helveticaBoldOblique(doc);
-          break;
-
-        case "LabelFontFamily.serif FontWeight.w400 FontStyle.normal":
-        case "LabelFontFamily.times FontWeight.w400 FontStyle.normal":
-          font = PdfFont.times(doc);
-          break;
-        case "LabelFontFamily.serif FontWeight.w700 FontStyle.normal":
-        case "LabelFontFamily.times FontWeight.w700 FontStyle.normal":
-          font = PdfFont.timesBold(doc);
-          break;
-        case "LabelFontFamily.serif FontWeight.w400 FontStyle.italic":
-        case "LabelFontFamily.times FontWeight.w400 FontStyle.italic":
-          font = PdfFont.timesItalic(doc);
-          break;
-        case "LabelFontFamily.serif FontWeight.w700 FontStyle.italic":
-        case "LabelFontFamily.times FontWeight.w700 FontStyle.italic":
-          font = PdfFont.timesBoldItalic(doc);
-          break;
-      }
-      font ??= PdfFont.helvetica(doc);
-      _fonts[key] = font;
-    }
-    return font;
-  }
-
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     final colorC = PdfColor.fromInt(textStyle.color.value);
@@ -294,13 +324,13 @@ class DrawOnPdf extends DrawOn {
         ..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
       ..setFillColor(colorC)
-      ..drawString(_getFont(fontKey(textStyle)), sizePixels * pixelSize * 1.0, text, 0.0, 0.0)
+      ..drawString(_canvasPdf.getFont(fontKey(textStyle)), sizePixels * pixelSize * 1.0, text, 0.0, 0.0)
       ..restoreContext();
   }
 
   @override
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
-    final metrics = _getFont(fontKey(textStyle)).stringMetrics(text);
+    final metrics = _canvasPdf.getFont(fontKey(textStyle)).stringMetrics(text);
     return Size(metrics.width, metrics.height) * (sizePixels * pixelSize * 1.0);
   }
 
@@ -311,12 +341,12 @@ class DrawOnPdf extends DrawOn {
       ..saveContext()
       ..setStrokeColor(colorc)
       ..setLineWidth(lineWidthPixels * pixelSize);
-    for (var x = viewport.left.ceilToDouble(); x < viewport.right; x += step) {
+    for (var x = viewport.left.ceilToDouble(); x <= viewport.right; x += step) {
       _canvas
         ..moveTo(x, viewport.top)
         ..lineTo(x, viewport.bottom);
     }
-    for (var y = viewport.top.ceilToDouble(); y < viewport.bottom; y += step) {
+    for (var y = viewport.top.ceilToDouble(); y <= viewport.bottom; y += step) {
       _canvas
         ..moveTo(viewport.left, y)
         ..lineTo(viewport.right, y);

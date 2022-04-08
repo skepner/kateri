@@ -92,6 +92,9 @@ class AntigenicMapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     paintOn(CanvasFlutter(canvas, size));
 
+    CanvasPdf(Size(1000.0, 1000.0 / size.width * size.height))
+      ..paintBy(paintOn)
+      ..write("/r/a.pdf", open: true);
     // DrawOnPdf(viewport: viewport)
     //   ..draw(sample_drawings2.draw)
     //   ..write("/r/a.pdf", open: true);

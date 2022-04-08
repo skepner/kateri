@@ -307,12 +307,12 @@ class _DrawOnCanvas extends DrawOn {
   @override
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {
     var path = Path();
-    for (var x = viewport.left.ceilToDouble(); x < viewport.right; x += step) {
+    for (var x = viewport.left.ceilToDouble(); x <= viewport.right; x += step) {
       path
         ..moveTo(x, viewport.top)
         ..lineTo(x, viewport.bottom);
     }
-    for (var y = viewport.top.ceilToDouble(); y < viewport.bottom; y += step) {
+    for (var y = viewport.top.ceilToDouble(); y <= viewport.bottom; y += step) {
       path
         ..moveTo(viewport.left, y)
         ..lineTo(viewport.right, y);
