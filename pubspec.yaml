@@ -19,7 +19,8 @@ dependencies:
   pdf: ^3.7.3
   path_provider: ^2.0.9
   intl: ^0.17.0
-  folder_file_saver: ^1.0.0+2
+  file_selector_macos: ^0.0.4+1
+  file_selector: ^0.8.2+1
 
 flutter:
   uses-material-design: true

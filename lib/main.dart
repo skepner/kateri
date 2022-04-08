@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart'; // MouseRegion
 
 import 'package:intl/intl.dart';
 
+import 'package:file_selector/file_selector.dart';
+
 // import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
 
@@ -111,10 +113,15 @@ class AntigenicMapPainter extends CustomPainter {
     //   ..write("/r/a.pdf", open: true);
   }
 
-  void exportPdf() {
-    CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
-      ..paintBy(paintOn)
-      ..write("/r/a.pdf", open: true);
+  void exportPdf() async {
+    // final String? path = await getSavePath();
+    // print("exportPdf $path");
+    final file = await openFile(acceptedTypeGroups: [XTypeGroup(label: 'pdfs', extensions: ['pdf'])]);
+    // await FolderFileSaver.getPermission().then((statusPermission) async {});
+
+    // CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
+    //   ..paintBy(paintOn)
+    //   ..write("/r/a.pdf", open: true);
   }
 
   void paintOn(CanvasRoot canvas) {
