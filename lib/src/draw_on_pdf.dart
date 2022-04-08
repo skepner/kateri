@@ -22,8 +22,7 @@ class CanvasPdf extends CanvasRoot {
     // coordinate system of Pdf has origin in the bottom left, change it ours with origin at the top left
     canvas.setTransform(Matrix4.identity()
       ..scale(1.0, -1.0)
-      ..translate(0.0, -canvasSize.height, 0.0)
-    );
+      ..translate(0.0, -canvasSize.height, 0.0));
   }
 
   void paintBy(Function painter) {
@@ -32,9 +31,9 @@ class CanvasPdf extends CanvasRoot {
 
   @override
   void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
-    canvas..saveContext()
-        ..setTransform(Matrix4.translationValues(drawingArea.left, drawingArea.top, 0.0))
-        ;
+    canvas
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(drawingArea.left, drawingArea.top, 0.0));
     // if (clip) {
     //   canvas.clipRect(Offset.zero & drawingArea.size);
     // }
@@ -135,7 +134,11 @@ class _DrawOnPdf extends DrawOn {
   _DrawOnPdf(this._canvasPdf, this.canvasSize, Rect viewport)
       : _canvas = _canvasPdf.canvas,
         _pixelSize = viewport.width / canvasSize.width,
-        super(viewport);
+        super(viewport) {
+    _canvas.setTransform(Matrix4.identity()
+      ..scale(canvasSize.width / viewport.width)
+      ..translate(-viewport.left, -viewport.top, 0.0));
+  }
 
   @override
   double get pixelSize => _pixelSize;
@@ -155,6 +158,7 @@ class _DrawOnPdf extends DrawOn {
       double rotation = NoRotation,
       double aspect = 1.0,
       PointLabel? label}) {
+    print("pdf draw pixelSize:${pixelSize} size:${sizePixels}");
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
