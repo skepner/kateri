@@ -9,7 +9,7 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:intl/intl.dart';
 
-// import 'package:file_selector/file_selector.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:file_saver/file_saver.dart';
 
 // import 'package:pdf/pdf.dart';
@@ -63,10 +63,16 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.green,
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            tooltip: 'Pdf',
+            icon: const Icon(Icons.file_open),
+            tooltip: 'Open ace file',
             onPressed: () {
-              // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+              antigenicMapPainter.openAceFile();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Export pdf',
+            onPressed: () {
               antigenicMapPainter.exportPdf();
             },
           ),
@@ -118,16 +124,13 @@ class AntigenicMapPainter extends CustomPainter {
     if (open && UniversalPlatform.isMacOS) {
       await Process.run("open-and-back-to-emacs", [filename]);
     }
+  }
 
-    //   final String? path = await getSavePath(acceptedTypeGroups: [
-    //     XTypeGroup(label: 'pdfs', extensions: ['pdf'])
-    // ], initialDirectory: "~/Downloads", suggestedName: mapName);
-    // if (path != null) {
-    //   print("exportPdf [$path]");
-    //   CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
-    //     ..paintBy(paintOn)
-    //     ..write(path, open: true);
-    //   }
+  void openAceFile() async {
+    final typeGroup = XTypeGroup(label: 'ace', extensions: ['ace', 'json']);
+    final file = await openFile(acceptedTypeGroups: [typeGroup]);
+    final data = await file?.readAsString();
+    print("openAceFile [$file] {$data]");
   }
 
   void paintOn(CanvasRoot canvas) {
