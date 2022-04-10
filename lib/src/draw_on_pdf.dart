@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
+import 'dart:typed_data';       // Uint8List
 import 'dart:math' as math;
 import 'package:pdf/pdf.dart';
 // import 'package:pdf/src/pdf/obj/type1_font.dart';
@@ -52,6 +53,10 @@ class CanvasPdf extends CanvasRoot {
     canvas.restoreContext();
   }
 
+  Future<Uint8List> bytes() async {
+    return doc.save();
+  }
+
   void write(String filename, {bool open = true}) async {
     final file = File(filename);
     await file.writeAsBytes(await doc.save());
@@ -59,6 +64,7 @@ class CanvasPdf extends CanvasRoot {
       await Process.run("open-and-back-to-emacs", [filename]);
     }
   }
+
 
   PdfFont getFont(String key) {
     var font = _fonts[key];

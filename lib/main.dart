@@ -1,14 +1,16 @@
 // import 'dart:ui';
-// import 'dart:io';
+import 'dart:io';
 // import 'dart:math' as math;
 
 // import 'package:flutter/cupertino.dart' as cupertino;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart'; // MouseRegion
+import 'package:universal_platform/universal_platform.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:file_selector/file_selector.dart';
+// import 'package:file_selector/file_selector.dart';
+import 'package:file_saver/file_saver.dart';
 
 // import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
@@ -108,23 +110,24 @@ class AntigenicMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     paintOn(CanvasFlutter(canvas, size));
-
-    // CanvasPdf(Size(1000.0, 1000.0 / size.width * size.height))
-    //   ..paintBy(paintOn)
-    //   ..write("/r/a.pdf", open: true);
   }
 
-  void exportPdf() async {
-    final String? path = await getSavePath(acceptedTypeGroups: [
-      XTypeGroup(label: 'pdfs', extensions: ['pdf'])
-    ], initialDirectory: "~/Downloads", suggestedName: mapName);
-    print("exportPdf $path");
-    // final file = await openFile(acceptedTypeGroups: [XTypeGroup(label: 'pdfs', extensions: ['pdf'])]);
-    // await FolderFileSaver.getPermission().then((statusPermission) async {});
+  void exportPdf({bool open = true}) async {
+    final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))..paintBy(paintOn);
+    final filename = await FileSaver.instance.saveFile(mapName, await canvasPdf.bytes(), "pdf", mimeType: MimeType.PDF);
+    if (open && UniversalPlatform.isMacOS) {
+      await Process.run("open-and-back-to-emacs", [filename]);
+    }
 
-    // CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
-    //   ..paintBy(paintOn)
-    //   ..write("/r/a.pdf", open: true);
+    //   final String? path = await getSavePath(acceptedTypeGroups: [
+    //     XTypeGroup(label: 'pdfs', extensions: ['pdf'])
+    // ], initialDirectory: "~/Downloads", suggestedName: mapName);
+    // if (path != null) {
+    //   print("exportPdf [$path]");
+    //   CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))
+    //     ..paintBy(paintOn)
+    //     ..write(path, open: true);
+    //   }
   }
 
   void paintOn(CanvasRoot canvas) {
