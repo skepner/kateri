@@ -9,8 +9,10 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:file_selector/file_selector.dart';
+// import 'package:file_selector/file_selector.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
+import 'dart:convert'; // json
 
 // import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
@@ -127,10 +129,34 @@ class AntigenicMapPainter extends CustomPainter {
   }
 
   void openAceFile() async {
-    final typeGroup = XTypeGroup(label: 'ace', extensions: ['ace', 'json']);
-    final file = await openFile(acceptedTypeGroups: [typeGroup]);
-    final data = await file?.readAsString();
-    print("openAceFile [$file] {$data]");
+    final file = (await FilePicker.platform.pickFiles())?.files.single;
+    final bytes = file?.bytes;
+    if (bytes != null) {
+      // web
+      final data = json.decoder.convert(utf8.decoder.convert(bytes));
+      print(data);
+    } else {
+      // macOS
+      final path = file?.path;
+      if (path != null) {
+        final data = await File(path).openRead().transform(utf8.decoder).transform(json.decoder).toList();
+        print(data);
+      }
+    }
+    // else if (file.path != null) {
+    //   print(data);
+    // }
+
+    // if (data != null) {
+    //   print(data);
+    // }
+
+    // final typeGroup = XTypeGroup(label: 'ace', extensions: ['ace', 'json']);
+    // final file = await openFile(acceptedTypeGroups: [typeGroup]);
+    // final data = file?.openRead().transform(utf8.decoder).transform(json.decoder);
+    // print(data);
+    // final data = await file?.readAsString();
+    // print("openAceFile [$file] {$data]");
   }
 
   void paintOn(CanvasRoot canvas) {
