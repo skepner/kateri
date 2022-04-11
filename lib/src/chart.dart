@@ -104,11 +104,16 @@ class Chart {
 // ----------------------------------------------------------------------
 
 class Projection {
-  Projection(this._data);
+  Projection(this._data) {
+    final trans = transformation();
+    _transformedLayout = layout().map((element) => element != null ? trans.transform3(element) : null).toList();
+  }
 
   Rect viewport() {
     return const Offset(-5, -5) & const Size(10, 10);
   }
+
+  List<Vector3?> transformedLayout() => _transformedLayout;
 
   List<Vector3?> layout() {
     Vector3? fromList(dynamic src) {
@@ -153,6 +158,7 @@ class Projection {
   }
 
   final Map<String, dynamic> _data;
+  late List<Vector3?> _transformedLayout;
 }
 
 // ----------------------------------------------------------------------

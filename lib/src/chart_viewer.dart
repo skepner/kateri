@@ -19,9 +19,9 @@ class ChartViewer {
   }
 
   void paint(DrawOn canvas) {
-    canvas.transform(projection.transformation());
+    // canvas.transform(projection.transformation());
     canvas.grid();
-    for (var point in projection.layout()) {
+    for (var point in projection.transformedLayout()) {
       // print(point);
       // assert(point is List<dynamic>);
       if (point != null) {
