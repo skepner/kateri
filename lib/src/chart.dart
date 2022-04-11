@@ -6,26 +6,20 @@ import 'decompress.dart'; // json
 // ----------------------------------------------------------------------
 
 class Chart {
+  Chart(List<int> source) : _data = json.decode(utf8.decode(source));
+
   static Chart? fromBytes(Uint8List? bytes) {
     if (bytes == null) {
       return null;
     }
-    // final text = decompress(bytes);
-    // print(text);
-    // final data = json.decoder.convert(utf8.decoder.convert(bytes));
-    // print(data);
-    return Chart();
+    return Chart(decompress(bytes));
   }
 
   static Chart? fromPath(String? path) {
     if (path == null) {
       return null;
     }
-    final text = decompress(File(path).readAsBytesSync());
-    print(text.length);
-    // final data = await File(path).openRead().transform(utf8.decoder).transform(json.decoder).toList();
-    // print(data);
-    return Chart();
+    return Chart(decompress(File(path).readAsBytesSync()));
   }
 
   static Future<Chart?> fromServer(String? path) async {
@@ -35,6 +29,17 @@ class Chart {
     // ajax
     return null;
   }
+
+  // ----------------------------------------------------------------------
+
+  String name() {
+    final info = _data["c"]["i"];
+    return "${info['V']} ${info['A']} ${info['D']} sources: ${info['S']?.length}";
+  }
+
+  // ----------------------------------------------------------------------
+
+  final Map<String, dynamic> _data;
 }
 
 // ----------------------------------------------------------------------

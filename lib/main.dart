@@ -133,6 +133,9 @@ class AntigenicMapPainter extends CustomPainter {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
     var chart = Chart.fromBytes(file?.bytes);
     chart ??= Chart.fromPath(file?.path);
+    if (chart != null) {
+      print(chart.name());
+    }
   }
 
   void paintOn(CanvasRoot canvas) {
