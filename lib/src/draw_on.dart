@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:math' as math;
+import 'package:vector_math/vector_math_64.dart';
 
 enum PointShape { circle, box, triangle, egg, uglyegg }
 
@@ -84,7 +85,7 @@ abstract class DrawOn {
   // legend
 
   void point(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
@@ -94,7 +95,7 @@ abstract class DrawOn {
       double aspect = 1.0,
       PointLabel? label});
 
-  void addPointLabel({required Offset center, required double sizePixels, required double outlineWidthPixels, required PointLabel label, required bool delayed}) {
+  void addPointLabel({required Vector3 center, required double sizePixels, required double outlineWidthPixels, required PointLabel label, required bool delayed}) {
     double labelOffset(double labelOffset, double pointSize, double textSize, bool vertical) {
       if (labelOffset >= 1.0) {
         return pointSize * labelOffset + (vertical ? textSize : 0.0);
@@ -108,7 +109,7 @@ abstract class DrawOn {
     final pointSize = (sizePixels + outlineWidthPixels) * pixelSize / 2;
     final textSize = this.textSize(label.text, sizePixels: label.sizePixels, textStyle: label);
     final Offset offset = Offset(labelOffset(label.offset.dx, pointSize, textSize.width, false), labelOffset(label.offset.dy, pointSize, textSize.height, true));
-    delayedText(label.text, center + offset, sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
+    delayedText(label.text, Offset(center.x + offset.dx, center.y + offset.dy), sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
   }
 
   void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
@@ -129,7 +130,7 @@ abstract class DrawOn {
     final headCenter = p2 - headRadiusOffset;
     path([p1, headCenter - headRadiusOffset / 2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
     point(
-        center: headCenter,
+        center: Vector3(headCenter.dx, headCenter.dy, 0.0),
         sizePixels: headLengthPixels,
         shape: PointShape.triangle,
         fill: headFill,
@@ -187,7 +188,7 @@ abstract class DrawOn {
   // ----------------------------------------------------------------------
 
   void point3d(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),

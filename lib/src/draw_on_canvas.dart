@@ -1,8 +1,14 @@
 // import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
+
+// ----------------------------------------------------------------------
+
+const black = Color(0xFF000000);
+const white = Color(0xFFFFFFFF);
 
 // ----------------------------------------------------------------------
 
@@ -58,7 +64,7 @@ class _DrawOnCanvas extends DrawOn {
 
   @override
   void point(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
@@ -69,7 +75,7 @@ class _DrawOnCanvas extends DrawOn {
       PointLabel? label}) {
     canvas
       ..save()
-      ..translate(center.dx, center.dy)
+      ..translate(center.x, center.y)
       ..rotate(rotation)
       ..scale(aspect, 1.0);
 
@@ -210,9 +216,9 @@ class _DrawOnCanvas extends DrawOn {
     required double radius,
     required double angle,
     Color fill = const Color(0x00000000),
-    Color outlineCircle = Colors.black,
+    Color outlineCircle = black,
     double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = Colors.black,
+    Color outlineRadius = black,
     double outlineRadiusWidthPixels = 1.0,
     double rotation = NoRotation, // NoRotation - first radius in upright
   }) {
@@ -337,7 +343,7 @@ class _DrawOnCanvas extends DrawOn {
 
   @override
   void point3d(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
@@ -346,7 +352,7 @@ class _DrawOnCanvas extends DrawOn {
       double rotation = NoRotation,
       double aspect = 1.0}) {
     canvas.save();
-    canvas.translate(center.dx, center.dy);
+    canvas.translate(center.x, center.y);
     // canvas.rotate(rotation);
     // canvas.scale(aspect, 1.0);
 
@@ -358,10 +364,10 @@ class _DrawOnCanvas extends DrawOn {
       //   const Color(0xFF0000FF),
       // ],
       colors: [
-        Colors.white,
+        white,
         fill,
         // Colors.blue,
-        // Colors.black,
+        // black,
       ],
       // stops: [
       //   0.0, 0.9, 1.0

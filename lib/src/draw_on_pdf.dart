@@ -13,6 +13,7 @@ import 'draw_on.dart';
 String fontKey(LabelStyle style) => "${style.fontFamily} ${style.fontWeight} ${style.fontStyle}";
 
 class CanvasPdf extends CanvasRoot {
+
   CanvasPdf(Size canvasSize)
       : doc = PdfDocument(),
         _fonts = <String, PdfFont>{},
@@ -159,7 +160,7 @@ class _DrawOnPdf extends DrawOn {
 
   @override
   void point(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),
@@ -170,7 +171,7 @@ class _DrawOnPdf extends DrawOn {
       PointLabel? label}) {
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
+      ..setTransform(Matrix4.translation(center)
         ..rotateZ(rotation)
         ..scale(aspect, 1.0));
     _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels);
@@ -375,7 +376,7 @@ class _DrawOnPdf extends DrawOn {
 
   @override
   void point3d(
-      {required Offset center,
+      {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
       Color fill = const Color(0x00000000),

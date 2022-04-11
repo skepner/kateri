@@ -23,8 +23,8 @@ class ChartViewer {
     for (var point in projection.layout()) {
       // print(point);
       // assert(point is List<dynamic>);
-      if (point.isNotEmpty) {
-        canvas.point(center: Offset(point[0], point[1]), sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
+      if (point != null) {
+        canvas.point(center: point, sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
       }
     }
   }
