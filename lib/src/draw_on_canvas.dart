@@ -58,6 +58,11 @@ class _DrawOnCanvas extends DrawOn {
   @override
   double get pixelSize => _pixelSize;
 
+  @override
+  void transform(Matrix4 transformation) {
+    canvas.transform(transformation.storage);
+  }
+
   // ----------------------------------------------------------------------
   // 2D
   // ----------------------------------------------------------------------

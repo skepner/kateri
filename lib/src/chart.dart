@@ -115,15 +115,16 @@ class Projection {
       switch (src.length) {
         case 0:
         case 1:
-        return null;
+          return null;
         case 2:
-        return Vector3(src[0], src[1], 0.0);
+          return Vector3(src[0], src[1], 0.0);
         case 3:
-        return Vector3(src[0], src[1], src[2]);
+          return Vector3(src[0], src[1], src[2]);
         default:
-        return null;
+          return null;
       }
     }
+
     return _data["l"].map<Vector3?>(fromList).toList();
   }
 
@@ -143,9 +144,9 @@ class Projection {
     if (_data["t"] != null) {
       switch (_data["t"].length) {
         case 4:
-          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(_data["t"]));
+          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(_data["t"].cast<double>()));
         case 6:
-          return Matrix4.identity()..copyRotation(Matrix3.fromList(_data["t"]));
+          return Matrix4.identity()..copyRotation(Matrix3.fromList(_data["t"].cast<double>()));
       }
     }
     return Matrix4.identity();

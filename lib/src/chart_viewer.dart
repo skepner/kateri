@@ -19,6 +19,7 @@ class ChartViewer {
   }
 
   void paint(DrawOn canvas) {
+    canvas.transform(projection.transformation());
     canvas.grid();
     for (var point in projection.layout()) {
       // print(point);
