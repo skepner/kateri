@@ -107,6 +107,10 @@ class Projection {
     return const Offset(-5, -5) & const Size(10, 10);
   }
 
+  List<dynamic> layout() {
+    return _data["l"];
+  }
+
   final Map<String, dynamic> _data;
 }
 

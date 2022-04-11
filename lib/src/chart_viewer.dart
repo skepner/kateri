@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'dart:typed_data';       // Uint8List
+import 'dart:typed_data'; // Uint8List
 
 import "chart.dart";
 import 'draw_on.dart';
@@ -20,6 +20,13 @@ class ChartViewer {
 
   void paint(DrawOn canvas) {
     canvas.grid();
+    for (var point in projection.layout()) {
+      // print(point);
+      // assert(point is List<dynamic>);
+      if (point.isNotEmpty) {
+        canvas.point(center: Offset(point[0], point[1]), sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
+      }
+    }
   }
 
   Future<Uint8List> exportPdf({bool open = true}) async {
