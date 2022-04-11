@@ -1,5 +1,6 @@
 // import 'dart:ui';
 import 'dart:io';
+import 'dart:typed_data';
 // import 'dart:math' as math;
 
 // import 'package:flutter/cupertino.dart' as cupertino;
@@ -24,8 +25,10 @@ import 'src/draw_on.dart';
 import 'src/draw_on_canvas.dart';
 import 'src/draw_on_pdf.dart';
 
+import 'src/chart_viewer.dart';
+
 // import 'src/sample/drawings1.dart' as sample_drawings1;
-import 'src/sample/drawings2.dart' as sample_drawings2;
+// import 'src/sample/drawings2.dart' as sample_drawings2;
 
 // ----------------------------------------------------------------------
 
@@ -57,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final antigenicMapPainter = AntigenicMapPainter(const Offset(-5.0, -5.0) & const Size.square(20.0));
+    final antigenicMapPainter = AntigenicMapPainter();
 
     print("_MyHomePageState build");
     return Scaffold(
@@ -111,38 +114,43 @@ class _MyHomePageState extends State<MyHomePage> {
 // ----------------------------------------------------------------------
 
 class AntigenicMapPainter extends CustomPainter {
-  final String mapName;
-  Rect viewport;
-
-  AntigenicMapPainter(this.viewport) : mapName = "mapp";
+  Chart? chart;
+  ChartViewer? viewer;
 
   @override
   void paint(Canvas canvas, Size size) {
+    loadChart(path: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
     paintOn(CanvasFlutter(canvas, size));
   }
 
   void exportPdf({bool open = true}) async {
-    final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))..paintBy(paintOn);
-    final filename = await FileSaver.instance.saveFile(mapName, await canvasPdf.bytes(), "pdf", mimeType: MimeType.PDF);
-    if (open && UniversalPlatform.isMacOS) {
-      await Process.run("open-and-back-to-emacs", [filename]);
+    if (chart != null && viewer != null) {
+      final filename = await FileSaver.instance.saveFile(chart!.nameForFilename(), await viewer!.exportPdf(), "pdf", mimeType: MimeType.PDF);
+      if (open && UniversalPlatform.isMacOS) {
+        await Process.run("open-and-back-to-emacs", [filename]);
+      }
     }
   }
 
   void openAceFile() async {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
-    var chart = Chart.fromBytes(file?.bytes);
-    chart ??= Chart.fromPath(file?.path);
-    if (chart != null) {
-      print("${chart.name()} projections: ${chart.numberOfProjections()}");
-    }
+    loadChart(bytes: file?.bytes, path: file?.path);
+  }
+
+  void loadChart({Uint8List? bytes, String? path}) {
+    chart = Chart.fromBytes(bytes);
+    chart ??= Chart.fromPath(path);
   }
 
   void paintOn(CanvasRoot canvas) {
-    canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.green, clip: true);
-    canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.red, clip: true);
-    canvas.draw(Offset(10.0, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
-    canvas.draw(Offset(canvas.size.width / 1.9, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
+    // if (chart != null) {
+    //   print("${chart!.name()} projections: ${chart!.numberOfProjections()}");
+    // }
+    ChartViewer(chart!, canvas);
+    // canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.green, clip: true);
+    // canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.red, clip: true);
+    // canvas.draw(Offset(10.0, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
+    // canvas.draw(Offset(canvas.size.width / 1.9, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
   }
 
   @override
