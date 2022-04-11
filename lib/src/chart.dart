@@ -34,7 +34,28 @@ class Chart {
 
   String name() {
     final info = _data["c"]["i"];
-    return "${info['V']} ${info['A']} ${info['D']} sources: ${info['S']?.length}";
+    final fields = [
+      info['V'],
+      if (info['A'] != "HI") info['A'],
+      info['r'],
+      info['l'],
+      _makeDate(),
+      if (info["S"] != null) "(tables: ${info['S']?.length})",
+    ];
+    return fields.where((field) => field != null).cast<String>().join(" ");
+  }
+
+  String? _makeDate() {
+    final info = _data["c"]["i"];
+    if (info['D'] != null) {
+      return info['D'];
+    }
+    final d1 = info['S']?.first["D"] ?? "", d2 = info['S']?.last["D"] ?? "";
+    return "$d1-$d2";
+  }
+
+  int numberOfProjections() {
+    return _data["c"]["P"]?.length ?? 0;
   }
 
   // ----------------------------------------------------------------------

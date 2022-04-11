@@ -134,7 +134,7 @@ class AntigenicMapPainter extends CustomPainter {
     var chart = Chart.fromBytes(file?.bytes);
     chart ??= Chart.fromPath(file?.path);
     if (chart != null) {
-      print(chart.name());
+      print("${chart.name()} projections: ${chart.numberOfProjections()}");
     }
   }
 
