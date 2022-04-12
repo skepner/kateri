@@ -12,8 +12,19 @@ import 'viewport.dart';
 
 // ----------------------------------------------------------------------
 
-class Chart {
-  Chart({Uint8List? bytes, String? localPath, String? serverPath}) {
+typedef _JsonData = Map<String, dynamic>;
+
+class _JsonAccess {
+  _JsonAccess(this.data);
+  _JsonAccess.empty();
+
+  late final _JsonData data;
+}
+
+// ----------------------------------------------------------------------
+
+class Chart extends _JsonAccess {
+  Chart({Uint8List? bytes, String? localPath, String? serverPath}) : super.empty() {
     //compute(_load, bytes: bytes, localPath: localPath, serverPath: serverPath);
     _load(bytes: bytes, localPath: localPath, serverPath: serverPath);
   }
@@ -85,27 +96,46 @@ class Chart {
   }
 
   void _parseJson(List<int> source) {
-    final data = jsonDecode(utf8.decode(source));
+    data = jsonDecode(utf8.decode(source));
     _info = data["c"]["i"];
     _projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
   }
 
   // ----------------------------------------------------------------------
 
-  Map<String, dynamic> _info = {};
+  _JsonData _info = {};
   List<Projection> _projections = [];
 }
 
 // ----------------------------------------------------------------------
 
-class Projection {
-  Projection(this._data)
-      : _layout = _data["l"].map<Vector3?>(_layoutElement).toList(),
-        _transformation = _makeTransformation(_data["t"]) {
+class _AntigenSerum extends _JsonAccess {
+  _AntigenSerum(_JsonData data) : super(data);
+}
+
+class Antigen extends _AntigenSerum {
+  Antigen(_JsonData data) : super(data);
+}
+
+typedef Antigens = List<Antigen>;
+
+class Serum extends _AntigenSerum {
+  Serum(_JsonData data) : super(data);
+}
+
+typedef Sera = List<Serum>;
+
+// ----------------------------------------------------------------------
+
+class Projection extends _JsonAccess {
+  Projection(_JsonData data)
+      : _layout = data["l"].map<Vector3?>(_layoutElement).toList(),
+        _transformation = _makeTransformation(data["t"]),
+        super(data) {
     _makeTransformedLayout();
   }
 
-  String comment() => _data["c"] ?? "";
+  String comment() => data["c"] ?? "";
 
   Viewport viewport() => _viewport;
 
@@ -113,15 +143,15 @@ class Projection {
 
   // Layout layout() => _layout;
 
-  double? stress() => _data["s"];
+  double? stress() => data["s"];
 
-  String minimumColumnBasis() => _data["m"] ?? "none";
+  String minimumColumnBasis() => data["m"] ?? "none";
 
-  List<double> forcedColumnBases() => _data["C"]?.cast<double>().toList();
+  List<double> forcedColumnBases() => data["C"]?.cast<double>().toList();
 
-  List<int> disconnectedPoints() => _data["D"]?.cast<int>().toList() ?? [];
-  List<int> unmovablePoints() => _data["U"]?.cast<int>().toList() ?? [];
-  List<int> unmovableInLastDimensionPoints() => _data["u"]?.cast<int>().toList() ?? [];
+  List<int> disconnectedPoints() => data["D"]?.cast<int>().toList() ?? [];
+  List<int> unmovablePoints() => data["U"]?.cast<int>().toList() ?? [];
+  List<int> unmovableInLastDimensionPoints() => data["u"]?.cast<int>().toList() ?? [];
 
   // ----------------------------------------------------------------------
 
@@ -158,7 +188,6 @@ class Projection {
 
   // ----------------------------------------------------------------------
 
-  final Map<String, dynamic> _data;
   final Layout _layout;
   final Matrix4 _transformation;
   late Layout _transformedLayout;
