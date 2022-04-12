@@ -7,6 +7,7 @@ import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
+import 'viewport.dart';
 
 // ----------------------------------------------------------------------
 
@@ -32,7 +33,7 @@ class CanvasPdf extends CanvasRoot {
   }
 
   @override
-  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
+  void draw(Rect drawingArea, Viewport viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(drawingArea.left, drawingArea.top, 0.0));
@@ -142,7 +143,7 @@ class _DrawOnPdf extends DrawOn {
   final double _pixelSize;
 
   // aspect: width / height
-  _DrawOnPdf(this._canvasPdf, this.canvasSize, Rect viewport)
+  _DrawOnPdf(this._canvasPdf, this.canvasSize, Viewport viewport)
       : _canvas = _canvasPdf.canvas,
         _pixelSize = viewport.width / canvasSize.width,
         super(viewport) {

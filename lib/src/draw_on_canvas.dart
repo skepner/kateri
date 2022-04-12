@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'draw_on.dart';
+import 'viewport.dart' as vp;
 
 // ----------------------------------------------------------------------
 
@@ -16,7 +17,7 @@ class CanvasFlutter extends CanvasRoot {
   CanvasFlutter(this.canvas, Size canvasSize) : super(canvasSize);
 
   @override
-  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
+  void draw(Rect drawingArea, vp.Viewport viewport, Function doDraw, {Color? debuggingOutline, bool clip = false}) {
     canvas
       ..save()
       ..translate(drawingArea.left, drawingArea.top);
@@ -48,7 +49,7 @@ class _DrawOnCanvas extends DrawOn {
   final Size canvasSize;
   final double _pixelSize;
 
-  _DrawOnCanvas(this.canvas, this.canvasSize, Rect viewport)
+  _DrawOnCanvas(this.canvas, this.canvasSize, vp.Viewport viewport)
       : _pixelSize = viewport.width / canvasSize.width,
         super(viewport) {
     canvas.scale(canvasSize.width / viewport.width);

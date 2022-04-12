@@ -1,77 +1,58 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:convert'; // json
 
 import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter/foundation.dart';
 
 import 'decompress.dart';
+import 'viewport.dart';
 
 // ----------------------------------------------------------------------
 
 class Chart {
-  Chart(List<int> source) : _data = json.decode(utf8.decode(source));
-
-  static Chart? fromBytes(Uint8List? bytes) {
-    if (bytes == null) {
-      return null;
-    }
-    return Chart(decompress(bytes));
-  }
-
-  static Chart? fromPath(String? path) {
-    if (path == null) {
-      return null;
-    }
-    return Chart(decompress(File(path).readAsBytesSync()));
-  }
-
-  static Future<Chart?> fromServer(String? path) async {
-    if (path == null) {
-      return null;
-    }
-    // ajax
-    return null;
+  Chart({Uint8List? bytes, String? localPath, String? serverPath}) {
+    //compute(_load, bytes: bytes, localPath: localPath, serverPath: serverPath);
+    _load(bytes: bytes, localPath: localPath, serverPath: serverPath);
   }
 
   // ----------------------------------------------------------------------
 
   String name() {
-    final info = _data["c"]["i"];
     final fields = [
-      info['V'],
-      if (info['A'] != "HI") info['A'],
-      info['r'],
-      info['l'],
+      _info['V'],
+      if (_info['A'] != "HI") _info['A'],
+      _info['r'],
+      _info['l'],
       _makeDate(),
-      if (info["S"] != null) "(tables: ${info['S']?.length})",
+      if (_info["S"] != null) "(tables: ${_info['S']?.length})",
     ];
     return fields.where((field) => field != null).cast<String>().join(" ");
   }
 
   String nameForFilename() {
-    final info = _data["c"]["i"];
     final fields = [
       _subtypeShort(),
-      if (info['A'] != "HI") info['A'],
-      info['r'],
-      info['l'],
+      if (_info['A'] != "HI") _info['A'],
+      _info['r'],
+      _info['l'],
       _makeDate(),
     ];
     return fields.where((field) => field != null).cast<String>().join("-")..replaceAll(RegExp(r'[\(\)/\s]'), "-").toLowerCase();
   }
 
   String? _makeDate() {
-    final info = _data["c"]["i"];
-    if (info['D'] != null) {
-      return info['D'];
+    if (_info['D'] != null) {
+      return _info['D'];
     }
-    final d1 = info['S']?.first["D"] ?? "", d2 = info['S']?.last["D"] ?? "";
+    final d1 = _info['S']?.first["D"] ?? "", d2 = _info['S']?.last["D"] ?? "";
     return "$d1-$d2";
   }
 
   String? _subtypeShort() {
-    final subtype = _data["c"]["i"]["V"];
+    final subtype = _info["V"];
     switch (subtype) {
       case "A(H1N1)":
         return "h1";
@@ -86,79 +67,102 @@ class Chart {
     }
   }
 
-  int numberOfProjections() {
-    return _data["c"]["P"]?.length ?? 0;
+  int numberOfProjections() => _projections.length;
+
+  Projection projection(int projectionNo) => _projections[projectionNo];
+
+  // ----------------------------------------------------------------------
+  // parse ace
+
+  void _load({Uint8List? bytes, String? localPath, String? serverPath}) {
+    if (bytes != null) {
+      _parseJson(decompress(bytes));
+    } else if (localPath != null) {
+      _parseJson(decompress(File(localPath).readAsBytesSync()));
+    } else if (serverPath != null) {
+      // _parseJson(loadFromServer(serverPath));
+    }
   }
 
-  Projection projection(int projectionNo) {
-    assert(_data["c"]["P"] != null);
-    assert(_data["c"]["P"]!.length > projectionNo);
-    return Projection(_data["c"]["P"][projectionNo]);
+  void _parseJson(List<int> source) {
+    final data = jsonDecode(utf8.decode(source));
+    _info = data["c"]["i"];
+    _projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
   }
 
   // ----------------------------------------------------------------------
 
-  final Map<String, dynamic> _data;
+  Map<String, dynamic> _info = {};
+  List<Projection> _projections = [];
 }
 
 // ----------------------------------------------------------------------
 
 class Projection {
-  Projection(this._data) {
-    final trans = transformation();
-    _transformedLayout = layout().map((element) => element != null ? trans.transform3(element) : null).toList();
+  Projection(this._data)
+      : _layout = _data["l"].map<Vector3?>(_layoutElement).toList(),
+        _transformation = _makeTransformation(_data["t"]) {
+    _makeTransformedLayout();
   }
 
-  Rect viewport() {
-    return const Offset(-5, -5) & const Size(10, 10);
-  }
+  String comment() => _data["c"] ?? "";
 
-  List<Vector3?> transformedLayout() => _transformedLayout;
+  Viewport viewport() => _viewport;
 
-  List<Vector3?> layout() {
-    Vector3? fromList(dynamic src) {
-      switch (src.length) {
-        case 0:
-        case 1:
-          return null;
-        case 2:
-          return Vector3(src[0], src[1], 0.0);
-        case 3:
-          return Vector3(src[0], src[1], src[2]);
-        default:
-          return null;
-      }
+  Layout transformedLayout() => _transformedLayout;
+
+  // Layout layout() => _layout;
+
+  double? stress() => _data["s"];
+
+  String minimumColumnBasis() => _data["m"] ?? "none";
+
+  List<double> forcedColumnBases() => _data["C"]?.cast<double>().toList();
+
+  List<int> disconnectedPoints() => _data["D"]?.cast<int>().toList() ?? [];
+  List<int> unmovablePoints() => _data["U"]?.cast<int>().toList() ?? [];
+  List<int> unmovableInLastDimensionPoints() => _data["u"]?.cast<int>().toList() ?? [];
+
+  // ----------------------------------------------------------------------
+
+  static Vector3? _layoutElement(dynamic src) {
+    switch (src.length) {
+      case 0:
+      case 1:
+        return null;
+      case 2:
+        return Vector3(src[0], src[1], 0.0);
+      case 3:
+        return Vector3(src[0], src[1], src[2]);
+      default:
+        return null;
     }
-
-    return _data["l"].map<Vector3?>(fromList).toList();
   }
 
-  double? stress() {
-    return _data["s"];
-  }
-
-  String minimumColumnBasis() {
-    return _data["m"] ?? "none";
-  }
-
-  List<double> forcedColumnBases() {
-    return _data["C"]?.cast<double>().toList();
-  }
-
-  Matrix4 transformation() {
-    if (_data["t"] != null) {
-      switch (_data["t"].length) {
+  static Matrix4 _makeTransformation(List<dynamic>? source) {
+    if (source != null) {
+      switch (source.length) {
         case 4:
-          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(_data["t"].cast<double>()));
+          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(source.cast<double>()));
         case 6:
-          return Matrix4.identity()..copyRotation(Matrix3.fromList(_data["t"].cast<double>()));
+          return Matrix4.identity()..copyRotation(Matrix3.fromList(source.cast<double>()));
       }
     }
     return Matrix4.identity();
   }
 
+  void _makeTransformedLayout() {
+    _transformedLayout = _layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
+    _viewport = Viewport.hullLayout(_transformedLayout)..moveCenterToOrigin(_transformedLayout)..round();
+  }
+
+  // ----------------------------------------------------------------------
+
   final Map<String, dynamic> _data;
-  late List<Vector3?> _transformedLayout;
+  final Layout _layout;
+  final Matrix4 _transformation;
+  late Layout _transformedLayout;
+  late Viewport _viewport;
 }
 
 // ----------------------------------------------------------------------

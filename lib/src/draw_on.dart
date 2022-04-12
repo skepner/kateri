@@ -2,6 +2,10 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'viewport.dart';
+
+// ----------------------------------------------------------------------
+
 enum PointShape { circle, box, triangle, egg, uglyegg }
 
 const NoRotation = 0.0;
@@ -61,7 +65,7 @@ class DelayedText {
 abstract class CanvasRoot {
   CanvasRoot(this.size);
 
-  void draw(Rect drawingArea, Rect viewport, Function doDraw, {Color? debuggingOutline, bool clip = false});
+  void draw(Rect drawingArea, Viewport viewport, Function doDraw, {Color? debuggingOutline, bool clip = false});
 
   final Size size;
 }
@@ -69,7 +73,7 @@ abstract class CanvasRoot {
 // ----------------------------------------------------------------------
 
 abstract class DrawOn {
-  final Rect viewport;
+  final Viewport viewport;
   final List<DelayedText> _delayedText;
 
   DrawOn(this.viewport) : _delayedText = <DelayedText>[];

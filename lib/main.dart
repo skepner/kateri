@@ -119,7 +119,7 @@ class AntigenicMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    loadChart(path: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
+    chart = Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
     paintOn(CanvasFlutter(canvas, size));
   }
 
@@ -134,12 +134,7 @@ class AntigenicMapPainter extends CustomPainter {
 
   void openAceFile() async {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
-    loadChart(bytes: file?.bytes, path: file?.path);
-  }
-
-  void loadChart({Uint8List? bytes, String? path}) {
-    chart = Chart.fromBytes(bytes);
-    chart ??= Chart.fromPath(path);
+    chart = Chart(bytes: file?.bytes, localPath: file?.path);
   }
 
   void paintOn(CanvasRoot canvas) {

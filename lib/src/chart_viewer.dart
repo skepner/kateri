@@ -1,16 +1,19 @@
 import 'dart:ui';
 import 'dart:typed_data'; // Uint8List
 
+import 'package:vector_math/vector_math_64.dart';
+
 import "chart.dart";
 import 'draw_on.dart';
 import 'draw_on_pdf.dart';
+import 'viewport.dart';
 
 // ----------------------------------------------------------------------
 
 class ChartViewer {
   final Chart chart;
   final Projection projection;
-  late final Rect viewport;
+  late Viewport viewport;
   final CanvasRoot canvas;
 
   ChartViewer(this.chart, this.canvas) : projection = chart.projection(0) {
