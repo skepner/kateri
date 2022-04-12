@@ -153,7 +153,7 @@ class Projection {
 
   void _makeTransformedLayout() {
     _transformedLayout = _layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
-    _viewport = Viewport.hullLayout(_transformedLayout)..moveCenterToOrigin(_transformedLayout)..round();
+    _viewport = Viewport.hullLayout(_transformedLayout)..roundAndRecenter(_transformedLayout);
   }
 
   // ----------------------------------------------------------------------

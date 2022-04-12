@@ -24,19 +24,29 @@ class Viewport {
   double get top => _aabb.min.y;
   double get bottom => _aabb.max.y;
 
-  /// Move center of this viewport to Vector3.all(0.0) and adjust points in the layout accordingly
-  void moveCenterToOrigin(Layout layout) {
+  // /// Move center of this viewport to Vector3.all(0.0) and adjust points in the layout accordingly
+  // void moveCenterToOrigin(Layout layout) {
+  //   for (var ind = 0; ind < layout.length; ++ind) {
+  //     if (layout[ind] != null) {
+  //       layout[ind] = layout[ind]! - _aabb.center;
+  //     }
+  //   }
+  //   _aabb.setCenterAndHalfExtents(Vector3.all(0.0), (_aabb.max - _aabb.min) / 2);
+  // }
+
+  /// extend viewport so it's corners are at the whole number vectors, then re-center layout within this viewport
+  void roundAndRecenter(Layout layout) {
+    final roundedSize = (_aabb.max - _aabb.min)..ceil();
+    final roundedHalfSize = roundedSize / 2;
+    final roundedHalfSizeCeiled = Vector3.copy(roundedSize)..ceil();
+    final origCenter = _aabb.center;
+    _aabb.setCenterAndHalfExtents(roundedHalfSizeCeiled - roundedHalfSize, roundedHalfSize);
+    final adjust = _aabb.center - origCenter;
     for (var ind = 0; ind < layout.length; ++ind) {
       if (layout[ind] != null) {
-        layout[ind] = layout[ind]! - _aabb.center;
+        layout[ind] = layout[ind]! + adjust;
       }
     }
-    _aabb.setCenterAndHalfExtents(Vector3.all(0.0), (_aabb.max - _aabb.min) / 2);
-  }
-
-  /// extend viewport so it's corners are at whole number vectors
-  void round() {
-    print("${_aabb.center} ${_aabb.min} ${_aabb.max}");
   }
 
   static bool notNull(Vector3? elt) => elt != null;
