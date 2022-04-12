@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'decompress.dart';
 import 'viewport.dart';
+import 'plot_spec.dart';
 
 // ----------------------------------------------------------------------
 
@@ -32,10 +33,14 @@ class Chart extends _JsonAccess {
   // ----------------------------------------------------------------------
 
   /// List of reference antigen indexes
-  List<int> referenceAntigens() {
+  Iterable<int> referenceAntigens() {
     bool hasSerum(String name) => sera.where((serum) => serum.name == name).isNotEmpty;
-    return Iterable<int>.generate(antigens.length).where((agNo) => hasSerum(antigens[agNo].name)).toList();
+    return Iterable<int>.generate(antigens.length).where((agNo) => hasSerum(antigens[agNo].name));
   }
+
+  // ----------------------------------------------------------------------
+
+  PlotSpecDefault plotSpecDefault([int projectionNo = 0]) => PlotSpecDefault(this, projections[projectionNo]);
 
   // ----------------------------------------------------------------------
   // parse ace
@@ -157,7 +162,7 @@ typedef Sera = List<Serum>;
 
 class Projection extends _JsonAccess {
   Projection(_JsonData data)
-      : _layout = data["l"].map<Vector3?>(_layoutElement).toList(),
+      : layout = data["l"].map<Vector3?>(_layoutElement).toList(),
         _transformation = _makeTransformation(data["t"]),
         super(data) {
     _makeTransformedLayout();
@@ -210,13 +215,13 @@ class Projection extends _JsonAccess {
   }
 
   void _makeTransformedLayout() {
-    _transformedLayout = _layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
+    _transformedLayout = layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
     _viewport = Viewport.hullLayout(_transformedLayout)..roundAndRecenter(_transformedLayout);
   }
 
   // ----------------------------------------------------------------------
 
-  final Layout _layout;
+  final Layout layout;
   final Matrix4 _transformation;
   late Layout _transformedLayout;
   late Viewport _viewport;
