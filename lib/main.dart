@@ -125,7 +125,7 @@ class AntigenicMapPainter extends CustomPainter {
 
   void exportPdf({bool open = true}) async {
     if (chart != null && viewer != null) {
-      final filename = await FileSaver.instance.saveFile(chart!.nameForFilename(), await viewer!.exportPdf(), "pdf", mimeType: MimeType.PDF);
+      final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), await viewer!.exportPdf(), "pdf", mimeType: MimeType.PDF);
       if (open && UniversalPlatform.isMacOS) {
         await Process.run("open-and-back-to-emacs", [filename]);
       }

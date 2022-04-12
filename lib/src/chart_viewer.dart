@@ -16,7 +16,8 @@ class ChartViewer {
   late Viewport viewport;
   final CanvasRoot canvas;
 
-  ChartViewer(this.chart, this.canvas) : projection = chart.projection(0) {
+  ChartViewer(this.chart, this.canvas) : projection = chart.projections[0] {
+    // print(chart.referenceAntigens().map((agNo) => "$agNo ${chart.antigens[agNo].name}").join("\n"));
     viewport = projection.viewport();
     canvas.draw(Offset.zero & canvas.size, viewport, paint);
   }

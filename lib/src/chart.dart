@@ -31,56 +31,11 @@ class Chart extends _JsonAccess {
 
   // ----------------------------------------------------------------------
 
-  String name() {
-    final fields = [
-      _info['V'],
-      if (_info['A'] != "HI") _info['A'],
-      _info['r'],
-      _info['l'],
-      _makeDate(),
-      if (_info["S"] != null) "(tables: ${_info['S']?.length})",
-    ];
-    return fields.where((field) => field != null).cast<String>().join(" ");
+  /// List of reference antigen indexes
+  List<int> referenceAntigens() {
+    bool hasSerum(String name) => sera.where((serum) => serum.name == name).isNotEmpty;
+    return Iterable<int>.generate(antigens.length).where((agNo) => hasSerum(antigens[agNo].name)).toList();
   }
-
-  String nameForFilename() {
-    final fields = [
-      _subtypeShort(),
-      if (_info['A'] != "HI") _info['A'],
-      _info['r'],
-      _info['l'],
-      _makeDate(),
-    ];
-    return fields.where((field) => field != null).cast<String>().join("-")..replaceAll(RegExp(r'[\(\)/\s]'), "-").toLowerCase();
-  }
-
-  String? _makeDate() {
-    if (_info['D'] != null) {
-      return _info['D'];
-    }
-    final d1 = _info['S']?.first["D"] ?? "", d2 = _info['S']?.last["D"] ?? "";
-    return "$d1-$d2";
-  }
-
-  String? _subtypeShort() {
-    final subtype = _info["V"];
-    switch (subtype) {
-      case "A(H1N1)":
-        return "h1";
-      case "A(H3N2)":
-        return "h3";
-      case "B":
-        return "b";
-      case null:
-        return null;
-      default:
-        return subtype;
-    }
-  }
-
-  int numberOfProjections() => _projections.length;
-
-  Projection projection(int projectionNo) => _projections[projectionNo];
 
   // ----------------------------------------------------------------------
   // parse ace
@@ -97,30 +52,103 @@ class Chart extends _JsonAccess {
 
   void _parseJson(List<int> source) {
     data = jsonDecode(utf8.decode(source));
-    _info = data["c"]["i"];
-    _projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
+    info = Info(data["c"]["i"]);
+    antigens = (data["c"]["a"] ?? []).map<Antigen>((pdata) => Antigen(pdata)).toList();
+    sera = (data["c"]["s"] ?? []).map<Serum>((pdata) => Serum(pdata)).toList();
+    projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
   }
 
   // ----------------------------------------------------------------------
 
-  _JsonData _info = {};
-  List<Projection> _projections = [];
+  Info info = Info.empty();
+  Projections projections = [];
+  Antigens antigens = [];
+  Sera sera = [];
+}
+
+// ----------------------------------------------------------------------
+
+class Info extends _JsonAccess {
+  Info(_JsonData data) : super(data);
+  Info.empty() : super.empty();
+
+  String name() {
+    final fields = [
+      data['V'],
+      if (data['A'] != "HI") data['A'],
+      data['r'],
+      data['l'],
+      _makeDate(),
+      if (data["S"] != null) "(tables: ${data['S']?.length})",
+    ];
+    return fields.where((field) => field != null).cast<String>().join(" ");
+  }
+
+  String nameForFilename() {
+    final fields = [
+      _subtypeShort(),
+      if (data['A'] != "HI") data['A'],
+      data['r'],
+      data['l'],
+      _makeDate(),
+    ];
+    return fields.where((field) => field != null).cast<String>().join("-")..replaceAll(RegExp(r'[\(\)/\s]'), "-").toLowerCase();
+  }
+
+  String? _makeDate() {
+    if (data['D'] != null) {
+      return data['D'];
+    }
+    final d1 = data['S']?.first["D"] ?? "", d2 = data['S']?.last["D"] ?? "";
+    return "$d1-$d2";
+  }
+
+  String? _subtypeShort() {
+    final subtype = data["V"];
+    switch (subtype) {
+      case "A(H1N1)":
+        return "h1";
+      case "A(H3N2)":
+        return "h3";
+      case "B":
+        return "b";
+      case null:
+        return null;
+      default:
+        return subtype;
+    }
+  }
 }
 
 // ----------------------------------------------------------------------
 
 class _AntigenSerum extends _JsonAccess {
   _AntigenSerum(_JsonData data) : super(data);
+
+  String get name => data["N"] ?? "";
+  List<String> get annotations => data["a"] ?? [];
+  String get lineage => data["L"] ?? "";
+  String get passage => data["P"] ?? "";
+  String get reassortant => data["R"] ?? "";
+  String get aa => data["A"] ?? "";
+  String get nuc => data["B"] ?? "";
+  Map<String, dynamic> get semantic => data["T"] ?? {};
 }
 
 class Antigen extends _AntigenSerum {
   Antigen(_JsonData data) : super(data);
+
+  String get date => data["D"] ?? "";
+  List<String> get labIds => data["l"] ?? [];
 }
 
 typedef Antigens = List<Antigen>;
 
 class Serum extends _AntigenSerum {
   Serum(_JsonData data) : super(data);
+
+  String get species => data["s"] ?? "";
+  String get serumId => data["I"] ?? "";
 }
 
 typedef Sera = List<Serum>;
@@ -193,5 +221,7 @@ class Projection extends _JsonAccess {
   late Layout _transformedLayout;
   late Viewport _viewport;
 }
+
+typedef Projections = List<Projection>;
 
 // ----------------------------------------------------------------------
