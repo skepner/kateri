@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final antigenicMapPainter = AntigenicMapPainter(Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace"));
+    final antigenicMapPainter = AntigenicMapPainter(); // Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace"));
 
     print("_MyHomePageState build");
     return Scaffold(
@@ -114,14 +114,14 @@ class _MyHomePageState extends State<MyHomePage> {
 // ----------------------------------------------------------------------
 
 class AntigenicMapPainter extends CustomPainter {
-  late Chart chart;
+  Chart? chart;
   late ChartViewer viewer;
 
-  AntigenicMapPainter(Chart chart) {
+  AntigenicMapPainter([Chart? chart]) {
     setChart(chart);
   }
 
-  void setChart(Chart chart) {
+  void setChart(Chart? chart) {
     this.chart = chart;
     viewer = ChartViewer(chart);
   }
@@ -130,13 +130,18 @@ class AntigenicMapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final stopwatch = Stopwatch()..start();
     viewer.paint(CanvasFlutter(canvas, size));
-    print("[paint] ${chart.antigens.length}:${chart.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+    print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
 
   void exportPdf({bool open = true}) async {
-    final filename = await FileSaver.instance.saveFile(chart.info.nameForFilename(), await viewer.exportPdf(), "pdf", mimeType: MimeType.PDF);
-    if (open && UniversalPlatform.isMacOS) {
-      await Process.run("open-and-back-to-emacs", [filename]);
+    if (chart != null) {
+      final bytes = await viewer.exportPdf();
+      if (bytes != null) {
+        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
+        if (open && UniversalPlatform.isMacOS) {
+          await Process.run("open-and-back-to-emacs", [filename]);
+        }
+      }
     }
   }
 

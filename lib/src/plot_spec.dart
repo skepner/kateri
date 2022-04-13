@@ -97,8 +97,8 @@ class PlotSpecLegacy extends PlotSpec {
       if (!(entry["+"] ?? true)) spec.shown = false;
       spec.fill = colorFromSpec(entry["F"], transparent);
       spec.outline = colorFromSpec(entry["O"], black);
-      spec.outlineWidthPixels = entry["o"] ?? 1.0;
-      spec.sizePixels = (entry["s"] ?? 1.0) * 10.0;
+      spec.outlineWidthPixels = entry["o"]?.toDouble() ?? 1.0;
+      spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {
         case "C":
           spec.shape = PointShape.circle;
@@ -116,8 +116,8 @@ class PlotSpecLegacy extends PlotSpec {
           spec.shape = PointShape.uglyegg;
           break;
       }
-      spec.rotation = entry["r"] ?? NoRotation;
-      spec.aspect = entry["a"] ?? aspectNormal;
+      spec.rotation = entry["r"]?.toDouble() ?? NoRotation;
+      spec.aspect = entry["a"]?.toDouble() ?? aspectNormal;
       // label
       _specs.add(spec);
     }

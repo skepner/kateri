@@ -12,23 +12,25 @@ import 'plot_spec.dart';
 // ----------------------------------------------------------------------
 
 class ChartViewer {
-  final Chart chart;
-  final Projection projection;
-  late Viewport viewport;
+  final Chart? chart;
+  final Projection? projection;
+  Viewport? viewport;
   PlotSpec? plotSpec;
 
-  ChartViewer(this.chart) : projection = chart.projections[0] {
-    viewport = projection.viewport();
+  ChartViewer(this.chart) : projection = chart?.projections[0] {
+    viewport = projection?.viewport();
   }
 
   void paint(CanvasRoot canvas) {
-    canvas.draw(Offset.zero & canvas.size, viewport, paintOn);
+    if (chart != null && viewport != null) {
+      canvas.draw(Offset.zero & canvas.size, viewport!, paintOn);
+    }
   }
 
   void paintOn(DrawOn canvas) {
-    plotSpec ??= chart.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
+    plotSpec ??= chart!.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
     canvas.grid();
-    final layout = projection.transformedLayout();
+    final layout = projection!.transformedLayout();
     for (final pointNo in plotSpec!.drawingOrder()) {
       if (layout[pointNo] != null) {
         canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec![pointNo]);
@@ -36,9 +38,12 @@ class ChartViewer {
     }
   }
 
-  Future<Uint8List> exportPdf({bool open = true}) async {
-    final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport.width * viewport.height))..paintBy(paint);
-    return canvasPdf.bytes();
+  Future<Uint8List?> exportPdf({bool open = true}) async {
+    if (chart != null && viewport != null) {
+      final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport!.width * viewport!.height))..paintBy(paint);
+      return canvasPdf.bytes();
+    }
+    return null;
   }
 }
 
