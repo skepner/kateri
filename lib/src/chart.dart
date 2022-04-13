@@ -40,7 +40,8 @@ class Chart extends _JsonAccess {
 
   // ----------------------------------------------------------------------
 
-  PlotSpecDefault plotSpecDefault([Projection? projection]) => PlotSpecDefault(this, projection ?? projections[0]);
+  PlotSpec plotSpecDefault([Projection? projection]) => PlotSpecDefault(this, projection ?? projections[0]);
+  PlotSpec plotSpecLegacy([Projection? projection]) => _hasPlotSpecLegacy() ? PlotSpecLegacy(this) : plotSpecDefault(projection);
 
   // ----------------------------------------------------------------------
   // parse ace
@@ -62,6 +63,8 @@ class Chart extends _JsonAccess {
     sera = (data["c"]["s"] ?? []).map<Serum>((pdata) => Serum(pdata)).toList();
     projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
   }
+
+  bool _hasPlotSpecLegacy() => data["c"]["p"] != null;
 
   // ----------------------------------------------------------------------
 

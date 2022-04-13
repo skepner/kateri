@@ -74,3 +74,25 @@ class PlotSpecDefault extends PlotSpec {
 }
 
 // ----------------------------------------------------------------------
+
+class PlotSpecLegacy extends PlotSpec {
+  PlotSpecLegacy(this._chart) : _data = _chart.data["c"]["p"] {
+    for (final entry in _data["P"] ?? []) {
+      _specs.add(PointPlotSpec());
+    }
+  }
+
+  @override
+  List<int> drawingOrder() {
+    return _data["d"]?.cast<int>() ?? [];
+  }
+
+  @override
+  PointPlotSpec operator [](int pointNo) => _specs[_data["p"][pointNo]];
+
+  final Chart _chart;
+  final Map<String, dynamic> _data;
+  final List<PointPlotSpec> _specs = [];
+}
+
+// ----------------------------------------------------------------------

@@ -23,7 +23,8 @@ class ChartViewer {
   }
 
   void paint(DrawOn canvas) {
-    final plotSpec = chart.plotSpecDefault(projection);
+    // final plotSpec = chart.plotSpecDefault(projection);
+    final plotSpec = chart.plotSpecLegacy();
     final stopwatch = Stopwatch()..start();
     canvas.grid();
     final layout = projection.transformedLayout();
