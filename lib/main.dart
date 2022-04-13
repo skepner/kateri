@@ -147,7 +147,14 @@ class AntigenicMapPainter extends CustomPainter {
 
   void openAceFile() async {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
-    setChart(Chart(bytes: file?.bytes, localPath: file?.path));
+
+    // accesing file?.path on web always reports an error (regardles of using try/catch)
+    if (file?.bytes != null) {
+      setChart(Chart(bytes: file?.bytes));
+    }
+    else {
+      setChart(Chart(localPath: file?.path));
+    }
   }
 
   @override
