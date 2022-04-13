@@ -23,7 +23,10 @@ const aspectEgg = 0.75;
 const black = Color(0xFF000000);
 const white = Color(0xFFFFFFFF);
 const transparent = Color(0x00000000);
+const red = Color(0xFFFF0000);
 const green = Color(0xFF00FF00);
+const blue = Color(0xFF0000FF);
+const orange = Color(0xFFFFA500);
 
 // ----------------------------------------------------------------------
 
