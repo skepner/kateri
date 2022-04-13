@@ -24,7 +24,7 @@ class ChartViewer {
 
   void paint(DrawOn canvas) {
     final plotSpec = chart.plotSpecDefault(projection);
-    final stopwatch = new Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     canvas.grid();
     final layout = projection.transformedLayout();
     for (final pointNo in plotSpec.drawingOrder()) {
@@ -32,14 +32,7 @@ class ChartViewer {
         canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec[pointNo]);
       }
     }
-    print("drawing chart: ${stopwatch.elapsed}");
-    // for (var point in projection.transformedLayout()) {
-    //   // print(point);
-    //   // assert(point is List<dynamic>);
-    //   if (point != null) {
-    //     canvas.point(center: point, sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
-    //   }
-    // }
+    print("drawing chart: ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
 
   Future<Uint8List> exportPdf({bool open = true}) async {

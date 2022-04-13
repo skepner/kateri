@@ -12,39 +12,30 @@ abstract class PlotSpec {
 
 class PlotSpecDefault extends PlotSpec {
   PlotSpecDefault(this._chart, this._projection) {
-    final stopwatch = new Stopwatch()..start();
     bool hasCoord(int pointNo) => _projection.layout[pointNo] != null;
     sera = Iterable<int>.generate(_chart.sera.length, (srNo) => srNo + _chart.antigens.length).where(hasCoord).toList();
-    final refAntigens = _chart.referenceAntigens();
-    referenceAntigens = refAntigens.where(hasCoord).toList();
+    referenceAntigens = _chart.referenceAntigens().where(hasCoord).toList();
     testAntigens = Iterable<int>.generate(_chart.antigens.length).where((agNo) => !referenceAntigens.contains(agNo)).where(hasCoord).toList();
-    print("PlotSpecDefault ref/test: ${stopwatch.elapsed}");
 
     _chart.antigens.asMap().forEach((agNo, antigen) {
-      refAntigens.contains(agNo);
-    });
-    print("PlotSpecDefault contains: ${stopwatch.elapsed}");
-
-    _chart.antigens.asMap().forEach((agNo, antigen) {
-      // if (refAntigens.contains(agNo)) {
-      //   if (antigen.isReassortant) {
-      //     pointSpec.add(referenceReassortant);
-      //   } else if (antigen.isEgg) {
-      //     pointSpec.add(referenceEgg);
-      //   } else {
-      //     pointSpec.add(referenceCell);
-      //   }
-      // } else {
-      if (antigen.isReassortant) {
-        pointSpec.add(testReassortant);
-      } else if (antigen.isEgg) {
-        pointSpec.add(testEgg);
+      if (referenceAntigens.contains(agNo)) {
+        if (antigen.isReassortant) {
+          pointSpec.add(referenceReassortant);
+        } else if (antigen.isEgg) {
+          pointSpec.add(referenceEgg);
+        } else {
+          pointSpec.add(referenceCell);
+        }
       } else {
-        pointSpec.add(testCell);
+        if (antigen.isReassortant) {
+          pointSpec.add(testReassortant);
+        } else if (antigen.isEgg) {
+          pointSpec.add(testEgg);
+        } else {
+          pointSpec.add(testCell);
+        }
       }
-      // }
     });
-    print("PlotSpecDefault antigens: ${stopwatch.elapsed}");
     _chart.sera.asMap().forEach((srNo, serum) {
       if (serum.isReassortant) {
         pointSpec.add(serumReassortant);
@@ -54,7 +45,6 @@ class PlotSpecDefault extends PlotSpec {
         pointSpec.add(serumCell);
       }
     });
-    print("constructing PlotSpecDefault: ${stopwatch.elapsed}");
   }
 
   @override
