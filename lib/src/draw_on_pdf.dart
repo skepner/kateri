@@ -168,8 +168,8 @@ class _DrawOnPdf extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0,
@@ -233,7 +233,7 @@ class _DrawOnPdf extends DrawOn {
   }
 
   @override
-  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
+  void path(List<Offset> vertices, {Color outline = black, Color fill = transparent, double lineWidthPixels = 1.0, bool close = true}) {
     _canvas.saveContext();
     _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: lineWidthPixels);
     _canvas.moveTo(vertices[0].dx, vertices[0].dy);
@@ -266,8 +266,8 @@ class _DrawOnPdf extends DrawOn {
   void circle(
       {required Offset center,
       required double size,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
@@ -287,10 +287,10 @@ class _DrawOnPdf extends DrawOn {
     required Offset center,
     required double radius,
     required double angle,
-    Color fill = const Color(0x00000000),
-    Color outlineCircle = const Color(0xFF000000),
+    Color fill = transparent,
+    Color outlineCircle = black,
     double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = const Color(0xFF000000),
+    Color outlineRadius = black,
     double outlineRadiusWidthPixels = 1.0,
     double rotation = NoRotation, // NoRotation - first radius in upright
   }) {
@@ -384,8 +384,8 @@ class _DrawOnPdf extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {

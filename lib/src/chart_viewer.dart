@@ -23,15 +23,23 @@ class ChartViewer {
   }
 
   void paint(DrawOn canvas) {
-    // canvas.transform(projection.transformation());
+    final plotSpec = chart.plotSpecDefault(projection);
+    final stopwatch = new Stopwatch()..start();
     canvas.grid();
-    for (var point in projection.transformedLayout()) {
-      // print(point);
-      // assert(point is List<dynamic>);
-      if (point != null) {
-        canvas.point(center: point, sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
+    final layout = projection.transformedLayout();
+    for (final pointNo in plotSpec.drawingOrder()) {
+      if (layout[pointNo] != null) {
+        canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec[pointNo]);
       }
     }
+    print("drawing chart: ${stopwatch.elapsed}");
+    // for (var point in projection.transformedLayout()) {
+    //   // print(point);
+    //   // assert(point is List<dynamic>);
+    //   if (point != null) {
+    //     canvas.point(center: point, sizePixels: 10, shape: PointShape.circle, fill: const Color(0xFF00FF00), outlineWidthPixels: 1);
+    //   }
+    // }
   }
 
   Future<Uint8List> exportPdf({bool open = true}) async {

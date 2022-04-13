@@ -8,11 +8,6 @@ import 'viewport.dart' as vp;
 
 // ----------------------------------------------------------------------
 
-const black = Color(0xFF000000);
-const white = Color(0xFFFFFFFF);
-
-// ----------------------------------------------------------------------
-
 class CanvasFlutter extends CanvasRoot {
   CanvasFlutter(this.canvas, Size canvasSize) : super(canvasSize);
 
@@ -73,8 +68,8 @@ class _DrawOnCanvas extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0,
@@ -155,7 +150,7 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
+  void path(List<Offset> vertices, {Color outline = black, Color fill = transparent, double lineWidthPixels = 1.0, bool close = true}) {
     var path = Path()..moveTo(vertices[0].dx, vertices[0].dy);
     for (var vertix in vertices.getRange(1, vertices.length)) {
       path.lineTo(vertix.dx, vertix.dy);
@@ -188,8 +183,8 @@ class _DrawOnCanvas extends DrawOn {
   void circle(
       {required Offset center,
       required double size,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {
@@ -221,7 +216,7 @@ class _DrawOnCanvas extends DrawOn {
     required Offset center,
     required double radius,
     required double angle,
-    Color fill = const Color(0x00000000),
+    Color fill = transparent,
     Color outlineCircle = black,
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = black,
@@ -352,8 +347,8 @@ class _DrawOnCanvas extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = const Color(0x00000000),
-      Color outline = const Color(0xFF000000),
+      Color fill = transparent,
+      Color outline = black,
       double outlineWidthPixels = 1.0,
       double rotation = NoRotation,
       double aspect = 1.0}) {

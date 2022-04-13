@@ -40,7 +40,7 @@ class Chart extends _JsonAccess {
 
   // ----------------------------------------------------------------------
 
-  PlotSpecDefault plotSpecDefault([int projectionNo = 0]) => PlotSpecDefault(this, projections[projectionNo]);
+  PlotSpecDefault plotSpecDefault([Projection? projection]) => PlotSpecDefault(this, projection ?? projections[0]);
 
   // ----------------------------------------------------------------------
   // parse ace
@@ -137,6 +137,8 @@ class _AntigenSerum extends _JsonAccess {
   String get reassortant => data["R"] ?? "";
   String get aa => data["A"] ?? "";
   String get nuc => data["B"] ?? "";
+  bool get isReassortant => reassortant.isNotEmpty;
+  bool get isEgg => passage.contains(RegExp(r"(?:E(?:GG))[\dX\?]*$"));
   Map<String, dynamic> get semantic => data["T"] ?? {};
 }
 
