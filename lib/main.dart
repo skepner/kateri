@@ -68,28 +68,29 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Kateri ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now())}'),
         backgroundColor: Colors.green,
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.file_open),
-            tooltip: 'Open ace file',
-            onPressed: () {
-              antigenicMapPainter.openAceFile();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            tooltip: 'Export pdf',
-            onPressed: () {
-              antigenicMapPainter.exportPdf();
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.file_open),
+          //   tooltip: 'Open ace file',
+          //   onPressed: () {
+          //     antigenicMapPainter.openAceFile();
+          //   },
+          // ),
+          // IconButton(
+          //   icon: const Icon(Icons.picture_as_pdf),
+          //   tooltip: 'Export pdf',
+          //   onPressed: () {
+          //     antigenicMapPainter.exportPdf();
+          //   },
+          // ),
         ],
       ),
       body: MouseRegion(
         onHover: _updateLocation,
-        child: CustomPaint(
-          painter: antigenicMapPainter,
-          size: const Size(99999, 99999),
-        ),
+        child: AntigenicMapViewer(),
+        // child: CustomPaint(
+        //   painter: antigenicMapPainter,
+        //   size: const Size(99999, 99999),
+        // ),
       ),
       // body: ListView(children: <Widget>[
       //   CustomPaint(
@@ -108,6 +109,52 @@ class _MyHomePageState extends State<MyHomePage> {
       //   ),
       // ]),
     );
+  }
+}
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapViewer extends StatefulWidget {
+  AntigenicMapViewer({Key? key}) : super(key: key);
+
+  @override
+  State<AntigenicMapViewer> createState() => _AntigenicMapViewerState();
+}
+
+class _AntigenicMapViewerState extends State<AntigenicMapViewer> {
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  Chart? chart;
+  String path = "*nothing*";
+  // double _size = 100;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        key: scaffoldKey,
+        // appBar: AppBar(), //title: Text("Kateri")),
+        drawer: Drawer(
+            child: ListView(padding: EdgeInsets.zero, children: [
+          ListTile(
+              title: Text("AAA"),
+              onTap: () {
+                Navigator.pop(context);
+              }),
+          ListTile(
+              title: Text("BBB"),
+              onTap: () {
+                Navigator.pop(context);
+              })
+        ])),
+        body: Stack(children: <Widget>[
+          Center(child: Text("path: $path")),
+          Positioned(
+              left: 10,
+              top: 20,
+              child: IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () => scaffoldKey.currentState?.openDrawer(),
+              ))
+        ]));
   }
 }
 
@@ -151,8 +198,7 @@ class AntigenicMapPainter extends CustomPainter {
     // accesing file?.path on web always reports an error (regardles of using try/catch)
     if (file?.bytes != null) {
       setChart(Chart(bytes: file?.bytes));
-    }
-    else {
+    } else {
       setChart(Chart(localPath: file?.path));
     }
   }
