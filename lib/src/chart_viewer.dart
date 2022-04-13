@@ -7,6 +7,7 @@ import "chart.dart";
 import 'draw_on.dart';
 import 'draw_on_pdf.dart';
 import 'viewport.dart';
+import 'plot_spec.dart';
 
 // ----------------------------------------------------------------------
 
@@ -15,6 +16,7 @@ class ChartViewer {
   final Projection projection;
   late Viewport viewport;
   final CanvasRoot canvas;
+  PlotSpec? plotSpec;
 
   ChartViewer(this.chart, this.canvas) : projection = chart.projections[0] {
     // print(chart.referenceAntigens().map((agNo) => "$agNo ${chart.antigens[agNo].name}").join("\n"));
@@ -23,14 +25,13 @@ class ChartViewer {
   }
 
   void paint(DrawOn canvas) {
-    // final plotSpec = chart.plotSpecDefault(projection);
-    final plotSpec = chart.plotSpecLegacy();
     final stopwatch = Stopwatch()..start();
+    plotSpec ??= chart.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
     canvas.grid();
     final layout = projection.transformedLayout();
-    for (final pointNo in plotSpec.drawingOrder()) {
+    for (final pointNo in plotSpec!.drawingOrder()) {
       if (layout[pointNo] != null) {
-        canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec[pointNo]);
+        canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec![pointNo]);
       }
     }
     print("drawing chart: ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
