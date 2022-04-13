@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final antigenicMapPainter = AntigenicMapPainter();
+    final antigenicMapPainter = AntigenicMapPainter(Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace"));
 
     print("_MyHomePageState build");
     return Scaffold(
@@ -114,38 +114,35 @@ class _MyHomePageState extends State<MyHomePage> {
 // ----------------------------------------------------------------------
 
 class AntigenicMapPainter extends CustomPainter {
-  Chart? chart;
-  ChartViewer? viewer;
+  late Chart chart;
+  late ChartViewer viewer;
+
+  AntigenicMapPainter(Chart chart) {
+    setChart(chart);
+  }
+
+  void setChart(Chart chart) {
+    this.chart = chart;
+    viewer = ChartViewer(chart);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    chart = Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
-    paintOn(CanvasFlutter(canvas, size));
+    final stopwatch = Stopwatch()..start();
+    viewer.paint(CanvasFlutter(canvas, size));
+    print("[paint] ${chart.antigens.length}:${chart.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
 
   void exportPdf({bool open = true}) async {
-    if (chart != null && viewer != null) {
-      final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), await viewer!.exportPdf(), "pdf", mimeType: MimeType.PDF);
-      if (open && UniversalPlatform.isMacOS) {
-        await Process.run("open-and-back-to-emacs", [filename]);
-      }
+    final filename = await FileSaver.instance.saveFile(chart.info.nameForFilename(), await viewer.exportPdf(), "pdf", mimeType: MimeType.PDF);
+    if (open && UniversalPlatform.isMacOS) {
+      await Process.run("open-and-back-to-emacs", [filename]);
     }
   }
 
   void openAceFile() async {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
-    chart = Chart(bytes: file?.bytes, localPath: file?.path);
-  }
-
-  void paintOn(CanvasRoot canvas) {
-    // if (chart != null) {
-    //   print("${chart!.name()} projections: ${chart!.numberOfProjections()}");
-    // }
-    ChartViewer(chart!, canvas);
-    // canvas.draw(Offset.zero & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.green, clip: true);
-    // canvas.draw(Offset(canvas.size.width / 2, 0.0) & canvas.size / 2, viewport, sample_drawings2.draw, debuggingOutline: Colors.red, clip: true);
-    // canvas.draw(Offset(10.0, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
-    // canvas.draw(Offset(canvas.size.width / 1.9, canvas.size.height / 1.9) & canvas.size / 2.1, viewport, sample_drawings2.draw);
+    setChart(Chart(bytes: file?.bytes, localPath: file?.path));
   }
 
   @override

@@ -15,17 +15,17 @@ class ChartViewer {
   final Chart chart;
   final Projection projection;
   late Viewport viewport;
-  final CanvasRoot canvas;
   PlotSpec? plotSpec;
 
-  ChartViewer(this.chart, this.canvas) : projection = chart.projections[0] {
-    // print(chart.referenceAntigens().map((agNo) => "$agNo ${chart.antigens[agNo].name}").join("\n"));
+  ChartViewer(this.chart) : projection = chart.projections[0] {
     viewport = projection.viewport();
-    canvas.draw(Offset.zero & canvas.size, viewport, paint);
   }
 
-  void paint(DrawOn canvas) {
-    final stopwatch = Stopwatch()..start();
+  void paint(CanvasRoot canvas) {
+    canvas.draw(Offset.zero & canvas.size, viewport, paintOn);
+  }
+
+  void paintOn(DrawOn canvas) {
     plotSpec ??= chart.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
     canvas.grid();
     final layout = projection.transformedLayout();
@@ -34,7 +34,6 @@ class ChartViewer {
         canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec![pointNo]);
       }
     }
-    print("drawing chart: ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
 
   Future<Uint8List> exportPdf({bool open = true}) async {
