@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'chart.dart';
 import 'draw_on.dart';
 
@@ -6,6 +7,20 @@ import 'draw_on.dart';
 abstract class PlotSpec {
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
+
+  Color colorFromSpec(String? spec, Color dflt) {
+    if (spec != null && spec.isNotEmpty) {
+      spec = spec.toUpperCase();
+      if (spec[0] == "#") {
+        if (spec.length == 7) return Color(int.parse(spec.substring(1, 7), radix: 16) + 0xFF000000);
+        // if (spec.length == 4) return Color(int.parse(spec.substring(1, 4), radix: 16) + 0xFF000000);
+        if (spec.length == 9) return Color(int.parse(spec.substring(1, 7), radix: 16));
+      } else if (spec == "T" || spec == "TRANSPARENT") {
+        return transparent;
+      }
+    }
+    return dflt;
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -78,7 +93,33 @@ class PlotSpecDefault extends PlotSpec {
 class PlotSpecLegacy extends PlotSpec {
   PlotSpecLegacy(this._chart) : _data = _chart.data["c"]["p"] {
     for (final entry in _data["P"] ?? []) {
-      _specs.add(PointPlotSpec());
+      final spec = PointPlotSpec();
+      if (!(entry["+"] ?? true)) spec.shown = false;
+      spec.fill = colorFromSpec(entry["F"], transparent);
+      spec.outline = colorFromSpec(entry["O"], black);
+      spec.outlineWidthPixels = entry["o"] ?? 1.0;
+      spec.sizePixels = (entry["s"] ?? 1.0) * 10.0;
+      switch (entry["S"]?.toUpperCase()[0] ?? "C") {
+        case "C":
+          spec.shape = PointShape.circle;
+          break;
+        case "B":
+          spec.shape = PointShape.box;
+          break;
+        case "T":
+          spec.shape = PointShape.triangle;
+          break;
+        case "E":
+          spec.shape = PointShape.egg;
+          break;
+        case "U":
+          spec.shape = PointShape.uglyegg;
+          break;
+      }
+      spec.rotation = entry["r"] ?? NoRotation;
+      spec.aspect = entry["a"] ?? aspectNormal;
+      // label
+      _specs.add(spec);
     }
   }
 

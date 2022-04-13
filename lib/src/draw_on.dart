@@ -34,6 +34,7 @@ class PointPlotSpec {
   static const testSize = 10.0;
   static const refSize = 16.0;
 
+  bool shown = true;
   double sizePixels = testSize;
   PointShape shape = PointShape.circle;
   Color fill = transparent;
