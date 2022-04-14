@@ -27,71 +27,85 @@ import 'src/draw_on_pdf.dart';
 
 import 'src/chart_viewer.dart';
 
+import "src/body-widget.dart";
+
+// import 'src/resizable_widget_sample.dart';
+
 // import 'src/sample/drawings1.dart' as sample_drawings1;
 // import 'src/sample/drawings2.dart' as sample_drawings2;
 
 // ----------------------------------------------------------------------
 
 void main() {
-  runApp(const MyApp());
+  runApp(const KateriApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class KateriApp extends StatelessWidget {
+  const KateriApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MyHomePage(),
+      home: KateriPage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class KateriPage extends StatefulWidget {
+  const KateriPage({Key? key}) : super(key: key);
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _KateriPageState createState() => _KateriPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _KateriPageState extends State<KateriPage> {
   void _updateLocation(PointerEvent details) {
     // print("_updateLocation $details");
   }
 
   @override
   Widget build(BuildContext context) {
-    final antigenicMapPainter = AntigenicMapPainter(); // Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace"));
+    // final antigenicMapPainter = AntigenicMapPainter(); // Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace"));
 
-    print("_MyHomePageState build");
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Kateri ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now())}'),
-        backgroundColor: Colors.green,
-        actions: <Widget>[
-          // IconButton(
-          //   icon: const Icon(Icons.file_open),
-          //   tooltip: 'Open ace file',
-          //   onPressed: () {
-          //     antigenicMapPainter.openAceFile();
-          //   },
-          // ),
-          // IconButton(
-          //   icon: const Icon(Icons.picture_as_pdf),
-          //   tooltip: 'Export pdf',
-          //   onPressed: () {
-          //     antigenicMapPainter.exportPdf();
-          //   },
-          // ),
-        ],
-      ),
-      body: MouseRegion(
-        onHover: _updateLocation,
-        child: AntigenicMapViewer(),
-        // child: CustomPaint(
-        //   painter: antigenicMapPainter,
-        //   size: const Size(99999, 99999),
-        // ),
-      ),
+      // appBar: AppBar(
+      //   title: Text('Kateri ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now())}'),
+      //   backgroundColor: Colors.green,
+      //   actions: <Widget>[
+      //     // IconButton(
+      //     //   icon: const Icon(Icons.file_open),
+      //     //   tooltip: 'Open ace file',
+      //     //   onPressed: () {
+      //     //     antigenicMapPainter.openAceFile();
+      //     //   },
+      //     // ),
+      //     // IconButton(
+      //     //   icon: const Icon(Icons.picture_as_pdf),
+      //     //   tooltip: 'Export pdf',
+      //     //   onPressed: () {
+      //     //     antigenicMapPainter.exportPdf();
+      //     //   },
+      //     // ),
+      //   ],
+      // ),
+      body: BodyWidget_Grid(),
+      // body: Column(children: [
+      //   Container(
+      //       margin: const EdgeInsets.all(10.0),
+      //       decoration: BoxDecoration(border: Border.all(color: Colors.orange, width: 8)),
+      //       width: 400.0,
+      //       child: AspectRatio(aspectRatio: 1.0, child: AntigenicMapViewer())),
+      //   Container(
+      //       margin: const EdgeInsets.all(10.0),
+      //       decoration: BoxDecoration(border: Border.all(color: Colors.green, width: 8)),
+      //       width: 300.0,
+      //       child: AspectRatio(aspectRatio: 1.0, child: AntigenicMapViewer()))
+      // ]),
+
+      // MouseRegion(onHover: _updateLocation, child: AntigenicMapViewer() // Column(children: [SizeBox(width: 300.0, height: 300.0, child: AntigenicMapViewer())]), // AntigenicMapViewer()]),
+      // child: CustomPaint(
+      //   painter: antigenicMapPainter,
+      //   size: const Size(99999, 99999),
+      // ),
       // body: ListView(children: <Widget>[
       //   CustomPaint(
       //     painter: AntigenicMapPainter(),
@@ -114,95 +128,49 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // ----------------------------------------------------------------------
 
-class AntigenicMapViewer extends StatefulWidget {
-  AntigenicMapViewer({Key? key}) : super(key: key);
+// class AntigenicMapPainter extends CustomPainter {
+//   Chart? chart;
+//   late ChartViewer viewer;
 
-  @override
-  State<AntigenicMapViewer> createState() => _AntigenicMapViewerState();
-}
+//   AntigenicMapPainter([Chart? chart]) {
+//     setChart(chart);
+//   }
 
-class _AntigenicMapViewerState extends State<AntigenicMapViewer> {
-  var scaffoldKey = GlobalKey<ScaffoldState>();
-  Chart? chart;
-  String path = "*nothing*";
-  // double _size = 100;
+//   void setChart(Chart? chart) {
+//     this.chart = chart;
+//     viewer = ChartViewer(chart);
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        key: scaffoldKey,
-        // appBar: AppBar(), //title: Text("Kateri")),
-        drawer: Drawer(
-            child: ListView(padding: EdgeInsets.zero, children: [
-          ListTile(
-              title: Text("AAA"),
-              onTap: () {
-                Navigator.pop(context);
-              }),
-          ListTile(
-              title: Text("BBB"),
-              onTap: () {
-                Navigator.pop(context);
-              })
-        ])),
-        body: Stack(children: <Widget>[
-          Center(child: Text("path: $path")),
-          Positioned(
-              left: 10,
-              top: 20,
-              child: IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () => scaffoldKey.currentState?.openDrawer(),
-              ))
-        ]));
-  }
-}
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final stopwatch = Stopwatch()..start();
+//     viewer.paint(CanvasFlutter(canvas, size));
+//     print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+//   }
 
-// ----------------------------------------------------------------------
+//   void exportPdf({bool open = true}) async {
+//     if (chart != null) {
+//       final bytes = await viewer.exportPdf();
+//       if (bytes != null) {
+//         final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
+//         if (open && UniversalPlatform.isMacOS) {
+//           await Process.run("open-and-back-to-emacs", [filename]);
+//         }
+//       }
+//     }
+//   }
 
-class AntigenicMapPainter extends CustomPainter {
-  Chart? chart;
-  late ChartViewer viewer;
+//   void openAceFile() async {
+//     final file = (await FilePicker.platform.pickFiles())?.files.single;
 
-  AntigenicMapPainter([Chart? chart]) {
-    setChart(chart);
-  }
+//     // accesing file?.path on web always reports an error (regardles of using try/catch)
+//     if (file?.bytes != null) {
+//       setChart(Chart(bytes: file?.bytes));
+//     } else {
+//       setChart(Chart(localPath: file?.path));
+//     }
+//   }
 
-  void setChart(Chart? chart) {
-    this.chart = chart;
-    viewer = ChartViewer(chart);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stopwatch = Stopwatch()..start();
-    viewer.paint(CanvasFlutter(canvas, size));
-    print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
-  }
-
-  void exportPdf({bool open = true}) async {
-    if (chart != null) {
-      final bytes = await viewer.exportPdf();
-      if (bytes != null) {
-        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
-        if (open && UniversalPlatform.isMacOS) {
-          await Process.run("open-and-back-to-emacs", [filename]);
-        }
-      }
-    }
-  }
-
-  void openAceFile() async {
-    final file = (await FilePicker.platform.pickFiles())?.files.single;
-
-    // accesing file?.path on web always reports an error (regardles of using try/catch)
-    if (file?.bytes != null) {
-      setChart(Chart(bytes: file?.bytes));
-    } else {
-      setChart(Chart(localPath: file?.path));
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
-}
+//   @override
+//   bool shouldRepaint(CustomPainter oldDelegate) => true;
+// }
