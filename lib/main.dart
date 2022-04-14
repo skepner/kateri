@@ -1,33 +1,35 @@
+import 'package:flutter/material.dart';
+
+import "src/body-widget.dart";
+
 // import 'dart:ui';
-import 'dart:io';
-import 'dart:typed_data';
+// import 'dart:io';
+// import 'dart:typed_data';
 // import 'dart:math' as math;
 
 // import 'package:flutter/cupertino.dart' as cupertino;
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart'; // MouseRegion
-import 'package:universal_platform/universal_platform.dart';
+// import 'package:flutter/widgets.dart'; // MouseRegion
+// import 'package:universal_platform/universal_platform.dart';
 
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 
 // import 'package:file_selector/file_selector.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:file_saver/file_saver.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:file_saver/file_saver.dart';
 
 // import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
 
 // import 'package:path_provider/path_provider.dart';
 
-import 'src/chart.dart';
+// import 'src/chart.dart';
 
-import 'src/draw_on.dart';
-import 'src/draw_on_canvas.dart';
-import 'src/draw_on_pdf.dart';
+// import 'src/draw_on.dart';
+// import 'src/draw_on_canvas.dart';
+// import 'src/draw_on_pdf.dart';
 
-import 'src/chart_viewer.dart';
+// import 'src/chart_viewer.dart';
 
-import "src/body-widget.dart";
 
 // import 'src/resizable_widget_sample.dart';
 
@@ -87,19 +89,8 @@ class _KateriPageState extends State<KateriPage> {
       //     // ),
       //   ],
       // ),
-      body: BodyWidget_Grid(),
-      // body: Column(children: [
-      //   Container(
-      //       margin: const EdgeInsets.all(10.0),
-      //       decoration: BoxDecoration(border: Border.all(color: Colors.orange, width: 8)),
-      //       width: 400.0,
-      //       child: AspectRatio(aspectRatio: 1.0, child: AntigenicMapViewer())),
-      //   Container(
-      //       margin: const EdgeInsets.all(10.0),
-      //       decoration: BoxDecoration(border: Border.all(color: Colors.green, width: 8)),
-      //       width: 300.0,
-      //       child: AspectRatio(aspectRatio: 1.0, child: AntigenicMapViewer()))
-      // ]),
+      body: BodyWidget_Singleton(),
+      // body: BodyWidget_Grid(),
 
       // MouseRegion(onHover: _updateLocation, child: AntigenicMapViewer() // Column(children: [SizeBox(width: 300.0, height: 300.0, child: AntigenicMapViewer())]), // AntigenicMapViewer()]),
       // child: CustomPaint(
