@@ -9,13 +9,10 @@ import "src/body-widget.dart";
 
 // import 'package:flutter/cupertino.dart' as cupertino;
 // import 'package:flutter/widgets.dart'; // MouseRegion
-// import 'package:universal_platform/universal_platform.dart';
 
 // import 'package:intl/intl.dart';
 
 // import 'package:file_selector/file_selector.dart';
-// import 'package:file_picker/file_picker.dart';
-// import 'package:file_saver/file_saver.dart';
 
 // import 'package:pdf/pdf.dart';
 // import 'package:pdf/widgets.dart' as pw;
@@ -24,11 +21,7 @@ import "src/body-widget.dart";
 
 // import 'src/chart.dart';
 
-// import 'src/draw_on.dart';
-// import 'src/draw_on_canvas.dart';
-// import 'src/draw_on_pdf.dart';
 
-// import 'src/chart_viewer.dart';
 
 
 // import 'src/resizable_widget_sample.dart';
@@ -118,50 +111,3 @@ class _KateriPageState extends State<KateriPage> {
 }
 
 // ----------------------------------------------------------------------
-
-// class AntigenicMapPainter extends CustomPainter {
-//   Chart? chart;
-//   late ChartViewer viewer;
-
-//   AntigenicMapPainter([Chart? chart]) {
-//     setChart(chart);
-//   }
-
-//   void setChart(Chart? chart) {
-//     this.chart = chart;
-//     viewer = ChartViewer(chart);
-//   }
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final stopwatch = Stopwatch()..start();
-//     viewer.paint(CanvasFlutter(canvas, size));
-//     print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
-//   }
-
-//   void exportPdf({bool open = true}) async {
-//     if (chart != null) {
-//       final bytes = await viewer.exportPdf();
-//       if (bytes != null) {
-//         final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
-//         if (open && UniversalPlatform.isMacOS) {
-//           await Process.run("open-and-back-to-emacs", [filename]);
-//         }
-//       }
-//     }
-//   }
-
-//   void openAceFile() async {
-//     final file = (await FilePicker.platform.pickFiles())?.files.single;
-
-//     // accesing file?.path on web always reports an error (regardles of using try/catch)
-//     if (file?.bytes != null) {
-//       setChart(Chart(bytes: file?.bytes));
-//     } else {
-//       setChart(Chart(localPath: file?.path));
-//     }
-//   }
-
-//   @override
-//   bool shouldRepaint(CustomPainter oldDelegate) => true;
-// }
