@@ -57,6 +57,7 @@ class _AntigenicMapViewerState extends State<AntigenicMapViewer> {
 
   @override
   Widget build(BuildContext context) {
+    print("_AntigenicMapViewerState.build $widget");
     return Scaffold(
         key: scaffoldKey,
         // appBar: AppBar(), //title: Text("Kateri")),
