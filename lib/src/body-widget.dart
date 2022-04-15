@@ -8,7 +8,7 @@ class BodyWidget_Singleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AntigenicMapViewer(width: 500);
+    return AntigenicMapViewWidget(width: 500);
   }
 }
 
@@ -20,10 +20,10 @@ class BodyWidget_Grid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.count(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, children: [
-      AntigenicMapViewer(),
-      // AntigenicMapViewer(),
-      // AntigenicMapViewer(width: 400.0),
-      // AntigenicMapViewer(aspectRatio: 1.5),
+      AntigenicMapViewWidget(),
+      // AntigenicMapViewWidget(),
+      // AntigenicMapViewWidget(width: 400.0),
+      // AntigenicMapViewWidget(aspectRatio: 1.5),
       // Container(
       //     margin: const EdgeInsets.all(10.0),
       //     decoration: BoxDecoration(border: Border.all(color: Colors.orange, width: 8)),
