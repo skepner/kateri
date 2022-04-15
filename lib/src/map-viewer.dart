@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
 
@@ -7,12 +8,13 @@ import 'package:file_saver/file_saver.dart';
 
 import 'package:universal_platform/universal_platform.dart';
 
-import 'chart-viewer.dart';
 import 'chart.dart';
+import 'viewport.dart' as vp;
+import 'plot_spec.dart';
 
-// import 'draw_on.dart';
+import 'draw_on.dart';
 import 'draw_on_canvas.dart';
-// import 'draw_on_pdf.dart';
+import 'draw_on_pdf.dart';
 
 // ======================================================================
 
@@ -139,9 +141,9 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
 // ----------------------------------------------------------------------
 
 class AntigenicMapPainter extends CustomPainter {
-  final ChartViewer viewer;
+  final AntigenicMapViewer viewer;
 
-  AntigenicMapPainter(Chart? chart) : viewer = ChartViewer(chart);
+  AntigenicMapPainter(Chart? chart) : viewer = AntigenicMapViewer(chart);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -154,5 +156,44 @@ class AntigenicMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
+
+// ----------------------------------------------------------------------
+
+class AntigenicMapViewer {
+  final Chart? chart;
+  final Projection? projection;
+  vp.Viewport? viewport;
+  PlotSpec? plotSpec;
+
+  AntigenicMapViewer(this.chart) : projection = chart?.projections[0] {
+    viewport = projection?.viewport();
+  }
+
+  void paint(CanvasRoot canvas) {
+    if (chart != null && viewport != null) {
+      canvas.draw(Offset.zero & canvas.size, viewport!, paintOn);
+    }
+  }
+
+  void paintOn(DrawOn canvas) {
+    plotSpec ??= chart!.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
+    canvas.grid();
+    final layout = projection!.transformedLayout();
+    for (final pointNo in plotSpec!.drawingOrder()) {
+      if (layout[pointNo] != null) {
+        canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec![pointNo]);
+      }
+    }
+  }
+
+  Future<Uint8List?> exportPdf({bool open = true}) async {
+    if (chart != null && viewport != null) {
+      final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport!.width * viewport!.height))..paintBy(paint);
+      return canvasPdf.bytes();
+    }
+    return null;
+  }
+}
+
 
 // ======================================================================
