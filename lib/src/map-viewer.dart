@@ -17,13 +17,15 @@ import 'draw_on_canvas.dart';
 // ======================================================================
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)}) : super(key: key);
+  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
+      : super(key: key);
 
   // setup
   final double width;
   final double aspectRatio;
   final double borderWidth;
   final Color borderColor;
+  final bool openExportedPdf;
 
   @override
   State<AntigenicMapViewWidget> createState() => _AntigenicMapViewWidgetState();
@@ -34,11 +36,12 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
   Chart? chart;
   String path = "*nothing*";
+  late bool openExportedPdf;
   // late double width;
   late double aspectRatio;
   late double borderWidth;
   late Color borderColor;
-  // late AntigenicMapPainter antigenicMapPainter;
+  late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
   @override
   void initState() {
@@ -47,14 +50,14 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
     aspectRatio = widget.aspectRatio;
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
+    openExportedPdf = widget.openExportedPdf;
 
-    // antigenicMapPainter = AntigenicMapPainter(this);
     chart = Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
   }
 
   @override
   Widget build(BuildContext context) {
-    print("_AntigenicMapViewWidgetState.build");
+    antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
     return Container(
         // margin: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
@@ -66,9 +69,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
                 // appBar: AppBar(), //title: Text("Kateri")),
                 drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewWidgetState: this)),
                 body: Stack(children: <Widget>[
-                  // Column(children: [Container(color: orange, child: Text("path: $path")), Container(color: Colors.green, child: Text("path: $path"))]),
-                  // Center(child: Container(color: borderColor /*  Colors.orange */, child: Text("path: $path $borderColor"))),
-                  CustomPaint(painter: AntigenicMapPainter(chart), size: const Size(99999, 99999)),
+                  CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
                   Positioned(
                       left: 0,
                       top: 0,
@@ -86,26 +87,25 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
     // accesing file?.path on web always reports an error (regardles of using try/catch)
     if (file?.bytes != null) {
-      setChart(Chart(bytes: file?.bytes));
+      setState(() { chart = Chart(bytes: file?.bytes); });
     } else {
-      setChart(Chart(localPath: file?.path));
+      setState(() { chart = Chart(localPath: file?.path); });
     }
   }
 
-  void setChart(Chart? newChart) {
-    setState(() {
-      chart = newChart;
-      // antigenicMapPainter.chartUpdated();
-    });
+  void exportPdf() async {
+    if (chart != null) {
+      final stopwatch = Stopwatch()..start();
+      final bytes = await antigenicMapPainter.viewer.exportPdf();
+      if (bytes != null) {
+        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
+        if (openExportedPdf && UniversalPlatform.isMacOS) {
+          await Process.run("open", [filename]);
+        }
+      }
+      print("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+    }
   }
-
-  // void setColor(Color color) {
-  //   setState(() {
-  //     borderColor = color;
-  //     print("borderColor $borderColor");
-  //   });
-  // }
-
 }
 
 // ----------------------------------------------------------------------
@@ -129,38 +129,9 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
           leading: const Icon(Icons.picture_as_pdf_rounded),
           title: const Text("Export pdf"),
           onTap: () {
+            antigenicMapViewWidgetState.exportPdf();
             Navigator.pop(context);
           }),
-      // ListTile(
-      //     title: Text("3"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
-      // ListTile(
-      //     title: Text("4"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
-      // ListTile(
-      //     title: Text("5"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
-      // ListTile(
-      //     title: Text("6"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
-      // ListTile(
-      //     title: Text("7"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
-      // ListTile(
-      //     title: Text("8"),
-      //     onTap: () {
-      //       Navigator.pop(context);
-      //     }),
     ]);
   }
 }
@@ -179,29 +150,6 @@ class AntigenicMapPainter extends CustomPainter {
     // print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
     print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
-
-  // void exportPdf({bool open = true}) async {
-  //   if (chart != null) {
-  //     final bytes = await viewer.exportPdf();
-  //     if (bytes != null) {
-  //       final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
-  //       if (open && UniversalPlatform.isMacOS) {
-  //         await Process.run("open-and-back-to-emacs", [filename]);
-  //       }
-  //     }
-  //   }
-  // }
-
-  // void openAceFile() async {
-  //   final file = (await FilePicker.platform.pickFiles())?.files.single;
-
-  //   // accesing file?.path on web always reports an error (regardles of using try/catch)
-  //   if (file?.bytes != null) {
-  //     setChart(Chart(bytes: file?.bytes));
-  //   } else {
-  //     setChart(Chart(localPath: file?.path));
-  //   }
-  // }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
