@@ -19,10 +19,10 @@ import 'draw_on_pdf.dart';
 // ======================================================================
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
+  const AntigenicMapViewWidget({Key? key, this.chart, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
       : super(key: key);
 
-  // setup
+  final Chart? chart;
   final double width;
   final double aspectRatio;
   final double borderWidth;
@@ -48,6 +48,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   @override
   void initState() {
     super.initState();
+    chart = widget.chart;
     // width = widget.width;
     aspectRatio = widget.aspectRatio;
     borderWidth = widget.borderWidth;
@@ -91,9 +92,13 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
     // accesing file?.path on web always reports an error (regardles of using try/catch)
     if (file?.bytes != null) {
-      setState(() { chart = Chart(bytes: file?.bytes); });
+      setState(() {
+        chart = Chart(bytes: file?.bytes);
+      });
     } else {
-      setState(() { chart = Chart(localPath: file?.path); });
+      setState(() {
+        chart = Chart(localPath: file?.path);
+      });
     }
   }
 
