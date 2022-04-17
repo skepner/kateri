@@ -54,9 +54,9 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
     borderColor = widget.borderColor;
     openExportedPdf = widget.openExportedPdf;
 
-    if (UniversalPlatform.isMacOS) {
-      chart = Chart(localPath: "/r/h1pdm-hi-turkey-vidrl.chain.ace");
-    }
+    // if (widget.fileToOpen != null && UniversalPlatform.isMacOS) {
+    //   chart = Chart(localPath: widget.fileToOpen);
+    // }
   }
 
   @override

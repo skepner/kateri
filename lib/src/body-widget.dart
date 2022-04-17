@@ -20,7 +20,7 @@ class BodyWidget_Grid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.count(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, children: [
-      AntigenicMapViewWidget(),
+      const AntigenicMapViewWidget(),
       // AntigenicMapViewWidget(),
       // AntigenicMapViewWidget(width: 400.0),
       // AntigenicMapViewWidget(aspectRatio: 1.5),
