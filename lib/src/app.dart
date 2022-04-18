@@ -8,14 +8,16 @@ import 'chart.dart';
 
 class App extends StatelessWidget {
   final List<String> commandLineArgs;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  const App(this.commandLineArgs, {Key? key}) : super(key: key);
+  App(this.commandLineArgs, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return CommandLineData(commandLineArgs,
-        child: const MaterialApp(
-          home: Scaffold(body: SingleMap()
+        errorReportingKey: _scaffoldKey,
+        child: MaterialApp(
+          home: Scaffold(key: _scaffoldKey, body: const SingleMap()
               // body: GridOfMaps(),
               ),
           debugShowCheckedModeBanner: false,
@@ -27,8 +29,9 @@ class App extends StatelessWidget {
 
 class CommandLineData extends InheritedWidget {
   late final String? _fileToOpen;
+  final GlobalKey<ScaffoldState> errorReportingKey;
 
-  CommandLineData(List<String> args, {required Widget child, Key? key}) : super(key: key, child: child) {
+  CommandLineData(List<String> args, {required this.errorReportingKey, required Widget child, Key? key}) : super(key: key, child: child) {
     final parser = ArgParser();
     parser.addOption("chart", abbr: "c", callback: (arg) {
       _fileToOpen = arg;
@@ -46,8 +49,12 @@ class CommandLineData extends InheritedWidget {
     if (_fileToOpen != null) {
       try {
         return Chart(localPath: _fileToOpen);
-      }
-      catch (err) {
+      } catch (err) {
+        // errorReportingKey.currentState.showSnackBar(
+        // SnackBar(
+        //   content: Text('Error: ${err}'),
+        //   duration: const Duration(seconds: 10),
+        // );
         print(err);
       }
     }
