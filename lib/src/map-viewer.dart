@@ -20,8 +20,7 @@ import 'draw_on_pdf.dart';
 // ======================================================================
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget(
-      {Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
+  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
       : super(key: key);
 
   final double width;
@@ -57,12 +56,37 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
     // load chart passed in the command line
     final fileToOpen = CommandLineData.of(context).fileToOpen;
-    if (fileToOpen != null) {
-      try {
+    try {
+      if (fileToOpen == "-") {
+        final data = <int>[];
+        for (var byte = stdin.readByteSync(); byte != -1; byte = stdin.readByteSync()) {
+          data.add(byte);
+        }
+        chart = Chart(bytes: Uint8List.fromList(data));
+
+        // final data = stdin.expand((element) => element).fold(<int>[], (List<int> acc, value) { acc.add(value); return acc; } );
+        // print("stdin read ${data.length}");
+        // chart = Chart(bytes: Uint8List.fromList(data));
+
+        // final data = Uint8List.fromList(
+        // final data = <int>[];
+        // for (var byte = stdin.readByteSync(); byte != -1; byte = stdin.readByteSync()) {
+        //   data.add(byte);
+        // }
+        // while (true) {
+        //   final byte = stdin.readByteSync();
+        //   if (byte == -1)
+        //   break;
+        // await stdin.forEach((element) => data.addAll(element));
+        // print("stdin read ${data.length}");
+        // chart = Chart(bytes: Uint8List.fromList(data));
+      } else if (fileToOpen != null) {
         chart = Chart(localPath: fileToOpen);
-      } on FileSystemException catch (err) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${err.message} : ${err.path}"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
       }
+    } on FileSystemException catch (err) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${err.message} : ${err.path}"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
+    } catch (err) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
     }
     if (chart == null) {
       openAceFile();
@@ -71,6 +95,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("build $chart");
     antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
     return Container(
         // margin: const EdgeInsets.all(10.0),
