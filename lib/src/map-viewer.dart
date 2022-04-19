@@ -141,27 +141,16 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
       try {
         chartBeingLoaded = true;
         if (path == "-") {
-          final newChart = Chart(await decompressStdin());
-          setState(() {
-            chart = newChart;
-            chartBeingLoaded = false;
-          });
+          setChart(Chart(await decompressStdin()));
         } else {
-          final newChart = Chart(await decompressFile(path));
-          setState(() {
-            chart = newChart;
-            chartBeingLoaded = false;
-          });
+          setChart(Chart(await decompressFile(path)));
         }
       } on Exception catch (err) {
         // cannot import chart from a file
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
-        setState(() {
-          chart = null;
-          chartBeingLoaded = false;
-        });
+        forceSelectingAceFile();
       }
     }
   }
@@ -172,23 +161,35 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
       try {
         // accesing file?.path on web always reports an error (regardles of using try/catch)
         if (file.bytes != null) {
-          setState(() {
-            chart = Chart(decompressBytes(file.bytes!));
-          });
+          setChart(Chart(decompressBytes(file.bytes!)));
         } else if (file.path != null) {
-          final newChart = Chart(await decompressFile(file.path!));
-          setState(() {
-            chart = newChart;
-          });
+          setChart(Chart(await decompressFile(file.path!)));
         }
       } on Exception catch (err) {
         // cannot import chart from a file
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
+        forceSelectingAceFile();
       }
+    } else {
+      forceSelectingAceFile();
     }
-    // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  void forceSelectingAceFile() {
+    setState(() {
+      chart = null;
+      chartBeingLoaded = false;
+    });
+  }
+
+  void setChart(Chart newChart) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    setState(() {
+      chart = newChart;
+      chartBeingLoaded = false;
+    });
   }
 
   // ----------------------------------------------------------------------
