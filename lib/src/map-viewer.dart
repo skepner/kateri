@@ -178,7 +178,9 @@ class AntigenicMapPainter extends CustomPainter {
     final stopwatch = Stopwatch()..start();
     viewer.paint(CanvasFlutter(canvas, size));
     // print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
-    print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+    if (stopwatch.elapsedMicroseconds > 100) {
+      print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+    }
   }
 
   @override
