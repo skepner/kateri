@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:args/args.dart';
 
 import 'map-viewer.dart';
-import 'chart.dart';
 
 // ----------------------------------------------------------------------
 
@@ -28,13 +27,13 @@ class App extends StatelessWidget {
 // ----------------------------------------------------------------------
 
 class CommandLineData extends InheritedWidget {
-  late final String? _fileToOpen;
+  late final String? fileToOpen;
   final GlobalKey<ScaffoldState> errorReportingKey;
 
   CommandLineData(List<String> args, {required this.errorReportingKey, required Widget child, Key? key}) : super(key: key, child: child) {
     final parser = ArgParser();
     parser.addOption("chart", abbr: "c", callback: (arg) {
-      _fileToOpen = arg;
+      fileToOpen = arg;
     });
     parser.parse(args);
   }
@@ -45,24 +44,8 @@ class CommandLineData extends InheritedWidget {
     return result!;
   }
 
-  Chart? chart() {
-    if (_fileToOpen != null) {
-      try {
-        return Chart(localPath: _fileToOpen);
-      } catch (err) {
-        // errorReportingKey.currentState.showSnackBar(
-        // SnackBar(
-        //   content: Text('Error: ${err}'),
-        //   duration: const Duration(seconds: 10),
-        // );
-        print(err);
-      }
-    }
-    return null;
-  }
-
   @override
-  bool updateShouldNotify(CommandLineData old) => _fileToOpen != old._fileToOpen;
+  bool updateShouldNotify(CommandLineData oldWidget) => fileToOpen != oldWidget.fileToOpen;
 }
 
 // ----------------------------------------------------------------------
@@ -72,7 +55,7 @@ class SingleMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AntigenicMapViewWidget(chart: CommandLineData.of(context).chart(), width: 500);
+    return const AntigenicMapViewWidget(width: 500);
   }
 }
 
@@ -83,8 +66,8 @@ class GridOfMaps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, children: [
-      const AntigenicMapViewWidget(),
+    return GridView.count(crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, children: const [
+      AntigenicMapViewWidget(),
       // AntigenicMapViewWidget(),
       // AntigenicMapViewWidget(width: 400.0),
       // AntigenicMapViewWidget(aspectRatio: 1.5),

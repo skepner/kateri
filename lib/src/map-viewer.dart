@@ -8,6 +8,7 @@ import 'package:file_saver/file_saver.dart';
 
 import 'package:universal_platform/universal_platform.dart';
 
+import 'app.dart'; // CommandLineData
 import 'chart.dart';
 import 'viewport.dart' as vp;
 import 'plot_spec.dart';
@@ -19,10 +20,10 @@ import 'draw_on_pdf.dart';
 // ======================================================================
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget({Key? key, this.chart, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
+  const AntigenicMapViewWidget(
+      {Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
       : super(key: key);
 
-  final Chart? chart;
   final double width;
   final double aspectRatio;
   final double borderWidth;
@@ -48,16 +49,24 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   @override
   void initState() {
     super.initState();
-    chart = widget.chart;
     // width = widget.width;
     aspectRatio = widget.aspectRatio;
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     openExportedPdf = widget.openExportedPdf;
 
-    // if (widget.fileToOpen != null && UniversalPlatform.isMacOS) {
-    //   chart = Chart(localPath: widget.fileToOpen);
-    // }
+    // load chart passed in the command line
+    final fileToOpen = CommandLineData.of(context).fileToOpen;
+    if (fileToOpen != null) {
+      try {
+        chart = Chart(localPath: fileToOpen);
+      } on FileSystemException catch (err) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${err.message} : ${err.path}"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
+      }
+    }
+    if (chart == null) {
+      openAceFile();
+    }
   }
 
   @override
@@ -88,18 +97,30 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   // ----------------------------------------------------------------------
 
   void openAceFile() async {
-    final file = (await FilePicker.platform.pickFiles())?.files.single;
+    while (chart == null) {
+      final file = (await FilePicker.platform.pickFiles())?.files.single;
 
-    // accesing file?.path on web always reports an error (regardles of using try/catch)
-    if (file?.bytes != null) {
-      setState(() {
-        chart = Chart(bytes: file?.bytes);
-      });
-    } else {
-      setState(() {
-        chart = Chart(localPath: file?.path);
-      });
+      if (file != null) {
+        try {
+          // accesing file?.path on web always reports an error (regardles of using try/catch)
+          if (file.bytes != null) {
+            setState(() {
+              chart = Chart(bytes: file.bytes);
+            });
+          } else if (file.path != null) {
+            setState(() {
+              chart = Chart(localPath: file.path);
+            });
+          }
+        } on Exception catch (err) {
+          // cannot import chart from a file
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
+        }
+      }
     }
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void exportPdf() async {
