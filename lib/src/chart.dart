@@ -5,9 +5,9 @@ import 'dart:typed_data';
 import 'dart:convert'; // json
 
 import 'package:vector_math/vector_math_64.dart';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 
-import 'decompress.dart';
+// import 'decompress.dart';
 import 'viewport.dart';
 import 'plot_spec.dart';
 
@@ -25,10 +25,13 @@ class _JsonAccess {
 // ----------------------------------------------------------------------
 
 class Chart extends _JsonAccess {
-  Chart({Uint8List? bytes, String? localPath, String? serverPath}) : super.empty() {
-    //compute(_load, bytes: bytes, localPath: localPath, serverPath: serverPath);
-    _load(bytes: bytes, localPath: localPath, serverPath: serverPath);
+  Chart(List<int> source) : super.empty() {
+    _parseJson(source);
   }
+  // Chart({Uint8List? bytes, String? localPath, String? serverPath}) : super.empty() {
+  //   //compute(_load, bytes: bytes, localPath: localPath, serverPath: serverPath);
+  //   _load(bytes: bytes, localPath: localPath, serverPath: serverPath);
+  // }
 
   // ----------------------------------------------------------------------
 
@@ -46,15 +49,15 @@ class Chart extends _JsonAccess {
   // ----------------------------------------------------------------------
   // parse ace
 
-  void _load({Uint8List? bytes, String? localPath, String? serverPath}) {
-    if (bytes != null) {
-      _parseJson(decompress(bytes));
-    } else if (localPath != null) {
-      _parseJson(decompress(File(localPath).readAsBytesSync()));
-    } else if (serverPath != null) {
-      // _parseJson(loadFromServer(serverPath));
-    }
-  }
+  // void _load({Uint8List? bytes, String? localPath, String? serverPath}) {
+  //   if (bytes != null) {
+  //     _parseJson(decompressBytes(bytes));
+  //   } else if (localPath != null) {
+  //     _parseJson(decompress(File(localPath).readAsBytesSync()));
+  //   } else if (serverPath != null) {
+  //     // _parseJson(loadFromServer(serverPath));
+  //   }
+  // }
 
   void _parseJson(List<int> source) {
     data = jsonDecode(utf8.decode(source));
