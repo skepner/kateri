@@ -66,36 +66,33 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (chart == null) {
-      if (!chartBeingLoaded) {
+    if (chart == null && !chartBeingLoaded) {
+      if (UniversalPlatform.isMacOS) { // forcing open dialog here does not work in web and eventually leads to problems
         selectAndOpenAceFile();
       }
-      print("build no chart yet");
-      return const Center(child: Text("Choose ace file"));
-    } else {
-      print("build $chart");
-      antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
-      return Container(
-          // margin: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-          // width: width,
-          child: AspectRatio(
-              aspectRatio: aspectRatio,
-              child: Scaffold(
-                  key: scaffoldKey,
-                  // appBar: AppBar(), //title: Text("Kateri")),
-                  drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewWidgetState: this)),
-                  body: Stack(children: <Widget>[
-                    CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                    Positioned(
-                        left: 0,
-                        top: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.menu),
-                          onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                        ))
-                  ]))));
     }
+    antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
+    return Container(
+        // margin: const EdgeInsets.all(10.0),
+        decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+        // width: width,
+        child: AspectRatio(
+            aspectRatio: aspectRatio,
+            child: Scaffold(
+                key: scaffoldKey,
+                // appBar: AppBar(), //title: Text("Kateri")),
+                drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewWidgetState: this)),
+                body: Stack(children: <Widget>[
+                  CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                  Positioned(
+                      left: 0,
+                      top: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.menu),
+                        onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                      ))
+                ]))));
+    // }
   }
 
   // ----------------------------------------------------------------------
