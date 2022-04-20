@@ -56,48 +56,12 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     openExportedPdf = widget.openExportedPdf;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     openLocalAceFile(CommandLineData.of(context).fileToOpen);
-
-    // // load chart passed in the command line
-    // final fileToOpen = CommandLineData.of(context).fileToOpen;
-    // try {
-    //   if (fileToOpen == "-") {
-    //     final bytes = decompressStream(stdin);
-    //     print("read from stdin: ${bytes.length}");
-
-    //     // final data = <int>[];
-    //     // for (var byte = stdin.readByteSync(); byte != -1; byte = stdin.readByteSync()) {
-    //     //   data.add(byte);
-    //     // }
-    //     // chart = Chart(bytes: Uint8List.fromList(data));
-
-    //     // final data = stdin.expand((element) => element).fold(<int>[], (List<int> acc, value) { acc.add(value); return acc; } );
-    //     // print("stdin read ${data.length}");
-    //     // chart = Chart(bytes: Uint8List.fromList(data));
-
-    //     // final data = Uint8List.fromList(
-    //     // final data = <int>[];
-    //     // for (var byte = stdin.readByteSync(); byte != -1; byte = stdin.readByteSync()) {
-    //     //   data.add(byte);
-    //     // }
-    //     // while (true) {
-    //     //   final byte = stdin.readByteSync();
-    //     //   if (byte == -1)
-    //     //   break;
-    //     // await stdin.forEach((element) => data.addAll(element));
-    //     // print("stdin read ${data.length}");
-    //     // chart = Chart(bytes: Uint8List.fromList(data));
-    //   } else if (fileToOpen != null) {
-    //     chart = Chart(localPath: fileToOpen);
-    //   }
-    // } on FileSystemException catch (err) {
-    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${err.message} : ${err.path}"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
-    // } catch (err) {
-    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
-    // }
-    // if (chart == null) {
-    //   openAceFile();
-    // }
   }
 
   @override
@@ -137,7 +101,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   // ----------------------------------------------------------------------
 
   Future<void> openLocalAceFile(String? path) async {
-    if (path != null) {
+    if (chart == null && path != null) {
       try {
         chartBeingLoaded = true;
         if (path == "-") {
