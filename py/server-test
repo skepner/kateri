@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-import sys, os, tempfile, asyncio
+import sys, os, time, tempfile, asyncio
 from pathlib import Path
 
 KATERI_EXE = Path("~/kateri/build/macos/Build/Products/Release/kateri.app/Contents/MacOS/kateri").expanduser()
@@ -24,6 +24,7 @@ async def server():
         kateri = None
         try:
             t1 = asyncio.create_task(start_server(sock_name), name="srv")
+            time.sleep(3)
             t2 = asyncio.create_task(start_kateri(sock_name), name="kateri")
             done, pending = await asyncio.wait([t1, t2], return_when=asyncio.FIRST_COMPLETED)
             for task in pending:

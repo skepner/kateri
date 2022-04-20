@@ -40,6 +40,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
   Chart? chart;
   bool chartBeingLoaded = false;
+  String? socketToConnect;
   // String path = "*nothing*";
   late bool openExportedPdf;
   // late double width;
@@ -61,15 +62,17 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    openLocalAceFile(CommandLineData.of(context).fileToOpen);
+    final commandLineData = CommandLineData.of(context);
+    openLocalAceFile(commandLineData.fileToOpen);
+    socketToConnect = commandLineData.socketToConnect;
+    connectToServer(commandLineData.socketToConnect);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (chart == null && !chartBeingLoaded) {
-      if (UniversalPlatform.isMacOS) { // forcing open dialog here does not work in web and eventually leads to problems
-        selectAndOpenAceFile();
-      }
+    if (chart == null && socketToConnect == null && !chartBeingLoaded && UniversalPlatform.isMacOS) {
+      // forcing open dialog here does not work in web and eventually leads to problems
+      selectAndOpenAceFile();
     }
     antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
     return Container(
@@ -151,6 +154,19 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
       chart = newChart;
       chartBeingLoaded = false;
     });
+  }
+
+  // ----------------------------------------------------------------------
+
+  void connectToServer(String? socketName) async {
+    if (socketName != null) {
+      final socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
+      print("flutter socket connected");
+      socket.listen((Uint8List event) {
+        print("socket event ${event.length} [${String.fromCharCodes(event)}]");
+      });
+      socket.write("JOpa");
+    }
   }
 
   // ----------------------------------------------------------------------

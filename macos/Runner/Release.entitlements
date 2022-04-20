@@ -8,5 +8,8 @@
         <true/>
         <key>com.apple.security.files.downloads.read-write</key>
         <true/>
+
+        <key>com.apple.security.app-sandbox</key>
+        <false/>
 </dict>
 </plist>
