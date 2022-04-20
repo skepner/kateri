@@ -1,0 +1,57 @@
+#! /usr/bin/env python3
+import sys, os, tempfile, asyncio
+from pathlib import Path
+
+KATERI_EXE = Path("~/kateri/build/macos/Build/Products/Release/kateri.app/Contents/MacOS/kateri").expanduser()
+
+# ----------------------------------------------------------------------
+
+async def handle_client(reader :asyncio.StreamReader, writer :asyncio.StreamWriter):
+    request = None
+    while request != 'quit\n':
+        request = (await reader.read(255)).decode('utf8')
+        print(f"request: {len(request)} [{request}]")
+        # response = str(eval(request)) + '\n'
+        writer.write("OK\n".encode('utf8'))
+        await writer.drain()
+    writer.close()
+
+async def server():
+    with tempfile.TemporaryDirectory() as td:
+        sock_name = os.path.join(td, 'sock')
+        print(f"socket: {sock_name}")
+
+        kateri = None
+        try:
+            t1 = asyncio.create_task(start_server(sock_name), name="srv")
+            t2 = asyncio.create_task(start_kateri(sock_name), name="kateri")
+            done, pending = await asyncio.wait([t1, t2], return_when=asyncio.FIRST_COMPLETED)
+            for task in pending:
+                task.cancel()
+        finally:
+            print("finally")
+            if kateri:
+                kateri.terminate()
+
+async def start_server(sock_name):
+    srv = await asyncio.start_unix_server(handle_client, sock_name)
+    print("srv started")
+    await srv.serve_forever()
+    print("srv done")
+    return srv
+
+async def start_kateri(sock_name):
+    kateri = await asyncio.create_subprocess_exec(KATERI_EXE, "--socket", sock_name)
+    print("kateri started")
+    retcode = await kateri.wait()
+    print(f"kateri finished with code {retcode}")
+    return kateri
+
+try:
+    asyncio.run(server())
+except Exception as err:
+    print(f"Error: {err}")
+except KeyboardInterrupt:
+    print(f"terminated by Ctrl-C")
+
+# ----------------------------------------------------------------------

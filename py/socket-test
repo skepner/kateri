@@ -18,9 +18,12 @@ async def server():
         sock_name = os.path.join(td, 'sock')
         print(f"socket: {sock_name}")
 
-        srv = await asyncio.start_unix_server(handle_client, sock_name)
-        async with srv:
-            await srv.serve_forever()
+        try:
+            srv = await asyncio.start_unix_server(handle_client, sock_name)
+            async with srv:
+                await srv.serve_forever()
+        finally:
+            print("srv done")
 
 try:
     asyncio.run(server())
