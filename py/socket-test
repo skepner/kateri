@@ -1,0 +1,30 @@
+#! /usr/bin/env python3
+import sys, os, tempfile, asyncio
+
+# ----------------------------------------------------------------------
+
+async def handle_client(reader :asyncio.StreamReader, writer :asyncio.StreamWriter):
+    request = None
+    while request != 'quit\n':
+        request = (await reader.read(255)).decode('utf8')
+        print(f"request: {len(request)} [{request}]")
+        # response = str(eval(request)) + '\n'
+        writer.write("OK\n".encode('utf8'))
+        await writer.drain()
+    writer.close()
+
+async def server():
+    with tempfile.TemporaryDirectory() as td:
+        sock_name = os.path.join(td, 'sock')
+        print(f"socket: {sock_name}")
+
+        srv = await asyncio.start_unix_server(handle_client, sock_name)
+        async with srv:
+            await srv.serve_forever()
+
+try:
+    asyncio.run(server())
+except Exception as err:
+    print(f"Error: {err}")
+
+# ----------------------------------------------------------------------

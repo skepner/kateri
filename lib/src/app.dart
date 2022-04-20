@@ -29,12 +29,16 @@ class App extends StatelessWidget {
 
 class CommandLineData extends InheritedWidget {
   late final String? fileToOpen;
+  late final String? socketToConnect;
   final GlobalKey<ScaffoldState> errorReportingKey;
 
   CommandLineData(List<String> args, {required this.errorReportingKey, required Widget child, Key? key}) : super(key: key, child: child) {
     final parser = ArgParser();
     parser.addOption("chart", abbr: "c", callback: (arg) {
       fileToOpen = arg;
+    });
+    parser.addOption("socket", abbr: "s", callback: (arg) {
+      socketToConnect = arg;
     });
     parser.parse(args);
   }
