@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data'; // Uint8List
+import 'dart:math';
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +24,7 @@ abstract class _Event {
   factory _Event.create(Uint8List source) {
     switch (String.fromCharCodes(source, 0, 4)) {
       case "CHRT":
-        return const ChartEvent();
+        return ChartEvent();
       default:
         throw FormatException("unrecognized socket event (${source.length}): \"${String.fromCharCodes(source)}\"");
     }
@@ -37,17 +38,39 @@ abstract class _Event {
 }
 
 class ChartEvent extends _Event {
-  const ChartEvent();
+  Uint8List? _data;
+  int _stored = 0; // number of bytes already in _data
+
+  ChartEvent();
 
   @override
   Uint8List consume(Uint8List source) {
-    print("chart data ${source.length}");
-    return Uint8List(0);
+    if (source.isEmpty) return source;
+    if (_data == null) {
+      if (source.length < 4) throw FormatException("ChartEvent: cannot read data size: too few bytes available (${source.length})");
+      _data = Uint8List(source.buffer.asUint32List(0, 1)[0]);
+      print("receiving chart ${_data!.length} 0x${_data!.length.toRadixString(16)} <- ${source.buffer.asUint32List(4, 1)[0]}");
+      if (source.length == 4) return Uint8List(0);
+      source = Uint8List.view(source.buffer, 4);
+    }
+    final copyCount = min(source.length, _data!.length - _stored);
+    _data!.setRange(_stored, _stored + copyCount, source);
+    _stored += copyCount;
+    return Uint8List.view(source.buffer, copyCount);
   }
 
   @override
   bool finished() {
-    return false;
+    return _data != null && _data!.length == _stored;
+  }
+
+  @override
+  String toString() {
+    if (_data == null) {
+      return "ChartEvent(empty)";
+    } else {
+      return "ChartEvent(${_data!.length} $_stored bytes)";
+    }
   }
 }
 

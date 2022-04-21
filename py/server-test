@@ -15,7 +15,7 @@ async def handle_client(reader :asyncio.StreamReader, writer :asyncio.StreamWrit
         # response = str(eval(request)) + '\n'
         writer.write(b"CHRT")
         chart_bytes = subprocess.check_output(["decat", str(CHART)])
-        print(f"[server-test] chart {len(chart_bytes)} 0x{len(chart_bytes):X}")
+        print(f"[server-test] sending chart {len(chart_bytes)} 0x{len(chart_bytes):X}")
         writer.write(len(chart_bytes).to_bytes(4, byteorder=sys.byteorder))
         writer.write(chart_bytes)
         await writer.drain()
