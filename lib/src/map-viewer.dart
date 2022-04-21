@@ -162,10 +162,21 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
     if (socketName != null) {
       final socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
       print("flutter socket connected");
+      var eventNo = 0;
       socket.listen((Uint8List event) {
-        print("socket event ${event.length} [${String.fromCharCodes(event)}]");
+        // print("[socket event $eventNo] (${event.length}): \"${String.fromCharCodes(event)}\"");
+        switch (String.fromCharCodes(event, 0, 4)) {
+          case "CHRT": // chart
+            final dataSize = event.buffer.asUint32List(4, 1)[0];
+            print("[socket event $eventNo] Chart $dataSize");
+            break;
+          default:
+            print("[socket event $eventNo] Error: unrecognized (${event.length}): \"${String.fromCharCodes(event)}\"");
+            break;
+        }
+        ++eventNo;
       });
-      socket.write("JOpa");
+      socket.write("Hello from Kateri");
     }
   }
 

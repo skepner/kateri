@@ -12,7 +12,8 @@ async def handle_client(reader :asyncio.StreamReader, writer :asyncio.StreamWrit
         request = (await reader.read(255)).decode('utf8')
         print(f"request: {len(request)} [{request}]")
         # response = str(eval(request)) + '\n'
-        writer.write("OK\n".encode('utf8'))
+        writer.write(b"CHRT")
+        writer.write(int(12345678).to_bytes(4, byteorder=sys.byteorder))
         await writer.drain()
     writer.close()
 
