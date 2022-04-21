@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
-import sys, os, time, tempfile, asyncio
+import sys, os, time, tempfile, asyncio, subprocess
 from pathlib import Path
 
-KATERI_EXE = Path("~/kateri/build/macos/Build/Products/Release/kateri.app/Contents/MacOS/kateri").expanduser()
+KATERI_EXE = Path(sys.argv[0]).parent.joinpath("../build/macos/Build/Products/Release/kateri.app/Contents/MacOS/kateri")
+CHART = Path("/r/bvic-hi-turkey-cnic.ace")
 
 # ----------------------------------------------------------------------
 
@@ -13,7 +14,10 @@ async def handle_client(reader :asyncio.StreamReader, writer :asyncio.StreamWrit
         print(f"request: {len(request)} [{request}]")
         # response = str(eval(request)) + '\n'
         writer.write(b"CHRT")
-        writer.write(int(12345678).to_bytes(4, byteorder=sys.byteorder))
+        chart_bytes = subprocess.check_output(["decat", str(CHART)])
+        print(f"[server-test] chart {len(chart_bytes)} 0x{len(chart_bytes):X}")
+        writer.write(len(chart_bytes).to_bytes(4, byteorder=sys.byteorder))
+        writer.write(chart_bytes)
         await writer.drain()
     writer.close()
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'app.dart'; // CommandLineData
 import 'chart.dart';
+import 'socket-events.dart';
 import 'viewport.dart' as vp;
 import 'plot_spec.dart';
 
@@ -161,21 +163,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   void connectToServer(String? socketName) async {
     if (socketName != null) {
       final socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
-      print("flutter socket connected");
-      var eventNo = 0;
-      socket.listen((Uint8List event) {
-        // print("[socket event $eventNo] (${event.length}): \"${String.fromCharCodes(event)}\"");
-        switch (String.fromCharCodes(event, 0, 4)) {
-          case "CHRT": // chart
-            final dataSize = event.buffer.asUint32List(4, 1)[0];
-            print("[socket event $eventNo] Chart $dataSize");
-            break;
-          default:
-            print("[socket event $eventNo] Error: unrecognized (${event.length}): \"${String.fromCharCodes(event)}\"");
-            break;
-        }
-        ++eventNo;
-      });
+      SocketEventHandler(socket).handle();
       socket.write("Hello from Kateri");
     }
   }
