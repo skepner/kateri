@@ -49,7 +49,7 @@ class ChartEvent extends _Event {
     if (_data == null) {
       if (source.length < 4) throw FormatException("ChartEvent: cannot read data size: too few bytes available (${source.length})");
       _data = Uint8List(source.buffer.asUint32List(0, 1)[0]);
-      print("receiving chart ${_data!.length} 0x${_data!.length.toRadixString(16)} <- ${source.buffer.asUint32List(4, 1)[0]}");
+      print("receiving chart ${_data!.length} 0x${_data!.length.toRadixString(16)}");
       if (source.length == 4) return Uint8List(0);
       source = Uint8List.view(source.buffer, 4);
     }
