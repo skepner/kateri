@@ -11,7 +11,7 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'app.dart'; // CommandLineData
 import 'chart.dart';
-import 'socket-events.dart';
+import 'socket-events.dart' as socket_events;
 import 'viewport.dart' as vp;
 import 'plot_spec.dart';
 
@@ -163,9 +163,13 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   void connectToServer(String? socketName) async {
     if (socketName != null) {
       final socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
-      SocketEventHandler(socket).handle();
+      socket_events.SocketEventHandler(socket).handle(eventFromServer);
       socket.write("Hello from Kateri");
     }
+  }
+
+  void eventFromServer(socket_events.Event event) {
+      print(event);
   }
 
   // ----------------------------------------------------------------------

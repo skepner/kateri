@@ -5,23 +5,23 @@ import 'dart:math';
 // ----------------------------------------------------------------------
 
 class SocketEventHandler {
-  final Stream<_Event> _transformed;
+  final Stream<Event> _transformed;
   SocketEventHandler(Stream<Uint8List> source) : _transformed = source.transform(const _Transformer());
 
-  void handle() async {
+  void handle(Function callback) async {
     await for (final event in _transformed) {
-      print(event);
+      callback(event);
     }
   }
 }
 
 // ----------------------------------------------------------------------
 
-abstract class _Event {
-  const _Event();
+abstract class Event {
+  const Event();
 
   /// 4 first bytes of source is a event type code
-  factory _Event.create(Uint8List source) {
+  factory Event.create(Uint8List source) {
     switch (String.fromCharCodes(source, 0, 4)) {
       case "CHRT":
         return ChartEvent();
@@ -37,7 +37,7 @@ abstract class _Event {
   bool finished();
 }
 
-class ChartEvent extends _Event {
+class ChartEvent extends Event {
   Uint8List? _data;
   int _stored = 0; // number of bytes already in _data
 
@@ -76,19 +76,19 @@ class ChartEvent extends _Event {
 
 // ----------------------------------------------------------------------
 
-class _Transformer extends StreamTransformerBase<Uint8List, _Event> {
+class _Transformer extends StreamTransformerBase<Uint8List, Event> {
   const _Transformer();
 
-  Stream<_Event> bind(Stream<Uint8List> stream) {
-    return Stream<_Event>.eventTransformed(stream, (EventSink<_Event> sink) => _EventSink(sink));
+  Stream<Event> bind(Stream<Uint8List> stream) {
+    return Stream<Event>.eventTransformed(stream, (EventSink<Event> sink) => _EventSink(sink));
   }
 }
 
 // ----------------------------------------------------------------------
 
 class _EventSink implements EventSink<Uint8List> {
-  final EventSink<_Event> _output;
-  _Event? _current;
+  final EventSink<Event> _output;
+  Event? _current;
 
   _EventSink(this._output);
 
@@ -98,7 +98,7 @@ class _EventSink implements EventSink<Uint8List> {
     // print("_EventSink.add ${source.length} \"${String.fromCharCodes(Uint8List.view(source.buffer, sourceStart, 4))}\" sourceStart:$sourceStart");
     while (sourceStart < source.length) {
       if (_current == null) {
-        _current = _Event.create(source);
+        _current = Event.create(source);
         sourceStart += 4;
       }
       sourceStart += _current!.consume(source, sourceStart);
