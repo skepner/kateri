@@ -46,22 +46,16 @@ class ChartEvent extends _Event {
   /// returns number of bytes consumed
   @override
   int consume(Uint8List source, int sourceStart) {
-    print("consume ${source.length} 0x${source.buffer.asUint32List(sourceStart, 1)[0].toRadixString(16)} \"${String.fromCharCodes(Uint8List.view(source.buffer, sourceStart, 4))}\"");
-    var rest = source.length - sourceStart;
-    if (rest <= 0) return 0;
     final sourceStartInit = sourceStart;
     if (_data == null) {
-      if (rest < 4) throw FormatException("ChartEvent: cannot read data size: too few bytes available ($rest)");
+      if ((source.length - sourceStart) < 4) throw FormatException("ChartEvent: cannot read data size: too few bytes available (${source.length - sourceStart})");
       _data = Uint8List(source.buffer.asUint32List(sourceStart, 1)[0]);
-      if (rest <= 4) return 0;
       sourceStart += 4;
-      rest -= 4;
-      print("receiving chart ${_data!.length} 0x${_data!.length.toRadixString(16)}");
+      if ((source.length - sourceStart) <= 4) return 0;
     }
-    final copyCount = min(rest, _data!.length - _stored);
+    final copyCount = min(source.length - sourceStart, _data!.length - _stored);
     _data!.setRange(_stored, _stored + copyCount, Uint8List.view(source.buffer, sourceStart));
     _stored += copyCount;
-    print("received $rest -> $_stored");
     return sourceStart - sourceStartInit + copyCount;
   }
 
@@ -101,20 +95,18 @@ class _EventSink implements EventSink<Uint8List> {
   @override
   void add(Uint8List source) {
     var sourceStart = 0;
-    print("_EventSink.add ${source.length} \"${String.fromCharCodes(Uint8List.view(source.buffer, sourceStart, 4))}\" sourceStart:$sourceStart");
+    // print("_EventSink.add ${source.length} \"${String.fromCharCodes(Uint8List.view(source.buffer, sourceStart, 4))}\" sourceStart:$sourceStart");
     while (sourceStart < source.length) {
       if (_current == null) {
         _current = _Event.create(source);
         sourceStart += 4;
       }
       sourceStart += _current!.consume(source, sourceStart);
-      print("event consumed ${source.length - sourceStart} start:$sourceStart");
       if (_current!.finished()) {
         _output.add(_current!);
         _current = null;
       }
     }
-    print("add done sourceStart:$sourceStart");
   }
 
   @override
