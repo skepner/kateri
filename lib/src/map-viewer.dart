@@ -23,6 +23,126 @@ import 'decompress.dart';
 
 // ======================================================================
 
+class AntigenicMapViewerData {
+  Chart? chart;
+  Projection? projection;
+  vp.Viewport? viewport;
+  PlotSpec? plotSpec;
+  bool chartBeingLoaded = false;
+  Socket? _socket;
+  Function updateCallback;
+  Function showMessage;
+  Function? exportPdfToString; // set by AntigenicMapPainter constructor
+  late bool openExportedPdf;
+
+  AntigenicMapViewerData({required this.updateCallback, required this.showMessage});
+
+  void setChart(Chart aChart) {
+    chart = aChart;
+    projection = chart!.projections[0];
+    viewport = projection!.viewport();
+    chartBeingLoaded = false;
+    updateCallback();
+  }
+
+  void resetChart() {
+    chart = null;
+    projection = null;
+    viewport = null;
+    plotSpec = null;
+    chartBeingLoaded = false;
+    updateCallback();
+  }
+
+  bool empty() => chart != null;
+
+  void buildStarted() {
+    if (UniversalPlatform.isMacOS && chart == null && !chartBeingLoaded
+        //&& socketToConnect == null
+        ) {
+      // forcing open dialog here does not work in web and eventually leads to problems
+      selectAndOpenAceFile();
+    }
+  }
+
+  void didChangeDependencies(CommandLineData commandLineData) {
+    openLocalAceFile(commandLineData.fileToOpen);
+    connectToServer(commandLineData.socketToConnect);
+  }
+
+  // ----------------------------------------------------------------------
+
+  Future<void> selectAndOpenAceFile() async {
+    final file = (await FilePicker.platform.pickFiles())?.files.single;
+    if (file != null) {
+      try {
+        // accesing file?.path on web always reports an error (regardles of using try/catch)
+        if (file.bytes != null) {
+          setChart(Chart(decompressBytes(file.bytes!)));
+        } else if (file.path != null) {
+          setChart(Chart(await decompressFile(file.path!)));
+        }
+      } on Exception catch (err) {
+        // cannot import chart from a file
+        showMessage(err.toString());
+        resetChart();
+      }
+    } else {
+      resetChart();
+    }
+  }
+
+  Future<void> openLocalAceFile(String? path) async {
+    print("openLocalAceFile path:$path chart:$chart");
+    if (chart == null && path != null) {
+      try {
+        chartBeingLoaded = true;
+        if (path == "-") {
+          setChart(Chart(await decompressStdin()));
+        } else {
+          setChart(Chart(await decompressFile(path)));
+        }
+      } on Exception catch (err) {
+        // cannot import chart from a file
+        showMessage(err.toString());
+        resetChart();
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------------
+
+  void connectToServer(String? socketName) async {
+    if (socketName != null) {
+      _socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
+      socket_events.SocketEventHandler(_socket!).handle(eventFromServer);
+      _socket!.write("Hello from Kateri");
+    }
+  }
+
+  void eventFromServer(socket_events.Event event) {
+    print(event);
+  }
+
+  // ----------------------------------------------------------------------
+
+  void exportPdf() async {
+    if (chart != null && exportPdfToString != null) {
+      final stopwatch = Stopwatch()..start();
+      final bytes = await exportPdfToString!(); // antigenicMapPainter.viewer.exportPdf();
+      if (bytes != null) {
+        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
+        if (openExportedPdf && UniversalPlatform.isMacOS) {
+          await Process.run("open", [filename]);
+        }
+      }
+      print("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+    }
+  }
+}
+
+// ----------------------------------------------------------------------
+
 class AntigenicMapViewWidget extends StatefulWidget {
   const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
       : super(key: key);
@@ -40,16 +160,18 @@ class AntigenicMapViewWidget extends StatefulWidget {
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Chart? chart;
-  bool chartBeingLoaded = false;
-  String? socketToConnect;
+  late final AntigenicMapViewerData _data;
+
   // String path = "*nothing*";
-  late bool openExportedPdf;
   // late double width;
   late double aspectRatio;
   late double borderWidth;
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
+
+  _AntigenicMapViewWidgetState() {
+    _data = AntigenicMapViewerData(updateCallback: updateCallback, showMessage: showMessage);
+  }
 
   @override
   void initState() {
@@ -58,25 +180,19 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
     aspectRatio = widget.aspectRatio;
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
-    openExportedPdf = widget.openExportedPdf;
+    _data.openExportedPdf = widget.openExportedPdf;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final commandLineData = CommandLineData.of(context);
-    openLocalAceFile(commandLineData.fileToOpen);
-    socketToConnect = commandLineData.socketToConnect;
-    connectToServer(commandLineData.socketToConnect);
+    _data.didChangeDependencies(CommandLineData.of(context));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (chart == null && socketToConnect == null && !chartBeingLoaded && UniversalPlatform.isMacOS) {
-      // forcing open dialog here does not work in web and eventually leads to problems
-      selectAndOpenAceFile();
-    }
-    antigenicMapPainter = AntigenicMapPainter(chart); // must be re-created!
+    _data.buildStarted();
+    antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
     return Container(
         // margin: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
@@ -86,7 +202,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
             child: Scaffold(
                 key: scaffoldKey,
                 // appBar: AppBar(), //title: Text("Kateri")),
-                drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewWidgetState: this)),
+                drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
                 body: Stack(children: <Widget>[
                   CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
                   Positioned(
@@ -102,99 +218,23 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
 
   // ----------------------------------------------------------------------
 
-  Future<void> openLocalAceFile(String? path) async {
-    if (chart == null && path != null) {
-      try {
-        chartBeingLoaded = true;
-        if (path == "-") {
-          setChart(Chart(await decompressStdin()));
-        } else {
-          setChart(Chart(await decompressFile(path)));
-        }
-      } on Exception catch (err) {
-        // cannot import chart from a file
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
-        forceSelectingAceFile();
-      }
-    }
+  void updateCallback() {
+    setState(() {/* AntigenicMapViewerData updated */});
   }
 
-  Future<void> selectAndOpenAceFile() async {
-    final file = (await FilePicker.platform.pickFiles())?.files.single;
-    if (file != null) {
-      try {
-        // accesing file?.path on web always reports an error (regardles of using try/catch)
-        if (file.bytes != null) {
-          setChart(Chart(decompressBytes(file.bytes!)));
-        } else if (file.path != null) {
-          setChart(Chart(await decompressFile(file.path!)));
-        }
-      } on Exception catch (err) {
-        // cannot import chart from a file
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text("$err"), backgroundColor: Colors.red, duration: const Duration(days: 1)));
-        forceSelectingAceFile();
-      }
-    } else {
-      forceSelectingAceFile();
-    }
-  }
-
-  void forceSelectingAceFile() {
-    setState(() {
-      chart = null;
-      chartBeingLoaded = false;
-    });
-  }
-
-  void setChart(Chart newChart) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    setState(() {
-      chart = newChart;
-      chartBeingLoaded = false;
-    });
-  }
-
-  // ----------------------------------------------------------------------
-
-  void connectToServer(String? socketName) async {
-    if (socketName != null) {
-      final socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
-      socket_events.SocketEventHandler(socket).handle(eventFromServer);
-      socket.write("Hello from Kateri");
-    }
-  }
-
-  void eventFromServer(socket_events.Event event) {
-      print(event);
-  }
-
-  // ----------------------------------------------------------------------
-
-  void exportPdf() async {
-    if (chart != null) {
-      final stopwatch = Stopwatch()..start();
-      final bytes = await antigenicMapPainter.viewer.exportPdf();
-      if (bytes != null) {
-        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
-        if (openExportedPdf && UniversalPlatform.isMacOS) {
-          await Process.run("open", [filename]);
-        }
-      }
-      print("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
-    }
+  void showMessage(String text, {Color backgroundColor = Colors.red}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text), backgroundColor: backgroundColor, duration: const Duration(days: 1)));
   }
 }
 
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewWidgetMenu extends StatelessWidget {
-  const AntigenicMapViewWidgetMenu({Key? key, required this.antigenicMapViewWidgetState}) : super(key: key);
+  const AntigenicMapViewWidgetMenu({Key? key, required this.antigenicMapViewerData}) : super(key: key);
 
-  final _AntigenicMapViewWidgetState antigenicMapViewWidgetState;
+  final AntigenicMapViewerData antigenicMapViewerData;
 
   @override
   Widget build(BuildContext context) {
@@ -204,13 +244,13 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
           title: const Text("Open"),
           onTap: () {
             Navigator.pop(context);
-            antigenicMapViewWidgetState.selectAndOpenAceFile();
+            antigenicMapViewerData.selectAndOpenAceFile();
           }),
       ListTile(
           leading: const Icon(Icons.picture_as_pdf_rounded),
           title: const Text("Export pdf"),
           onTap: () {
-            antigenicMapViewWidgetState.exportPdf();
+            antigenicMapViewerData.exportPdf();
             Navigator.pop(context);
           }),
     ]);
@@ -222,7 +262,9 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
 class AntigenicMapPainter extends CustomPainter {
   final AntigenicMapViewer viewer;
 
-  AntigenicMapPainter(Chart? chart) : viewer = AntigenicMapViewer(chart);
+  AntigenicMapPainter(AntigenicMapViewerData data) : viewer = AntigenicMapViewer(data) {
+    data.exportPdfToString = viewer.exportPdf;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -241,35 +283,30 @@ class AntigenicMapPainter extends CustomPainter {
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewer {
-  final Chart? chart;
-  final Projection? projection;
-  vp.Viewport? viewport;
-  PlotSpec? plotSpec;
+  final AntigenicMapViewerData _data;
 
-  AntigenicMapViewer(this.chart) : projection = chart?.projections[0] {
-    viewport = projection?.viewport();
-  }
+  AntigenicMapViewer(this._data);
 
   void paint(CanvasRoot canvas) {
-    if (chart != null && viewport != null) {
-      canvas.draw(Offset.zero & canvas.size, viewport!, paintOn);
+    if (_data.chart != null && _data.viewport != null) {
+      canvas.draw(Offset.zero & canvas.size, _data.viewport!, paintOn);
     }
   }
 
   void paintOn(DrawOn canvas) {
-    plotSpec ??= chart!.plotSpecLegacy(projection); // chart.plotSpecDefault(projection);
+    _data.plotSpec ??= _data.chart!.plotSpecLegacy(_data.projection); // chart.plotSpecDefault(projection);
     canvas.grid();
-    final layout = projection!.transformedLayout();
-    for (final pointNo in plotSpec!.drawingOrder()) {
+    final layout = _data.projection!.transformedLayout();
+    for (final pointNo in _data.plotSpec!.drawingOrder()) {
       if (layout[pointNo] != null) {
-        canvas.pointOfPlotSpec(layout[pointNo]!, plotSpec![pointNo]);
+        canvas.pointOfPlotSpec(layout[pointNo]!, _data.plotSpec![pointNo]);
       }
     }
   }
 
   Future<Uint8List?> exportPdf({bool open = true}) async {
-    if (chart != null && viewport != null) {
-      final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / viewport!.width * viewport!.height))..paintBy(paint);
+    if (_data.chart != null && _data.viewport != null) {
+      final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
       return canvasPdf.bytes();
     }
     return null;
