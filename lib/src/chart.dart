@@ -212,11 +212,12 @@ class Projection extends _JsonAccess {
 
   static Matrix4 _makeTransformation(List<dynamic>? source) {
     if (source != null) {
+      final data = List<double>.from(source.map<double>((value) => value.toDouble())); // using map, some values may represented as int and then source.cast<double>() fails
       switch (source.length) {
         case 4:
-          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(source.cast<double>()));
+          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(data));
         case 6:
-          return Matrix4.identity()..copyRotation(Matrix3.fromList(source.cast<double>()));
+          return Matrix4.identity()..copyRotation(Matrix3.fromList(data));
       }
     }
     return Matrix4.identity();
