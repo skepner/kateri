@@ -23,26 +23,32 @@ import 'decompress.dart';
 
 // ======================================================================
 
+abstract class AntigenicMapViewerCallbacks {
+  void updateCallback();
+  void showMessage(String text, {Color backgroundColor = Colors.red});
+  Future<Uint8List?> exportPdf();
+}
+
+// ----------------------------------------------------------------------
+
 class AntigenicMapViewerData {
+  final AntigenicMapViewerCallbacks _callbacks;
   Chart? chart;
   Projection? projection;
   vp.Viewport? viewport;
   PlotSpec? plotSpec;
-  bool chartBeingLoaded = false;
+  bool _chartBeingLoaded = false;
   Socket? _socket;
-  Function updateCallback;
-  Function showMessage;
-  Function? exportPdfToString; // set by AntigenicMapPainter constructor
   late bool openExportedPdf;
 
-  AntigenicMapViewerData({required this.updateCallback, required this.showMessage});
+  AntigenicMapViewerData(this._callbacks);
 
   void setChart(Chart aChart) {
     chart = aChart;
     projection = chart!.projections[0];
     viewport = projection!.viewport();
-    chartBeingLoaded = false;
-    updateCallback();
+    _chartBeingLoaded = false;
+    _callbacks.updateCallback();
   }
 
   void resetChart() {
@@ -50,14 +56,14 @@ class AntigenicMapViewerData {
     projection = null;
     viewport = null;
     plotSpec = null;
-    chartBeingLoaded = false;
-    updateCallback();
+    _chartBeingLoaded = false;
+    _callbacks.updateCallback();
   }
 
   bool empty() => chart != null;
 
   void buildStarted() {
-    if (UniversalPlatform.isMacOS && chart == null && !chartBeingLoaded
+    if (UniversalPlatform.isMacOS && chart == null && !_chartBeingLoaded
         //&& socketToConnect == null
         ) {
       // forcing open dialog here does not work in web and eventually leads to problems
@@ -84,7 +90,7 @@ class AntigenicMapViewerData {
         }
       } on Exception catch (err) {
         // cannot import chart from a file
-        showMessage(err.toString());
+        _callbacks.showMessage(err.toString());
         resetChart();
       }
     } else {
@@ -96,7 +102,7 @@ class AntigenicMapViewerData {
     print("openLocalAceFile path:$path chart:$chart");
     if (chart == null && path != null) {
       try {
-        chartBeingLoaded = true;
+        _chartBeingLoaded = true;
         if (path == "-") {
           setChart(Chart(await decompressStdin()));
         } else {
@@ -104,7 +110,7 @@ class AntigenicMapViewerData {
         }
       } on Exception catch (err) {
         // cannot import chart from a file
-        showMessage(err.toString());
+        _callbacks.showMessage(err.toString());
         resetChart();
       }
     }
@@ -127,9 +133,9 @@ class AntigenicMapViewerData {
   // ----------------------------------------------------------------------
 
   void exportPdf() async {
-    if (chart != null && exportPdfToString != null) {
+    if (chart != null) {
       final stopwatch = Stopwatch()..start();
-      final bytes = await exportPdfToString!(); // antigenicMapPainter.viewer.exportPdf();
+      final bytes = await _callbacks.exportPdf(); // antigenicMapPainter.viewer.exportPdf();
       if (bytes != null) {
         final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
         if (openExportedPdf && UniversalPlatform.isMacOS) {
@@ -157,7 +163,7 @@ class AntigenicMapViewWidget extends StatefulWidget {
   State<AntigenicMapViewWidget> createState() => _AntigenicMapViewWidgetState();
 }
 
-class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
+class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> implements AntigenicMapViewerCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final AntigenicMapViewerData _data;
@@ -170,7 +176,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
   _AntigenicMapViewWidgetState() {
-    _data = AntigenicMapViewerData(updateCallback: updateCallback, showMessage: showMessage);
+    _data = AntigenicMapViewerData(this);
   }
 
   @override
@@ -227,6 +233,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(text), backgroundColor: backgroundColor, duration: const Duration(days: 1)));
   }
+
+  Future<Uint8List?> exportPdf() async {
+    return antigenicMapPainter.viewer.exportPdf();
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -262,9 +272,7 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
 class AntigenicMapPainter extends CustomPainter {
   final AntigenicMapViewer viewer;
 
-  AntigenicMapPainter(AntigenicMapViewerData data) : viewer = AntigenicMapViewer(data) {
-    data.exportPdfToString = viewer.exportPdf;
-  }
+  AntigenicMapPainter(AntigenicMapViewerData data) : viewer = AntigenicMapViewer(data);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -304,7 +312,7 @@ class AntigenicMapViewer {
     }
   }
 
-  Future<Uint8List?> exportPdf({bool open = true}) async {
+  Future<Uint8List?> exportPdf() async {
     if (_data.chart != null && _data.viewport != null) {
       final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
       return canvasPdf.bytes();
