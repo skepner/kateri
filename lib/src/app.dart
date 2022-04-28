@@ -1,5 +1,6 @@
-// import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:args/args.dart';
 
 import 'map-viewer.dart';
@@ -40,7 +41,13 @@ class CommandLineData extends InheritedWidget {
     parser.addOption("socket", abbr: "s", callback: (arg) {
       socketToConnect = arg;
     });
-    parser.parse(args);
+    try {
+      final results = parser.parse(args);
+      if (results.rest.isNotEmpty) throw const FormatException("unrecognized data in the command line");
+    } on FormatException catch (err) {
+      print("> ERROR: ${err.message}\n${parser.usage}");
+      SystemNavigator.pop(animated: true);
+    }
   }
 
   static CommandLineData of(BuildContext context) {

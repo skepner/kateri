@@ -94,7 +94,7 @@ class AntigenicMapViewerData {
   }
 
   Future<void> openLocalAceFile(String? path) async {
-    print("openLocalAceFile path:$path chart:$chart");
+    // print("openLocalAceFile path:$path chart:$chart");
     if (chart == null && path != null) {
       try {
         _chartBeingLoaded = true;
