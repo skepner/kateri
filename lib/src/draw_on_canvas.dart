@@ -161,7 +161,7 @@ class _DrawOnCanvas extends DrawOn {
 
     canvas
       // ..save()
-      ..drawPath(
+      .drawPath(
           path,
           Paint()
             ..style = PaintingStyle.fill
@@ -327,7 +327,7 @@ class _DrawOnCanvas extends DrawOn {
     }
     canvas
           // ..save()
-          ..drawPath(
+          .drawPath(
               path,
               Paint()
                 ..style = PaintingStyle.stroke

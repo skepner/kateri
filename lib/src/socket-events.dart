@@ -2,15 +2,19 @@ import 'dart:async';
 import 'dart:typed_data'; // Uint8List
 import 'dart:math';
 
+import 'map-viewer-data.dart';
+
 // ----------------------------------------------------------------------
 
 class SocketEventHandler {
+  final AntigenicMapViewerData antigenicMapViewerData;
   final Stream<Event> _transformed;
-  SocketEventHandler(Stream<Uint8List> source) : _transformed = source.transform(const _Transformer());
 
-  void handle(Function callback) async {
+  SocketEventHandler({required Stream<Uint8List> socketStream, required this.antigenicMapViewerData}) : _transformed = socketStream.transform(const _Transformer());
+
+  void handle() async {
     await for (final event in _transformed) {
-      callback(event);
+      event.act(antigenicMapViewerData);
     }
   }
 }
@@ -19,6 +23,8 @@ class SocketEventHandler {
 
 abstract class Event {
   const Event();
+
+  void act(AntigenicMapViewerData antigenicMapViewerData);
 
   /// 4 first bytes of source is a event type code
   factory Event.create(Uint8List source) {
@@ -42,6 +48,12 @@ class ChartEvent extends Event {
   int _stored = 0; // number of bytes already in _data
 
   ChartEvent();
+
+  @override
+  void act(AntigenicMapViewerData antigenicMapViewerData) {
+    if (_data == null) return;
+    antigenicMapViewerData.setChartFromBytes(_data!);
+  }
 
   /// returns number of bytes consumed
   @override
