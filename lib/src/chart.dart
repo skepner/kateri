@@ -45,7 +45,7 @@ class Chart extends _JsonAccess {
     final specs = <PlotSpec>[];
     if (_hasPlotSpecSemantic) {
       data["c"]["R"].forEach((name, plotSpecData) {
-        specs.add(PlotSpecSemantic(this, name, plotSpecData));
+        specs.add(PlotSpecSemantic(this, projection ?? projections[0], name, plotSpecData));
       });
     }
     if (_hasPlotSpecLegacy) {
