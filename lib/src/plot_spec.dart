@@ -4,6 +4,7 @@ import 'chart.dart';
 import 'draw_on.dart';
 import 'color.dart';
 import 'error.dart';
+import 'cast.dart';
 
 // ----------------------------------------------------------------------
 
@@ -136,7 +137,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     makeDefaultDrawingOrder(_chart, _projection);
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
-    apply();
+    apply(_data["A"] ?? []);
   }
 
   @override
@@ -154,37 +155,41 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   @override
   bool _addPointSpecByCloning() => true;
 
-  void apply() {
-    for (final en in ((_data["A"] ?? []) as List<dynamic>)) {
-      applyEntry(en);
+  void apply(List<dynamic> data, [int recursionLevel = 1]) {
+    if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.apply: too deep recursion");
+    for (final en in data) {
+      applyEntry(en as Map<String, dynamic>, recursionLevel);
     }
   }
 
-  void applyEntry(Map<String, dynamic> entry, [int recursionLevel = 1]) {
-    if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.applyEntry: too deep recursion");
-    if (entry["R"] != null) applyEntry(_chart.data["c"]["R"][entry["R"]]["A"], recursionLevel + 1);
-    final points = selectPoints(entry["T"], entry["A"]);
-    if (points.isNotEmpty) {
-      for (final pointNo in points) {
-        modifyPointPlotSpec(pointSpec[pointNo], entry);
-      }
-      switch (entry["D"]) {
-        case "r":
-          break;
-        case "l":
-          break;
-        default:
-          break;
+  void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
+    if (entry["R"] != null) {
+      apply(_chart.data["c"]["R"][entry["R"]]["A"] ?? [], recursionLevel + 1);
+    }
+    if (entry["T"] != null) {
+      final points = selectPoints(entry["T"], entry["A"]);
+      if (points.isNotEmpty) {
+        for (final pointNo in points) {
+          modifyPointPlotSpec(pointSpec[pointNo], entry);
+        }
+        switch (entry["D"]) {
+          case "r":
+            break;
+          case "l":
+            break;
+          default:
+            break;
+        }
       }
     }
   }
 
-  List<int> selectPoints(Map<String, dynamic> selector, bool? antigensOnly) {
+  List<int> selectPoints(Map<String, dynamic> selector, dynamic antigensOnly) {
     final selected = <int>[];
-    if (antigensOnly == null || antigensOnly) {
+    if (castToBool(antigensOnly, ifNull: true)) {
       selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => semanticMatch(selector, _chart.antigens[agNo].semantic)));
     }
-    if (antigensOnly == null || !antigensOnly) {
+    if (!castToBool(antigensOnly, ifNull: false)) {
       selected.addAll(
           Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => semanticMatch(selector, _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
