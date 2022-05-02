@@ -212,7 +212,8 @@ class AntigenicMapViewer {
   }
 
   void paintOn(DrawOn canvas) {
-    _data.plotSpec ??= _data.chart!.plotSpecLegacy(_data.projection); // chart.plotSpecDefault(projection);
+    // _data.plotSpec ??= _data.chart!.plotSpecLegacy(_data.projection); // chart.plotSpecDefault(projection);
+    _data.plotSpec ??= _data.chart!.plotSpecs(_data.projection)[0]; // chart.plotSpecDefault(projection);
     canvas.grid();
     final layout = _data.projection!.transformedLayout();
     for (final pointNo in _data.plotSpec!.drawingOrder()) {

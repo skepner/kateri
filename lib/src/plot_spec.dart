@@ -5,6 +5,7 @@ import 'draw_on.dart';
 // ----------------------------------------------------------------------
 
 abstract class PlotSpec {
+  String title();
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
 
@@ -63,6 +64,9 @@ class PlotSpecDefault extends PlotSpec {
   }
 
   @override
+  String title() => "Default";
+
+  @override
   List<int> drawingOrder() {
     return sera + referenceAntigens + testAntigens;
   }
@@ -86,6 +90,29 @@ class PlotSpecDefault extends PlotSpec {
       serumCell = PointPlotSpec.serumCell(),
       serumEgg = PointPlotSpec.serumEgg(),
       serumReassortant = PointPlotSpec.serumReassortant();
+}
+
+// ----------------------------------------------------------------------
+
+class PlotSpecSemantic extends PlotSpec {
+  PlotSpecSemantic(this._chart, this._name, this._data) {}
+
+  @override
+  String title() => _data["T"] ?? _name;
+
+  @override
+  List<int> drawingOrder() {
+    return [];
+  }
+
+  @override
+  PointPlotSpec operator [](int pointNo) {
+    return PointPlotSpec();
+  }
+
+  final Chart _chart;
+  final String _name;
+  final Map<String, dynamic> _data;
 }
 
 // ----------------------------------------------------------------------
@@ -122,6 +149,9 @@ class PlotSpecLegacy extends PlotSpec {
       _specs.add(spec);
     }
   }
+
+  @override
+  String title() => "Legacy";
 
   @override
   List<int> drawingOrder() {
