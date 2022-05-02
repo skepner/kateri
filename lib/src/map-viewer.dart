@@ -93,27 +93,27 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
               ReloadChartIntent: CallbackAction<ReloadChartIntent>(onInvoke: (ReloadChartIntent intent) => _data.reloadChart()),
               PdfIntent: CallbackAction<PdfIntent>(onInvoke: (PdfIntent intent) => _data.exportPdf()),
             },
-            child: Container(
-                // margin: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-                // width: width,
-                child: AspectRatio(
-                    aspectRatio: aspectRatio,
-                    child: Scaffold(
-                        key: scaffoldKey,
-                        // appBar: AppBar(), //title: Text("Kateri")),
-                        drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                        body: Stack(children: <Widget>[
-                          CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                          Positioned(
-                              left: 0,
-                              top: 0,
-                              child: IconButton(
-                                icon: const Icon(Icons.menu),
-                                onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                              ))
-                        ]))))));
-    // }
+            child: Focus(
+                child: Container(
+                    // margin: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+                    // width: width,
+                    child: AspectRatio(
+                        aspectRatio: aspectRatio,
+                        child: Scaffold(
+                            key: scaffoldKey,
+                            // appBar: AppBar(), //title: Text("Kateri")),
+                            drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
+                            body: Stack(children: <Widget>[
+                              CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                              Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.menu),
+                                    onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                                  ))
+                            ])))))));
   }
 
   // ----------------------------------------------------------------------
