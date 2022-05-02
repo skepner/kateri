@@ -18,6 +18,7 @@ import 'plot_spec.dart';
 abstract class AntigenicMapViewerCallbacks {
   void updateCallback();
   void showMessage(String text, {Color backgroundColor = Colors.red});
+  void hideMessage();
   Future<Uint8List?> exportPdf();
 }
 
@@ -25,6 +26,7 @@ abstract class AntigenicMapViewerCallbacks {
 
 class AntigenicMapViewerData {
   final AntigenicMapViewerCallbacks _callbacks;
+  String? chartFilename; // for reloadChart()
   Chart? chart;
   Projection? projection;
   vp.Viewport? viewport;
@@ -41,6 +43,7 @@ class AntigenicMapViewerData {
     viewport = projection!.viewport();
     plotSpec = null;
     _chartBeingLoaded = false;
+    _callbacks.hideMessage();
     _callbacks.updateCallback();
   }
 
@@ -55,6 +58,13 @@ class AntigenicMapViewerData {
     plotSpec = null;
     _chartBeingLoaded = false;
     _callbacks.updateCallback();
+  }
+
+  void reloadChart() async {
+    if (chartFilename != null) {
+      print("reloadChart $chartFilename");
+      setChart(Chart(await decompressFile(chartFilename!)));
+    }
   }
 
   bool empty() => chart != null;
@@ -81,6 +91,7 @@ class AntigenicMapViewerData {
         if (file.bytes != null) {
           setChart(Chart(decompressBytes(file.bytes!)));
         } else if (file.path != null) {
+          chartFilename = file.path;
           setChart(Chart(await decompressFile(file.path!)));
         }
       } on Exception catch (err) {

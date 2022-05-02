@@ -3,6 +3,7 @@
 import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -12,6 +13,20 @@ import 'draw_on_canvas.dart';
 import 'draw_on_pdf.dart';
 
 // ======================================================================
+
+class OpenChartIntent extends Intent {
+  const OpenChartIntent();
+}
+
+class ReloadChartIntent extends Intent {
+  const ReloadChartIntent();
+}
+
+class PdfIntent extends Intent {
+  const PdfIntent();
+}
+
+// ----------------------------------------------------------------------
 
 class AntigenicMapViewWidget extends StatefulWidget {
   const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
@@ -26,6 +41,8 @@ class AntigenicMapViewWidget extends StatefulWidget {
   @override
   State<AntigenicMapViewWidget> createState() => _AntigenicMapViewWidgetState();
 }
+
+// ----------------------------------------------------------------------
 
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> implements AntigenicMapViewerCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
@@ -64,26 +81,38 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
   Widget build(BuildContext context) {
     _data.buildStarted();
     antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
-    return Container(
-        // margin: const EdgeInsets.all(10.0),
-        decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-        // width: width,
-        child: AspectRatio(
-            aspectRatio: aspectRatio,
-            child: Scaffold(
-                key: scaffoldKey,
-                // appBar: AppBar(), //title: Text("Kateri")),
-                drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                body: Stack(children: <Widget>[
-                  CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                  Positioned(
-                      left: 0,
-                      top: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                      ))
-                ]))));
+    return Shortcuts(
+        shortcuts: <ShortcutActivator, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.f3): const OpenChartIntent(),
+          LogicalKeySet(LogicalKeyboardKey.f4): const PdfIntent(),
+          LogicalKeySet(LogicalKeyboardKey.f5): const ReloadChartIntent(),
+        },
+        child: Actions(
+            actions: <Type, Action<Intent>>{
+              OpenChartIntent: CallbackAction<OpenChartIntent>(onInvoke: (OpenChartIntent intent) => _data.selectAndOpenAceFile()),
+              ReloadChartIntent: CallbackAction<ReloadChartIntent>(onInvoke: (ReloadChartIntent intent) => _data.reloadChart()),
+              PdfIntent: CallbackAction<PdfIntent>(onInvoke: (PdfIntent intent) => _data.exportPdf()),
+            },
+            child: Container(
+                // margin: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+                // width: width,
+                child: AspectRatio(
+                    aspectRatio: aspectRatio,
+                    child: Scaffold(
+                        key: scaffoldKey,
+                        // appBar: AppBar(), //title: Text("Kateri")),
+                        drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
+                        body: Stack(children: <Widget>[
+                          CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                          Positioned(
+                              left: 0,
+                              top: 0,
+                              child: IconButton(
+                                icon: const Icon(Icons.menu),
+                                onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                              ))
+                        ]))))));
     // }
   }
 
@@ -96,9 +125,15 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
 
   @override
   void showMessage(String text, {Color backgroundColor = Colors.red}) {
+    print("showMessage \"$text\"");
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(text), backgroundColor: backgroundColor, duration: const Duration(days: 1)));
+  }
+
+  @override
+  void hideMessage() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   @override
@@ -119,16 +154,23 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
     return ListView(padding: EdgeInsets.zero, children: [
       ListTile(
           leading: const Icon(Icons.file_open_rounded),
-          title: const Text("Open"),
+          title: const Text("Open F3"),
           onTap: () {
             Navigator.pop(context);
             antigenicMapViewerData.selectAndOpenAceFile();
           }),
       ListTile(
           leading: const Icon(Icons.picture_as_pdf_rounded),
-          title: const Text("Export pdf"),
+          title: const Text("Export pdf F4"),
           onTap: () {
             antigenicMapViewerData.exportPdf();
+            Navigator.pop(context);
+          }),
+      ListTile(
+          leading: const Icon(Icons.file_open_rounded),
+          title: const Text("Reload F5"),
+          onTap: () {
+            antigenicMapViewerData.reloadChart();
             Navigator.pop(context);
           }),
     ]);
