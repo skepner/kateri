@@ -91,17 +91,20 @@ class AntigenicMapViewerData {
         if (file.bytes != null) {
           setChart(Chart(decompressBytes(file.bytes!)));
         } else if (file.path != null) {
-          chartFilename = file.path;
           setChart(Chart(await decompressFile(file.path!)));
+          chartFilename = file.path;
         }
       } on Exception catch (err) {
         // cannot import chart from a file
         _callbacks.showMessage(err.toString());
-        resetChart();
+        if (chart == null) {
+          resetChart();
+        }
       }
-    } else {
-      resetChart();
     }
+    // else {
+    //   resetChart();
+    // }
   }
 
   Future<void> openLocalAceFile(String? path) async {
