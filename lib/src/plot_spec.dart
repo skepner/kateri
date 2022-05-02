@@ -137,7 +137,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
     apply();
-    postProcessColors();
   }
 
   @override
@@ -237,10 +236,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         return PointShape.uglyegg;
     }
     return PointShape.circle;
-  }
-
-  void postProcessColors() {
-    for (final spec in pointSpec) {}
   }
 
   final Chart _chart;
