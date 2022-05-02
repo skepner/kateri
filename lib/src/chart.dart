@@ -252,3 +252,18 @@ class Projection extends _JsonAccess {
 typedef Projections = List<Projection>;
 
 // ----------------------------------------------------------------------
+
+bool semanticMatch(Map<String, dynamic> selector, Map<String, dynamic> attributes) {
+  // print(attributes);
+  return selector.entries.fold(true, (value, en) {
+      if (!value) return false;
+      if (en.value is bool) return en.value && attributes.containsKey(en.key);
+
+      final attrVal = attributes[en.key];
+      if (attrVal == null) return false;
+      if (attrVal is List) return attrVal.contains(en.value);
+      return attrVal == en.value;
+  });
+}
+
+// ----------------------------------------------------------------------

@@ -1,6 +1,9 @@
 import 'dart:ui';
+
 import 'chart.dart';
 import 'draw_on.dart';
+import 'color.dart';
+import 'error.dart';
 
 // ----------------------------------------------------------------------
 
@@ -134,6 +137,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
     apply();
+    postProcessColors();
   }
 
   @override
@@ -157,14 +161,86 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     }
   }
 
-  void applyEntry(Map<String, dynamic> entry) {
-    if (entry["R"] != null) applyEntry(_chart.data["c"]["R"][entry["R"]]["A"]);
+  void applyEntry(Map<String, dynamic> entry, [int recursionLevel = 1]) {
+    if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.applyEntry: too deep recursion");
+    if (entry["R"] != null) applyEntry(_chart.data["c"]["R"][entry["R"]]["A"], recursionLevel + 1);
     final points = selectPoints(entry["T"], entry["A"]);
-    print(entry.keys);
+    if (points.isNotEmpty) {
+      for (final pointNo in points) {
+        modifyPointPlotSpec(pointSpec[pointNo], entry);
+      }
+      switch (entry["D"]) {
+        case "r":
+          break;
+        case "l":
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   List<int> selectPoints(Map<String, dynamic> selector, bool? antigensOnly) {
-    return [];
+    final selected = <int>[];
+    if (antigensOnly == null || antigensOnly) {
+      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => semanticMatch(selector, _chart.antigens[agNo].semantic)));
+    }
+    if (antigensOnly == null || !antigensOnly) {
+      selected.addAll(
+          Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => semanticMatch(selector, _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+    }
+    return selected;
+  }
+
+  static void modifyPointPlotSpec(PointPlotSpec spec, Map<String, dynamic> mod) {
+    mod.forEach((modKey, modValue) {
+      switch (modKey) {
+        case "S":
+          spec.shape = pointShapeFromString(modValue);
+          break;
+        case "F":
+          spec.fill = NamedColor.fromString(modValue);
+          break;
+        case "O":
+          spec.outline = NamedColor.fromString(modValue);
+          break;
+        case "o":
+          spec.outlineWidthPixels = modValue.toDouble();
+          break;
+        case "s":
+          spec.sizePixels = modValue.toDouble();
+          break;
+        case "r":
+          spec.rotation = modValue.toDouble();
+          break;
+        case "a":
+          spec.aspect = modValue.toDouble();
+          break;
+        case "-":
+          spec.shown = !(modValue as bool);
+          break;
+      }
+    });
+  }
+
+  static PointShape pointShapeFromString(String src) {
+    switch (src[0].toUpperCase()) {
+      case "C":
+        return PointShape.circle;
+      case "B":
+        return PointShape.box;
+      case "T":
+        return PointShape.triangle;
+      case "E":
+        return PointShape.egg;
+      case "U":
+        return PointShape.uglyegg;
+    }
+    return PointShape.circle;
+  }
+
+  void postProcessColors() {
+    for (final spec in pointSpec) {}
   }
 
   final Chart _chart;
