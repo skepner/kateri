@@ -151,7 +151,16 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   @override
   bool _addPointSpecByCloning() => true;
 
-  void apply() {}
+  void apply() {
+    for (final en in ((_data["A"] ?? []) as List<dynamic>)) {
+      applyEntry(en);
+    }
+  }
+
+  void applyEntry(Map<String, dynamic> entry) {
+    // if (entry["R"] != null) _chart.data["c"]["R"][entry["R"]]
+    print(entry.keys);
+  }
 
   final Chart _chart;
   final Projection _projection;
