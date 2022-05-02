@@ -45,6 +45,18 @@ class PointPlotSpec {
   PointLabel? label;
 
   PointPlotSpec();
+  PointPlotSpec.from(PointPlotSpec src)
+      : shown = src.shown,
+        sizePixels = src.sizePixels,
+        shape = src.shape,
+        fill = src.fill,
+        outline = src.outline,
+        outlineWidthPixels = src.outlineWidthPixels,
+        rotation = src.rotation,
+        aspect = src.aspect {
+    if (src.label != null) label = PointLabel.from(src.label!);
+  }
+
   PointPlotSpec.referenceCell() : sizePixels = refSize;
   PointPlotSpec.referenceEgg()
       : sizePixels = refSize,
@@ -84,6 +96,11 @@ class LabelStyle {
   final FontStyle fontStyle;
 
   const LabelStyle({this.color = black, this.fontFamily = LabelFontFamily.helvetica, this.fontStyle = FontStyle.normal, this.fontWeight = FontWeight.normal});
+  LabelStyle.from(LabelStyle src)
+      : color = src.color,
+        fontFamily = src.fontFamily,
+        fontWeight = src.fontWeight,
+        fontStyle = src.fontStyle;
 }
 
 // ----------------------------------------------------------------------
@@ -103,6 +120,13 @@ class PointLabel extends LabelStyle {
       FontStyle fontStyle = FontStyle.normal,
       FontWeight fontWeight = FontWeight.normal})
       : super(color: color, fontFamily: fontFamily, fontStyle: fontStyle, fontWeight: fontWeight);
+
+  PointLabel.from(PointLabel src)
+      : offset = src.offset,
+        text = src.text,
+        sizePixels = src.sizePixels,
+        rotation = src.rotation,
+        super.from(src);
 }
 
 // ----------------------------------------------------------------------

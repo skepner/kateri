@@ -8,6 +8,7 @@ abstract class PlotSpec {
   String title();
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
+  int priority();
 
   Color colorFromSpec(String? spec, Color dflt) {
     if (spec != null && spec.isNotEmpty) {
@@ -39,56 +40,50 @@ class _DefaultDrawingOrder {
 
 // ----------------------------------------------------------------------
 
-class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder {
-  PlotSpecDefault(this._chart, this._projection) {
-    makeDefaultDrawingOrder(_chart, _projection);
-    _chart.antigens.asMap().forEach((agNo, antigen) {
-      if (ddoReferenceAntigens.contains(agNo)) {
+abstract class _DefaultPointSpecs {
+  void makeDefaultPointSpecs({required Chart chart, required Function isReferenceAntigen}) {
+    chart.antigens.asMap().forEach((agNo, antigen) {
+      if (isReferenceAntigen(agNo)) {
         if (antigen.isReassortant) {
-          pointSpec.add(referenceReassortant);
+          _addPointSpec(referenceReassortant);
         } else if (antigen.isEgg) {
-          pointSpec.add(referenceEgg);
+          _addPointSpec(referenceEgg);
         } else {
-          pointSpec.add(referenceCell);
+          _addPointSpec(referenceCell);
         }
       } else {
         if (antigen.isReassortant) {
-          pointSpec.add(testReassortant);
+          _addPointSpec(testReassortant);
         } else if (antigen.isEgg) {
-          pointSpec.add(testEgg);
+          _addPointSpec(testEgg);
         } else {
-          pointSpec.add(testCell);
+          _addPointSpec(testCell);
         }
       }
     });
-    _chart.sera.asMap().forEach((srNo, serum) {
+    chart.sera.asMap().forEach((srNo, serum) {
       if (serum.isReassortant) {
-        pointSpec.add(serumReassortant);
+        _addPointSpec(serumReassortant);
       } else if (serum.isEgg) {
-        pointSpec.add(serumEgg);
+        _addPointSpec(serumEgg);
       } else {
-        pointSpec.add(serumCell);
+        _addPointSpec(serumCell);
       }
     });
   }
 
-  @override
-  String title() => "Default";
+  bool _addPointSpecByCloning();
 
-  @override
-  List<int> drawingOrder() {
-    return ddoSera + ddoReferenceAntigens + ddoTestAntigens;
+  void _addPointSpec(PointPlotSpec spec) {
+    if (_addPointSpecByCloning()) {
+      pointSpec.add(PointPlotSpec.from(spec));
+    } else {
+      pointSpec.add(spec);
+    }
   }
-
-  @override
-  PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
-
-  // ----------------------------------------------------------------------
-
-  final Chart _chart;
-  final Projection _projection;
 
   final List<PointPlotSpec> pointSpec = [];
+
   final PointPlotSpec referenceCell = PointPlotSpec.referenceCell(),
       referenceEgg = PointPlotSpec.referenceEgg(),
       referenceReassortant = PointPlotSpec.referenceReassortant(),
@@ -102,10 +97,43 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder {
 
 // ----------------------------------------------------------------------
 
-class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder {
+class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
+  PlotSpecDefault(this._chart, this._projection) {
+    makeDefaultDrawingOrder(_chart, _projection);
+    makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
+  }
+
+  @override
+  String title() => "Default";
+
+  @override
+  List<int> drawingOrder() {
+    return ddoSera + ddoReferenceAntigens + ddoTestAntigens;
+  }
+
+  @override
+  PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
+
+  @override
+  int priority() => 999;
+
+  @override
+  bool _addPointSpecByCloning() => false;
+
+  // ----------------------------------------------------------------------
+
+  final Chart _chart;
+  final Projection _projection;
+}
+
+// ----------------------------------------------------------------------
+
+class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
   PlotSpecSemantic(this._chart, this._projection, this._name, this._data) {
     makeDefaultDrawingOrder(_chart, _projection);
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
+    makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
+    apply();
   }
 
   @override
@@ -115,9 +143,15 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder {
   List<int> drawingOrder() => _drawingOrder;
 
   @override
-  PointPlotSpec operator [](int pointNo) {
-    return PointPlotSpec();
-  }
+  PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
+
+  @override
+  int priority() => _data["z"] ?? 0;
+
+  @override
+  bool _addPointSpecByCloning() => true;
+
+  void apply() {}
 
   final Chart _chart;
   final Projection _projection;
@@ -126,6 +160,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder {
   final Map<String, dynamic> _data;
 
   late final List<int> _drawingOrder;
+  final List<PointPlotSpec> pointSpec = [];
 }
 
 // ----------------------------------------------------------------------
@@ -173,6 +208,9 @@ class PlotSpecLegacy extends PlotSpec {
 
   @override
   PointPlotSpec operator [](int pointNo) => _specs[_data["p"][pointNo]];
+
+  @override
+  int priority() => 998;
 
   final Chart _chart;
   final Map<String, dynamic> _data;

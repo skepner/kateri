@@ -54,6 +54,7 @@ class Chart extends _JsonAccess {
     if (specs.isEmpty) {
       specs.add(plotSpecDefault(projection));
     }
+    specs.sort((e1, e2) => e1.priority().compareTo(e2.priority()));
     return specs;
   }
 
