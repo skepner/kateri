@@ -158,8 +158,13 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   }
 
   void applyEntry(Map<String, dynamic> entry) {
-    // if (entry["R"] != null) _chart.data["c"]["R"][entry["R"]]
+    if (entry["R"] != null) applyEntry(_chart.data["c"]["R"][entry["R"]]["A"]);
+    final points = selectPoints(entry["T"], entry["A"]);
     print(entry.keys);
+  }
+
+  List<int> selectPoints(Map<String, dynamic> selector, bool? antigensOnly) {
+    return [];
   }
 
   final Chart _chart;
