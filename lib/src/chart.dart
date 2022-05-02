@@ -60,7 +60,12 @@ class Chart extends _JsonAccess {
   // }
 
   void _parseJson(List<int> source) {
-    data = jsonDecode(utf8.decode(source));
+    try {
+      data = jsonDecode(utf8.decode(source));
+    } catch (err) {
+      // print("json decoding failed: $err\n${String.fromCharCodes(source)}");
+      throw FormatException("json decoding failed: $err");
+    }
     info = Info(data["c"]["i"]);
     antigens = (data["c"]["a"] ?? []).map<Antigen>((pdata) => Antigen(pdata)).toList();
     sera = (data["c"]["s"] ?? []).map<Serum>((pdata) => Serum(pdata)).toList();
