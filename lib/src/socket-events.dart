@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data'; // Uint8List
 import 'dart:math';
 
+import 'error.dart';
 import 'map-viewer-data.dart';
 
 // ----------------------------------------------------------------------
@@ -32,7 +33,7 @@ abstract class Event {
       case "CHRT":
         return ChartEvent();
       default:
-        throw FormatException("unrecognized socket event (${source.length}): \"${String.fromCharCodes(source)}\"");
+        throw FormatError("unrecognized socket event (${source.length}): \"${String.fromCharCodes(source)}\"");
     }
   }
 
@@ -60,7 +61,7 @@ class ChartEvent extends Event {
   int consume(Uint8List source, int sourceStart) {
     final sourceStartInit = sourceStart;
     if (_data == null) {
-      if ((source.length - sourceStart) < 4) throw FormatException("ChartEvent: cannot read data size: too few bytes available (${source.length - sourceStart})");
+      if ((source.length - sourceStart) < 4) throw FormatError("ChartEvent: cannot read data size: too few bytes available (${source.length - sourceStart})");
       _data = Uint8List(source.buffer.asUint32List(sourceStart, 1)[0]);
       sourceStart += 4;
       if ((source.length - sourceStart) <= 4) return 0;

@@ -1,13 +1,12 @@
-import 'dart:io';
-import 'dart:ui';
-import 'dart:math';
-import 'dart:typed_data';
+// import 'dart:io';
+// import 'dart:ui';
+// import 'dart:math';
+// import 'dart:typed_data';
 import 'dart:convert'; // json
 
 import 'package:vector_math/vector_math_64.dart';
-// import 'package:flutter/foundation.dart';
 
-// import 'decompress.dart';
+import 'error.dart';
 import 'viewport.dart';
 import 'plot_spec.dart';
 
@@ -28,10 +27,6 @@ class Chart extends _JsonAccess {
   Chart(List<int> source) : super.empty() {
     _parseJson(source);
   }
-  // Chart({Uint8List? bytes, String? localPath, String? serverPath}) : super.empty() {
-  //   //compute(_load, bytes: bytes, localPath: localPath, serverPath: serverPath);
-  //   _load(bytes: bytes, localPath: localPath, serverPath: serverPath);
-  // }
 
   // ----------------------------------------------------------------------
 
@@ -49,22 +44,17 @@ class Chart extends _JsonAccess {
   // ----------------------------------------------------------------------
   // parse ace
 
-  // void _load({Uint8List? bytes, String? localPath, String? serverPath}) {
-  //   if (bytes != null) {
-  //     _parseJson(decompressBytes(bytes));
-  //   } else if (localPath != null) {
-  //     _parseJson(decompress(File(localPath).readAsBytesSync()));
-  //   } else if (serverPath != null) {
-  //     // _parseJson(loadFromServer(serverPath));
-  //   }
-  // }
-
   void _parseJson(List<int> source) {
+    late final String utf8Decoded;
     try {
-      data = jsonDecode(utf8.decode(source));
+      utf8Decoded = utf8.decode(source);
     } catch (err) {
-      // print("json decoding failed: $err\n${String.fromCharCodes(source)}");
-      throw FormatException("json decoding failed: $err");
+      throw FormatError("utf8 decoding failed: $err");
+    }
+    try {
+      data = jsonDecode(utf8Decoded);
+    } catch (err) {
+      throw FormatError("json decoding failed: $err");
     }
     info = Info(data["c"]["i"]);
     antigens = (data["c"]["a"] ?? []).map<Antigen>((pdata) => Antigen(pdata)).toList();

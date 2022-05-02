@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:args/args.dart';
 
+import 'error.dart';
 import 'map-viewer.dart';
 
 // ----------------------------------------------------------------------
@@ -43,8 +44,8 @@ class CommandLineData extends InheritedWidget {
     });
     try {
       final results = parser.parse(args);
-      if (results.rest.isNotEmpty) throw const FormatException("unrecognized data in the command line");
-    } on FormatException catch (err) {
+      if (results.rest.isNotEmpty) throw FormatError("unrecognized data in the command line");
+    } on FormatError catch (err) {
       print("> ERROR: ${err.message}\n${parser.usage}");
       SystemNavigator.pop(animated: true);
     }

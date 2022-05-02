@@ -7,6 +7,8 @@ import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart' as aio;
 import 'package:brotli/brotli.dart';
 
+import 'error.dart';
+
 // ----------------------------------------------------------------------
 
 enum Encoder { plain, xz, bz2, gzip, brotli }
@@ -55,8 +57,7 @@ Future<List<int>> decompressFile(String path) async {
         return brotliDecode(await File(path).readAsBytes());
     }
   } catch (err) {
-    print("$path: $encoder failed: $err");
-    throw FormatException("$encoder decompression failed: $err");
+    throw FormatError("$path: $encoder decompression failed: $err");
   }
 }
 
@@ -78,8 +79,7 @@ List<int> decompressBytes(Uint8List source) {
         return brotliDecode(source);
     }
   } catch (err) {
-    print("$encoder failed: $err");
-    throw FormatException("$encoder decompression failed: $err");
+    throw FormatError("$encoder decompression failed: $err");
   }
 }
 
