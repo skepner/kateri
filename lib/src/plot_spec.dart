@@ -171,7 +171,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
     if (entry["R"] != null) {
       // reference to another style
-      apply(_chart.data["c"]["R"][entry["R"]]["A"] ?? [], recursionLevel + 1);
+      apply(_chart.data["c"]["R"][entry["R"]]?["A"] ?? [], recursionLevel + 1);
     }
     final points = selectPoints(entry["T"], entry["A"]);
     if (points.isNotEmpty) {
@@ -209,8 +209,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       }
       if (raiseLower == "r") {
         _drawingOrder = keep + move;
-      }
-      else {
+      } else {
         _drawingOrder = move + keep;
       }
     }
