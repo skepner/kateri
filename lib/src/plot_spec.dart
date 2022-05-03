@@ -178,14 +178,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       for (final pointNo in points) {
         modifyPointPlotSpec(pointSpec[pointNo], entry);
       }
-      switch (entry["D"]) {
-        case "r":
-          break;
-        case "l":
-          break;
-        default:
-          break;
-      }
+      raiseLowerPoints(entry["D"], points);
     }
   }
 
@@ -193,15 +186,43 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     bool match(Map<String, dynamic> semantic) {
       return selector != null ? semanticMatch(selector, semantic) : true; // select all if selector absent
     }
+
     final selected = <int>[];
     if (castToBool(antigensOnly, ifNull: true)) {
       selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(_chart.antigens[agNo].semantic))); //
     }
     if (!castToBool(antigensOnly, ifNull: false)) {
-      selected.addAll(
-          Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(_chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+      selected.addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(_chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
+  }
+
+  void raiseLowerPoints(String? raiseLower, List<int> points) {
+    if (raiseLower != null) {
+      final List<int> keep = [], move = [];
+      for (final pnt in _drawingOrder) {
+        if (points.contains(pnt)) {
+          move.add(pnt);
+        } else {
+          keep.add(pnt);
+        }
+      }
+      if (raiseLower == "r") {
+        _drawingOrder = keep + move;
+      }
+      else {
+        _drawingOrder = move + keep;
+      }
+    }
+
+    switch (raiseLower) {
+      case "r":
+        break;
+      case "l":
+        break;
+      default:
+        break;
+    }
   }
 
   static void modifyPointPlotSpec(PointPlotSpec spec, Map<String, dynamic> mod) {
@@ -257,7 +278,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   final String _name;
   final Map<String, dynamic> _data;
 
-  late final List<int> _drawingOrder;
+  late List<int> _drawingOrder;
   final List<PointPlotSpec> pointSpec = [];
 }
 
