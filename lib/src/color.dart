@@ -47,6 +47,8 @@ const _colorNames = <String, Color>{
   "transparent": transparent,
   "black": black,
   "gray": gray,
+  "grey": gray,
+  "grey80": gray80,
   "white": white,
   "red": red,
   "green": green,
