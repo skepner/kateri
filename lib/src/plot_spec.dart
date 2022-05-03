@@ -173,33 +173,33 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       // reference to another style
       apply(_chart.data["c"]["R"][entry["R"]]["A"] ?? [], recursionLevel + 1);
     }
-    if (entry["T"] != null) {
-      // if point selection criterium present
-      final points = selectPoints(entry["T"], entry["A"]);
-      if (points.isNotEmpty) {
-        for (final pointNo in points) {
-          modifyPointPlotSpec(pointSpec[pointNo], entry);
-        }
-        switch (entry["D"]) {
-          case "r":
-            break;
-          case "l":
-            break;
-          default:
-            break;
-        }
+    final points = selectPoints(entry["T"], entry["A"]);
+    if (points.isNotEmpty) {
+      for (final pointNo in points) {
+        modifyPointPlotSpec(pointSpec[pointNo], entry);
+      }
+      switch (entry["D"]) {
+        case "r":
+          break;
+        case "l":
+          break;
+        default:
+          break;
       }
     }
   }
 
-  List<int> selectPoints(Map<String, dynamic> selector, dynamic antigensOnly) {
+  List<int> selectPoints(Map<String, dynamic>? selector, dynamic antigensOnly) {
+    bool match(Map<String, dynamic> semantic) {
+      return selector != null ? semanticMatch(selector, semantic) : true; // select all if selector absent
+    }
     final selected = <int>[];
     if (castToBool(antigensOnly, ifNull: true)) {
-      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => semanticMatch(selector, _chart.antigens[agNo].semantic)));
+      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(_chart.antigens[agNo].semantic))); //
     }
     if (!castToBool(antigensOnly, ifNull: false)) {
       selected.addAll(
-          Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => semanticMatch(selector, _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+          Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(_chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
   }
