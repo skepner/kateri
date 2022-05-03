@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 // import 'package:pdf/src/pdf/obj/type1_font.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'color.dart';
 import 'draw_on.dart';
 import 'viewport.dart';
 
@@ -171,7 +172,7 @@ class _DrawOnPdf extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0,
       PointLabel? label}) {
     _canvas
@@ -269,7 +270,7 @@ class _DrawOnPdf extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0}) {
     _canvas
       ..saveContext()
@@ -292,7 +293,7 @@ class _DrawOnPdf extends DrawOn {
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = black,
     double outlineRadiusWidthPixels = 1.0,
-    double rotation = NoRotation, // NoRotation - first radius in upright
+    double rotation = noRotation, // noRotation - first radius in upright
   }) {
     _canvas
       ..saveContext()
@@ -387,7 +388,7 @@ class _DrawOnPdf extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0}) {
     point(center: center, sizePixels: sizePixels, shape: shape, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, rotation: rotation, aspect: aspect);
   }

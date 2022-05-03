@@ -54,11 +54,11 @@ void draw(DrawOn drawOn) {
   // drawOn.point(
   //     center: const Offset(2.0, 3.0),
   //     sizePixels: 40,
-  //     label: const PointLabel("Bjork", rotation: RotationLeft45),
+  //     label: const PointLabel("Bjork", rotation: rotationLeft45),
   //     shape: PointShape.uglyegg,
   //     fill: Colors.cyan,
   //     outlineWidthPixels: 1,
-  //     rotation: RotationRight30);
+  //     rotation: rotationRight30);
 
   // drawOn.point(center: const Offset(-2.2, 3.5), sizePixels: 100, label: const PointLabel("Bo/2/22", offset: Offset(-1.0, 0.0)), shape: PointShape.circle, fill: Colors.orange, outlineWidthPixels: 0);
   // drawOn.point(center: const Offset(-3.5, 3.5), sizePixels: 100, label: const PointLabel("Bo/1/22"), shape: PointShape.circle, fill: Colors.orange, outlineWidthPixels: 0);

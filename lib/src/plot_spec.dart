@@ -45,6 +45,18 @@ class _DefaultDrawingOrder {
 // ----------------------------------------------------------------------
 
 abstract class _DefaultPointSpecs {
+  void initDefaultPointSpecs({required Color testAntigenFill, required Color outline}) {
+    referenceCell = PointPlotSpec.referenceCell(outline);
+    referenceEgg = PointPlotSpec.referenceEgg(outline);
+    referenceReassortant = PointPlotSpec.referenceReassortant(outline);
+    testCell = PointPlotSpec.testCell(testAntigenFill, outline);
+    testEgg = PointPlotSpec.testEgg(testAntigenFill, outline);
+    testReassortant = PointPlotSpec.testReassortant(testAntigenFill, outline);
+    serumCell = PointPlotSpec.serumCell(outline);
+    serumEgg = PointPlotSpec.serumEgg(outline);
+    serumReassortant = PointPlotSpec.serumReassortant(outline);
+  }
+
   void makeDefaultPointSpecs({required Chart chart, required Function isReferenceAntigen}) {
     chart.antigens.asMap().forEach((agNo, antigen) {
       if (isReferenceAntigen(agNo)) {
@@ -88,21 +100,14 @@ abstract class _DefaultPointSpecs {
 
   final List<PointPlotSpec> pointSpec = [];
 
-  final PointPlotSpec referenceCell = PointPlotSpec.referenceCell(),
-      referenceEgg = PointPlotSpec.referenceEgg(),
-      referenceReassortant = PointPlotSpec.referenceReassortant(),
-      testCell = PointPlotSpec.testCell(),
-      testEgg = PointPlotSpec.testEgg(),
-      testReassortant = PointPlotSpec.testReassortant(),
-      serumCell = PointPlotSpec.serumCell(),
-      serumEgg = PointPlotSpec.serumEgg(),
-      serumReassortant = PointPlotSpec.serumReassortant();
+  late final PointPlotSpec referenceCell, referenceEgg, referenceReassortant, testCell, testEgg, testReassortant, serumCell, serumEgg, serumReassortant;
 }
 
 // ----------------------------------------------------------------------
 
 class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
   PlotSpecDefault(this._chart, this._projection) {
+    initDefaultPointSpecs(testAntigenFill: green, outline: black);
     makeDefaultDrawingOrder(_chart, _projection);
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
   }
@@ -134,6 +139,7 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
 
 class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
   PlotSpecSemantic(this._chart, this._projection, this._name, this._data) {
+    initDefaultPointSpecs(testAntigenFill: gray80, outline: gray80);
     makeDefaultDrawingOrder(_chart, _projection);
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
@@ -164,9 +170,11 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
     if (entry["R"] != null) {
+      // reference to another style
       apply(_chart.data["c"]["R"][entry["R"]]["A"] ?? [], recursionLevel + 1);
     }
     if (entry["T"] != null) {
+      // if point selection criterium present
       final points = selectPoints(entry["T"], entry["A"]);
       if (points.isNotEmpty) {
         for (final pointNo in points) {
@@ -281,7 +289,7 @@ class PlotSpecLegacy extends PlotSpec {
           spec.shape = PointShape.uglyegg;
           break;
       }
-      spec.rotation = entry["r"]?.toDouble() ?? NoRotation;
+      spec.rotation = entry["r"]?.toDouble() ?? noRotation;
       spec.aspect = entry["a"]?.toDouble() ?? aspectNormal;
       // label
       _specs.add(spec);

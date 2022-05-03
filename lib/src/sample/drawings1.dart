@@ -21,28 +21,28 @@ void draw(DrawOn drawOn) {
     // drawOn.point(center: const Offset(-2.9, -4.1), sizePixels: 70, shape: PointShape.box, fill: const Color(0x80FF0000), outlineWidthPixels: 5);
 
     // drawOn.point(center: const Offset(-2, -4.0), sizePixels: 70, shape: PointShape.triangle, fill: Colors.red, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-2, -3.2), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-2, -2.4), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-2, -1.6), sizePixels: 70, shape: PointShape.triangle, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-2, -0.8), sizePixels: 70, shape: PointShape.triangle, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-2, -3.2), sizePixels: 70, shape: PointShape.triangle, rotation: rotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-2, -2.4), sizePixels: 70, shape: PointShape.triangle, rotation: rotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-2, -1.6), sizePixels: 70, shape: PointShape.triangle, rotation: rotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-2, -0.8), sizePixels: 70, shape: PointShape.triangle, rotation: rotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
     // drawOn.point(center: const Offset(-1, -4.0), sizePixels: 70, shape: PointShape.egg, fill: Colors.red, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-1, -3.2), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-1, -2.4), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-1, -1.6), sizePixels: 70, shape: PointShape.egg, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(-1, -0.8), sizePixels: 70, shape: PointShape.egg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-1, -3.2), sizePixels: 70, shape: PointShape.egg, rotation: rotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-1, -2.4), sizePixels: 70, shape: PointShape.egg, rotation: rotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-1, -1.6), sizePixels: 70, shape: PointShape.egg, rotation: rotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(-1, -0.8), sizePixels: 70, shape: PointShape.egg, rotation: rotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
     // drawOn.point(center: const Offset(0.0, -4.0), sizePixels: 70, shape: PointShape.uglyegg, fill: Colors.red, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(0.0, -3.2), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(0.0, -2.4), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(0.0, -1.6), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(0.0, -0.8), sizePixels: 70, shape: PointShape.uglyegg, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(0.0, -3.2), sizePixels: 70, shape: PointShape.uglyegg, rotation: rotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(0.0, -2.4), sizePixels: 70, shape: PointShape.uglyegg, rotation: rotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(0.0, -1.6), sizePixels: 70, shape: PointShape.uglyegg, rotation: rotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(0.0, -0.8), sizePixels: 70, shape: PointShape.uglyegg, rotation: rotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
     // drawOn.point(center: const Offset(1.0, -4.0), sizePixels: 70, shape: PointShape.box, fill: Colors.red, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(1.0, -3.2), sizePixels: 70, shape: PointShape.box, rotation: RotationRight30, fill: Colors.green, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(1.0, -2.4), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(1.0, -1.6), sizePixels: 70, shape: PointShape.box, rotation: RotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
-    // drawOn.point(center: const Offset(1.0, -0.8), sizePixels: 70, shape: PointShape.box, rotation: RotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(1.0, -3.2), sizePixels: 70, shape: PointShape.box, rotation: rotationRight30, fill: Colors.green, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(1.0, -2.4), sizePixels: 70, shape: PointShape.box, rotation: rotationLeft30, fill: Colors.blue, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(1.0, -1.6), sizePixels: 70, shape: PointShape.box, rotation: rotationRight45, fill: Colors.orange, outlineWidthPixels: 2);
+    // drawOn.point(center: const Offset(1.0, -0.8), sizePixels: 70, shape: PointShape.box, rotation: rotationLeft45, fill: Colors.yellow, outlineWidthPixels: 2);
 
     // drawOn.point(center: const Offset(-1.0, -2.0), sizePixels: 170, shape: PointShape.circle, fill: const Color(0x80FFA500), outlineWidthPixels: -1);
 
@@ -74,7 +74,7 @@ void draw(DrawOn drawOn) {
     //     outlineCircle: Colors.orange,
     //     outlineCircleWidthPixels: 5.0,
     //     angle: math.pi * 1.2,
-    //     rotation: RotationRight30,
+    //     rotation: rotationRight30,
     //     outlineRadiusWidthPixels: 5.0);
     // drawOn.sector(
     //     center: const Offset(2.0, 0.0),
@@ -83,14 +83,14 @@ void draw(DrawOn drawOn) {
     //     outlineCircle: Colors.orange,
     //     outlineCircleWidthPixels: 5.0,
     //     angle: math.pi / 6,
-    //     rotation: RotationLeft30,
+    //     rotation: rotationLeft30,
     //     outlineRadius: Colors.green,
     //     outlineRadiusWidthPixels: 5.0);
 
     // drawOn.text("Later ones", Offset.zero);
     // drawOn.text("Later ones", const Offset(-4, 3.5), sizePixels: 50, textStyle: const LabelStyle(fontFamily: LabelFontFamily.monospace, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold));
     // drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, textStyle: const LabelStyle(fontFamily: LabelFontFamily.sansSerif, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold));
-    // drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, rotation: RotationRight30, textStyle: const LabelStyle(fontFamily: LabelFontFamily.serif, color: Colors.red));
+    // drawOn.text("Later ones", const Offset(-4, 4), sizePixels: 50, rotation: rotationRight30, textStyle: const LabelStyle(fontFamily: LabelFontFamily.serif, color: Colors.red));
 
     // drawOn.text("CDC A(H3N2) HINT by clade Öl", const Offset(-5.8, -4.5), sizePixels: 30, textStyle: const LabelStyle(fontWeight: FontWeight.bold));
 }

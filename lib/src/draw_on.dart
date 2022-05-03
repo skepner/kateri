@@ -3,36 +3,29 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'viewport.dart';
+import 'color.dart';
 
 // ----------------------------------------------------------------------
 
 enum PointShape { circle, box, triangle, egg, uglyegg }
 
-const NoRotation = 0.0;
+const noRotation = 0.0;
 const rotationReassortant = 0.5;
-const RotationRight30 = math.pi / 6;
-const RotationRight45 = math.pi / 4;
-const RotationRight60 = math.pi / 3;
-const RotationLeft30 = -math.pi / 6;
-const RotationLeft45 = -math.pi / 4;
-const RotationLeft60 = -math.pi / 3;
+const rotationRight30 = math.pi / 6;
+const rotationRight45 = math.pi / 4;
+const rotationRight60 = math.pi / 3;
+const rotationLeft30 = -math.pi / 6;
+const rotationLeft45 = -math.pi / 4;
+const rotationLeft60 = -math.pi / 3;
 
 const aspectNormal = 1.0;
 const aspectEgg = 0.75;
 
-const black = Color(0xFF000000);
-const white = Color(0xFFFFFFFF);
-const transparent = Color(0x00000000);
-const red = Color(0xFFFF0000);
-const green = Color(0xFF00FF00);
-const blue = Color(0xFF0000FF);
-const orange = Color(0xFFFFA500);
-
 // ----------------------------------------------------------------------
 
 class PointPlotSpec {
-  static const testSize = 10.0;
-  static const refSize = 16.0;
+  static const testSize = 20.0;
+  static const refSize = 32.0;
 
   bool shown = true;
   double sizePixels = testSize;
@@ -40,7 +33,7 @@ class PointPlotSpec {
   Color fill = transparent;
   Color outline = black;
   double outlineWidthPixels = 1.0;
-  double rotation = NoRotation;
+  double rotation = noRotation;
   double aspect = aspectNormal;
   PointLabel? label;
 
@@ -57,29 +50,26 @@ class PointPlotSpec {
     if (src.label != null) label = PointLabel.from(src.label!);
   }
 
-  PointPlotSpec.referenceCell() : sizePixels = refSize;
-  PointPlotSpec.referenceEgg()
+  PointPlotSpec.referenceCell(this.outline) : sizePixels = refSize;
+  PointPlotSpec.referenceEgg(this.outline)
       : sizePixels = refSize,
         shape = PointShape.egg;
-  PointPlotSpec.referenceReassortant()
+  PointPlotSpec.referenceReassortant(this.outline)
       : sizePixels = refSize,
         shape = PointShape.egg,
         rotation = rotationReassortant;
-  PointPlotSpec.testCell() : fill = green;
-  PointPlotSpec.testEgg()
+  PointPlotSpec.testCell(this.fill, this.outline);
+  PointPlotSpec.testEgg(this.fill, this.outline) : shape = PointShape.egg;
+  PointPlotSpec.testReassortant(this.fill, this.outline)
       : shape = PointShape.egg,
-        fill = green;
-  PointPlotSpec.testReassortant()
-      : shape = PointShape.egg,
-        fill = green,
         rotation = rotationReassortant;
-  PointPlotSpec.serumCell()
+  PointPlotSpec.serumCell(this.outline)
       : sizePixels = refSize,
         shape = PointShape.box;
-  PointPlotSpec.serumEgg()
+  PointPlotSpec.serumEgg(this.outline)
       : sizePixels = refSize,
         shape = PointShape.uglyegg;
-  PointPlotSpec.serumReassortant()
+  PointPlotSpec.serumReassortant(this.outline)
       : sizePixels = refSize,
         shape = PointShape.uglyegg,
         rotation = rotationReassortant;
@@ -178,7 +168,7 @@ abstract class DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0,
       PointLabel? label});
 
@@ -240,7 +230,7 @@ abstract class DrawOn {
         aspect: headAspect);
   }
 
-  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = NoRotation, double aspect = 1.0});
+  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0});
 
   void rectangle({required Rect rect, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0}) {
     path([rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft], fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels, close: true);
@@ -255,7 +245,7 @@ abstract class DrawOn {
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = black,
     double outlineRadiusWidthPixels = 1.0,
-    double rotation = NoRotation, // NoRotation - first radius in upright
+    double rotation = noRotation, // noRotation - first radius in upright
   });
 
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()});
@@ -287,7 +277,7 @@ abstract class DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0});
 }
 

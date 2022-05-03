@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'color.dart';
 import 'draw_on.dart';
 import 'viewport.dart' as vp;
 
@@ -71,7 +72,7 @@ class _DrawOnCanvas extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0,
       PointLabel? label}) {
     canvas
@@ -186,7 +187,7 @@ class _DrawOnCanvas extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0}) {
     canvas
       ..save()
@@ -221,7 +222,7 @@ class _DrawOnCanvas extends DrawOn {
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = black,
     double outlineRadiusWidthPixels = 1.0,
-    double rotation = NoRotation, // NoRotation - first radius in upright
+    double rotation = noRotation, // noRotation - first radius in upright
   }) {
     canvas
       ..save()
@@ -350,7 +351,7 @@ class _DrawOnCanvas extends DrawOn {
       Color fill = transparent,
       Color outline = black,
       double outlineWidthPixels = 1.0,
-      double rotation = NoRotation,
+      double rotation = noRotation,
       double aspect = 1.0}) {
     canvas.save();
     canvas.translate(center.x, center.y);
