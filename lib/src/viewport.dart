@@ -47,9 +47,12 @@ class Viewport {
         layout[ind] = layout[ind]! + adjust;
       }
     }
+    // print("Viewport.roundAndRecenter ${toString()}");
   }
 
   static bool notNull(Vector3? elt) => elt != null;
+
+  String toString() => "Viewport[$left, $top, $width, $height]";
 
   // ----------------------------------------------------------------------
 

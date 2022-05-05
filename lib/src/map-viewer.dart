@@ -11,6 +11,7 @@ import 'map-viewer-data.dart';
 import 'draw_on.dart';
 import 'draw_on_canvas.dart';
 import 'draw_on_pdf.dart';
+import 'plot_spec.dart';
 
 // ======================================================================
 
@@ -221,6 +222,19 @@ class AntigenicMapViewer {
         canvas.pointOfPlotSpec(layout[pointNo]!, _data.plotSpec![pointNo]);
       }
     }
+    paintLegend(canvas);
+    paintTitle(canvas);
+  }
+
+  void paintLegend(DrawOn canvas) {
+    final legend = _data.plotSpec?.legend() ?? Legend();
+    print("paintLegend ${_data.plotSpec?.title()} $legend");
+  }
+
+  void paintTitle(DrawOn canvas) {
+    final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
+    print("paintTitle ${_data.plotSpec?.title()} $title");
+    print(title.offset());
   }
 
   Future<Uint8List?> exportPdf() async {

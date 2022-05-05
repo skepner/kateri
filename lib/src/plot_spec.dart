@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'chart.dart';
 import 'draw_on.dart';
@@ -13,6 +14,8 @@ abstract class PlotSpec {
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
   int priority();
+  PlotTitle plotTitle();
+  Legend legend();
 
   Color colorFromSpec(String? spec, Color dflt) {
     if (spec != null && spec.isNotEmpty) {
@@ -129,6 +132,12 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
   @override
   bool _addPointSpecByCloning() => false;
 
+  @override
+  PlotTitle plotTitle() => PlotTitle();
+
+  @override
+  Legend legend() => Legend();
+
   // ----------------------------------------------------------------------
 
   final Chart _chart;
@@ -147,7 +156,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   }
 
   @override
-  String title() => _data["T"] ?? _name;
+  String title() => _data["t"] ?? _name;
 
   @override
   List<int> drawingOrder() => _drawingOrder;
@@ -160,6 +169,12 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   @override
   bool _addPointSpecByCloning() => true;
+
+  @override
+  PlotTitle plotTitle() => PlotTitle(_data["T"] ?? {});
+
+  @override
+  Legend legend() => Legend(_data["L"] ?? {});
 
   void apply(List<dynamic> data, [int recursionLevel = 1]) {
     if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.apply: too deep recursion");
@@ -283,6 +298,80 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
 // ----------------------------------------------------------------------
 
+abstract class _TitleLegendCommon {
+  Map<String, dynamic> get data;
+
+  bool shown() => data["-"] == null || !data["-"];
+
+  Vector3 offset() {
+    final offs = data["p"];
+    if (offs == null) return Vector3.zero();
+    return Vector3(offs[0].toDouble(), offs[1].toDouble(), 0.0);
+  }
+}
+
+// ----------------------------------------------------------------------
+
+class PlotTitle with _TitleLegendCommon {
+  PlotTitle([this._data = const <String, dynamic>{}]);
+
+  @override
+  String toString() => "PlotTitle($_data)";
+
+  @override
+  Map<String, dynamic> get data => _data;
+
+  final Map<String, dynamic> _data;
+}
+
+// |             |     |      | "p" |     | [x, y]                           | offset                                                                                                                                                         |
+// |             |     |      | "A" |     | object                           | plot spec of the area -> AreaData                                                                                                                              |
+// |             |     |      |     | "P" | [top, right, bottom, left]       | padding                                                                                                                                                        |
+// |             |     |      |     | "O" | Color: black                     | border                                                                                                                                                         |
+// |             |     |      |     | "o" | 1.0                              | outline width                                                                                                                                                  |
+// |             |     |      |     | "F" | Color: white                     | fill                                                                                                                                                           |
+// |             |     |      | "t" |     | str                              | title text                                                                                                                                                     |
+// |             |     |      | "f" |     | str                              | font face                                                                                                                                                      |
+// |             |     |      | "S" |     | str                              | font slant: "normal" (default), "italic"                                                                                                                       |
+// |             |     |      | "W" |     | str                              | font weight: "normal" (default), "bold"                                                                                                                        |
+// |             |     |      | "s" |     | float                            | label size, default 1.0                                                                                                                                        |
+// |             |     |      | "c" |     | color                            | label color, default: "black"                                                                                                                                  |
+
+// ----------------------------------------------------------------------
+
+class Legend with _TitleLegendCommon {
+  Legend([this._data = const <String, dynamic>{}]);
+
+  @override
+  String toString() => "Legend($_data)";
+
+  @override
+  Map<String, dynamic> get data => _data;
+
+  final Map<String, dynamic> _data;
+}
+
+// |             |     |      | "p" |     | [x, y]                           | offset, relative to "p"                                                                                                                                        |
+// |             |     |      | "c" |     | "tl"                             | corner or center of the plot: t - top, c - center, b - bottom, l -left, r - right                                                                              |
+// |             |     |      | "A" |     | object                           | plot spec of the area  -> AreaData                                                                                                                             |
+// |             |     |      |     | "P" | [top, right, bottom, left]       | padding                                                                                                                                                        |
+// |             |     |      |     | "O" | Color: black                     | border                                                                                                                                                         |
+// |             |     |      |     | "o" | 1.0                              | outline width                                                                                                                                                  |
+// |             |     |      |     | "F" | Color: white                     | fill                                                                                                                                                           |
+// |             |     |      | "C" |     | bool                             | add counter                                                                                                                                                    |
+// |             |     |      | "S" |     | 10.0                             | point size                                                                                                                                                     |
+// |             |     |      | "T" |     | object                           | title -> TextData                                                                                                                                              |
+// |             |     |      |     | "t" | str                              | title text                                                                                                                                                     |
+// |             |     |      |     | "f" | str                              | font face                                                                                                                                                      |
+// |             |     |      |     | "S" | str                              | font slant: "normal" (default), "italic"                                                                                                                       |
+// |             |     |      |     | "W" | str                              | font weight: "normal" (default), "bold"                                                                                                                        |
+// |             |     |      |     | "s" | float                            | label size, default 1.0                                                                                                                                        |
+// |             |     |      |     | "c" | color                            | label color, default: "black"                                                                                                                                  |
+// |             |     |      |     | "A" | object                           | plot spec of the area  -> AreaData                                                                                                                             |
+// |             |     |      | "z" |     | bool                             | show rows with zero count                                                                                                                                      |
+
+// ----------------------------------------------------------------------
+
 class PlotSpecLegacy extends PlotSpec {
   PlotSpecLegacy(this._chart) : _data = _chart.data["c"]["p"] {
     for (final entry in _data["P"] ?? []) {
@@ -329,6 +418,12 @@ class PlotSpecLegacy extends PlotSpec {
 
   @override
   int priority() => 998;
+
+  @override
+  PlotTitle plotTitle() => PlotTitle();
+
+  @override
+  Legend legend() => Legend();
 
   final Chart _chart;
   final Map<String, dynamic> _data;
