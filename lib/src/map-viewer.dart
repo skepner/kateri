@@ -234,7 +234,7 @@ class AntigenicMapViewer {
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
     print("paintTitle ${_data.plotSpec?.title()} $title");
-    print(title.offset());
+    print("${title.offset()} ${title.padding()} ${title.borderColor()} ${title.borderWidth()} ${title.backgroundColor()}");
   }
 
   Future<Uint8List?> exportPdf() async {

@@ -308,6 +308,10 @@ abstract class _TitleLegendCommon {
     if (offs == null) return Vector3.zero();
     return Vector3(offs[0].toDouble(), offs[1].toDouble(), 0.0);
   }
+
+  // area
+  List<double> padding() => data["A"]?["P"]?.map((val) => val.toDouble()) ?? <double>[0.0, 0.0, 0.0, 0.0];
+  String borderColor() => data["A"]?["O"] ?? "black";
 }
 
 // ----------------------------------------------------------------------
@@ -321,15 +325,13 @@ class PlotTitle with _TitleLegendCommon {
   @override
   Map<String, dynamic> get data => _data;
 
+  // area
+  double borderWidth() => data["A"]?["o"] ?? 0.0;
+  String backgroundColor() => data["A"]?["F"] ?? "transparent";
+
   final Map<String, dynamic> _data;
 }
 
-// |             |     |      | "p" |     | [x, y]                           | offset                                                                                                                                                         |
-// |             |     |      | "A" |     | object                           | plot spec of the area -> AreaData                                                                                                                              |
-// |             |     |      |     | "P" | [top, right, bottom, left]       | padding                                                                                                                                                        |
-// |             |     |      |     | "O" | Color: black                     | border                                                                                                                                                         |
-// |             |     |      |     | "o" | 1.0                              | outline width                                                                                                                                                  |
-// |             |     |      |     | "F" | Color: white                     | fill                                                                                                                                                           |
 // |             |     |      | "t" |     | str                              | title text                                                                                                                                                     |
 // |             |     |      | "f" |     | str                              | font face                                                                                                                                                      |
 // |             |     |      | "S" |     | str                              | font slant: "normal" (default), "italic"                                                                                                                       |
@@ -348,16 +350,14 @@ class Legend with _TitleLegendCommon {
   @override
   Map<String, dynamic> get data => _data;
 
+  // area
+  double borderWidth() => data["A"]?["o"] ?? 1.0;
+  String backgroundColor() => data["A"]?["F"] ?? "white";
+
   final Map<String, dynamic> _data;
 }
 
-// |             |     |      | "p" |     | [x, y]                           | offset, relative to "p"                                                                                                                                        |
 // |             |     |      | "c" |     | "tl"                             | corner or center of the plot: t - top, c - center, b - bottom, l -left, r - right                                                                              |
-// |             |     |      | "A" |     | object                           | plot spec of the area  -> AreaData                                                                                                                             |
-// |             |     |      |     | "P" | [top, right, bottom, left]       | padding                                                                                                                                                        |
-// |             |     |      |     | "O" | Color: black                     | border                                                                                                                                                         |
-// |             |     |      |     | "o" | 1.0                              | outline width                                                                                                                                                  |
-// |             |     |      |     | "F" | Color: white                     | fill                                                                                                                                                           |
 // |             |     |      | "C" |     | bool                             | add counter                                                                                                                                                    |
 // |             |     |      | "S" |     | 10.0                             | point size                                                                                                                                                     |
 // |             |     |      | "T" |     | object                           | title -> TextData                                                                                                                                              |
