@@ -1,5 +1,5 @@
 // import 'dart:io';
-// import 'dart:convert';
+import 'dart:convert';
 import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
@@ -233,8 +233,26 @@ class AntigenicMapViewer {
 
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    print("paintTitle ${_data.plotSpec?.title()} $title");
-    print("${title.offset()} ${title.padding()} ${title.borderColor()} ${title.borderWidth()} ${title.backgroundColor()}");
+    final text = const LineSplitter().convert(title.text()), fontSizePixels = title.fontSize(), textStyle = title.labelStyle(), offsetPixels = title.offset(), interline1 = title.interline() + 1.0;
+    final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
+    var dy = 0.0;
+    if (offsetPixels.dy >= 0.0) {
+      dy = canvas.viewport.top + textSize[0].height + offsetPixels.dy * canvas.pixelSize;
+    } else {
+      dy = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - textSize.skip(1).fold(0.0, (acc, ts) => acc + ts.height * interline1);
+    }
+    // background
+    // border
+    for (var lineNo = 0; lineNo < text.length; ++lineNo) {
+      var dx = 0.0;
+      if (offsetPixels.dx >= 0) {
+        dx = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
+      } else {
+        dx = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - textSize[lineNo].width;
+      }
+      canvas.text(text[lineNo], Offset(dx, dy), sizePixels: fontSizePixels, textStyle: textStyle);
+      dy += textSize[lineNo].height * interline1;
+    }
   }
 
   Future<Uint8List?> exportPdf() async {

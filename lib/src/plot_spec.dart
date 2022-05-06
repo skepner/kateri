@@ -303,11 +303,17 @@ abstract class _TitleLegendCommon {
 
   bool shown() => data["-"] == null || !data["-"];
 
-  Vector3 offset() {
+  Offset offset() {
     final offs = data["p"];
-    if (offs == null) return Vector3.zero();
-    return Vector3(offs[0].toDouble(), offs[1].toDouble(), 0.0);
+    if (offs == null) return Offset(0.0, 0.0);
+    return Offset(offs[0].toDouble(), offs[1].toDouble());
   }
+
+  // font
+  LabelStyle labelStyle() => LabelStyle(
+      color: NamedColor.fromString(data["c"] ?? "black"), fontFamily: labelFontFamilyFromString(data["f"]), fontStyle: fontStyleFromString(data["S"]), fontWeight: fontWeightFromString(data["W"]));
+  double fontSize() => data["s"]?.toDouble() ?? 16.0;
+  double interline() => data["i"]?.toDouble() ?? 0.2;
 
   // area
   List<double> padding() => data["A"]?["P"]?.map((val) => val.toDouble()) ?? <double>[0.0, 0.0, 0.0, 0.0];
@@ -325,19 +331,14 @@ class PlotTitle with _TitleLegendCommon {
   @override
   Map<String, dynamic> get data => _data;
 
+  String text() => data["t"] ?? "";
+
   // area
   double borderWidth() => data["A"]?["o"] ?? 0.0;
   String backgroundColor() => data["A"]?["F"] ?? "transparent";
 
   final Map<String, dynamic> _data;
 }
-
-// |             |     |      | "t" |     | str                              | title text                                                                                                                                                     |
-// |             |     |      | "f" |     | str                              | font face                                                                                                                                                      |
-// |             |     |      | "S" |     | str                              | font slant: "normal" (default), "italic"                                                                                                                       |
-// |             |     |      | "W" |     | str                              | font weight: "normal" (default), "bold"                                                                                                                        |
-// |             |     |      | "s" |     | float                            | label size, default 1.0                                                                                                                                        |
-// |             |     |      | "c" |     | color                            | label color, default: "black"                                                                                                                                  |
 
 // ----------------------------------------------------------------------
 
