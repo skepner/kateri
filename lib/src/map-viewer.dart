@@ -1,4 +1,5 @@
 // import 'dart:io';
+import 'dart:math';
 import 'dart:convert';
 import 'dart:typed_data'; // Uint8List
 
@@ -12,6 +13,7 @@ import 'draw_on.dart';
 import 'draw_on_canvas.dart';
 import 'draw_on_pdf.dart';
 import 'plot_spec.dart';
+import 'color.dart';
 
 // ======================================================================
 
@@ -233,22 +235,34 @@ class AntigenicMapViewer {
 
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    final text = const LineSplitter().convert(title.text()), fontSizePixels = title.fontSize(), textStyle = title.labelStyle(), offsetPixels = title.offset(), interline1 = title.interline() + 1.0;
+    final text = const LineSplitter().convert(title.text()),
+        fontSizePixels = title.fontSize(),
+        textStyle = title.labelStyle(),
+        offsetPixels = title.offset(),
+        interline1 = title.interline() + 1.0,
+        padding = title.padding().map((val) => val * canvas.pixelSize).toList();
     final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
     var dy = 0.0;
     if (offsetPixels.dy >= 0.0) {
-      dy = canvas.viewport.top + textSize[0].height + offsetPixels.dy * canvas.pixelSize;
+      dy = canvas.viewport.top + textSize[0].height + offsetPixels.dy * canvas.pixelSize + padding[0];
     } else {
-      dy = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - textSize.skip(1).fold(0.0, (acc, ts) => acc + ts.height * interline1);
+      dy = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - padding[2] - textSize.skip(1).fold(0.0, (acc, ts) => acc + ts.height * interline1);
     }
-    // background
-    // border
+
+    // area
+    final areaWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding[1] + padding[3];
+    final areaHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding[0] + padding[2];
+    final areaX = offsetPixels.dx >= 0 ? (canvas.viewport.left + offsetPixels.dx * canvas.pixelSize) : (canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - areaWidth);
+    final areaY = offsetPixels.dy >= 0 ? (canvas.viewport.top + offsetPixels.dy * canvas.pixelSize) : (canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - areaHeight);
+    canvas.rectangle(
+      rect: Rect.fromLTWH(areaX, areaY, areaWidth, areaHeight), fill: NamedColor.fromString(title.backgroundColor()), outline: NamedColor.fromString(title.borderColor()), outlineWidthPixels: title.borderWidth());
+
     for (var lineNo = 0; lineNo < text.length; ++lineNo) {
       var dx = 0.0;
       if (offsetPixels.dx >= 0) {
-        dx = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
+        dx = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize + padding[3];
       } else {
-        dx = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - textSize[lineNo].width;
+        dx = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - textSize[lineNo].width - padding[1];
       }
       canvas.text(text[lineNo], Offset(dx, dy), sizePixels: fontSizePixels, textStyle: textStyle);
       dy += textSize[lineNo].height * interline1;
