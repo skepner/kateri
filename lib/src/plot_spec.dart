@@ -175,13 +175,14 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   PlotTitle plotTitle() => PlotTitle(_data["T"] ?? {});
 
   @override
-  Legend legend() => Legend(_data["L"] ?? {});
+  Legend legend() => Legend(_data["L"] ?? {}, _legendRows);
 
   void apply(List<dynamic> data, [int recursionLevel = 1]) {
     if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.apply: too deep recursion");
     for (final en in data) {
       applyEntry(en as Map<String, dynamic>, recursionLevel);
     }
+    _legendRows.sort((e1, e2) => e1.priority.compareTo(e2.priority));
   }
 
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
@@ -195,6 +196,16 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         modifyPointPlotSpec(pointSpec[pointNo], entry);
       }
       raiseLowerPoints(entry["D"], points);
+    }
+    final legend = entry["L"];
+    if (legend != null) {
+      var point = PointPlotSpec();
+      if (points.isNotEmpty) {
+        point = pointSpec[points[0]];
+      } else {
+        modifyPointPlotSpec(point, entry);
+      }
+      _legendRows.add(LegendRow(text: legend["t"] ?? "", point: point, count: points.length, priority: legend["p"] ?? 0));
     }
   }
 
@@ -295,6 +306,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   late List<int> _drawingOrder;
   final List<PointPlotSpec> pointSpec = [];
+  final List<LegendRow> _legendRows = [];
 }
 
 // ----------------------------------------------------------------------
@@ -313,23 +325,40 @@ class PlotTitle {
 
 // ----------------------------------------------------------------------
 
+class LegendRow {
+  LegendRow({required this.text, required this.point, required this.count, required this.priority});
+  String toString() => "\"$text}\" $point count:$count priority:$priority";
+
+  final String text;
+  final PointPlotSpec point;
+  final int count;
+  final int priority;
+}
+
 class Legend {
-  Legend([this.data = const <String, dynamic>{}]);
+  Legend([this.data = const <String, dynamic>{}, this.legendRows = const <LegendRow>[]]);
 
   String toString() => "Legend($data)";
 
-  bool get shown => !(data["-"] ?? false);
+  bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
   PlotBox get box => PlotBox.Legend(data["B"]);
   PlotText get text => PlotText(data["T"]);
 
   final Map<String, dynamic> data;
+  final List<LegendRow> legendRows;
 }
 
 // ----------------------------------------------------------------------
 
 class PlotBox {
-  PlotBox.Title(Map<String, dynamic>? dat) : data = dat ?? <String, dynamic>{}, defaultBackgroundColor = "transparent", defaultBorderWidth = 0.0;
-  PlotBox.Legend(Map<String, dynamic>? dat) : data = dat ?? <String, dynamic>{}, defaultBackgroundColor = "white", defaultBorderWidth = 1.0;
+  PlotBox.Title(Map<String, dynamic>? dat)
+      : data = dat ?? <String, dynamic>{},
+        defaultBackgroundColor = "transparent",
+        defaultBorderWidth = 0.0;
+  PlotBox.Legend(Map<String, dynamic>? dat)
+      : data = dat ?? <String, dynamic>{},
+        defaultBackgroundColor = "white",
+        defaultBorderWidth = 1.0;
 
   String get origin => data["o"] ?? "tl";
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : const Offset(0.0, 0.0);
@@ -358,7 +387,7 @@ class PlotText {
   double get fontSize => data["s"]?.toDouble() ?? 16.0;
   double get interline => data["i"]?.toDouble() ?? 0.2;
 
- final Map<String, dynamic> data;
+  final Map<String, dynamic> data;
 }
 
 // ----------------------------------------------------------------------

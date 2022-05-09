@@ -227,8 +227,10 @@ class AntigenicMapViewer {
   }
 
   void paintLegend(DrawOn canvas) {
-    final legend = _data.plotSpec?.legend() ?? Legend();
-
+    final legend = _data.plotSpec?.legend();
+    if (legend != null && legend.shown) {
+      print(legend.legendRows);
+    }
   }
 
   void paintTitle(DrawOn canvas) {
@@ -290,7 +292,6 @@ class AntigenicMapViewer {
         boxX = canvas.viewport.centerX - offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
         break;
     }
-
 
     return Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight);
   }
