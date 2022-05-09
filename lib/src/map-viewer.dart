@@ -214,8 +214,7 @@ class AntigenicMapViewer {
   }
 
   void paintOn(DrawOn canvas) {
-    // _data.plotSpec ??= _data.chart!.plotSpecLegacy(_data.projection); // chart.plotSpecDefault(projection);
-    _data.plotSpec ??= _data.chart!.plotSpecs(_data.projection)[0]; // chart.plotSpecDefault(projection);
+    _data.plotSpec ??= _data.chart!.plotSpecs(_data.projection)[0];
     canvas.grid();
     final layout = _data.projection!.transformedLayout();
     for (final pointNo in _data.plotSpec!.drawingOrder()) {
@@ -229,20 +228,34 @@ class AntigenicMapViewer {
 
   void paintLegend(DrawOn canvas) {
     final legend = _data.plotSpec?.legend() ?? Legend();
-    print("paintLegend ${_data.plotSpec?.title()} $legend");
+
   }
 
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    final text = title.text.text, fontSizePixels = title.text.fontSize, textStyle = title.text.labelStyle, offsetPixels = title.box.offset, interline1 = title.text.interline + 1.0;
+    final text = title.text.text, fontSizePixels = title.text.fontSize, textStyle = title.text.labelStyle, interline1 = title.text.interline + 1.0;
     final padding = [title.box.padding_top, title.box.padding_right, title.box.padding_bottom, title.box.padding_left].map((val) => val * canvas.pixelSize).toList();
     final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
 
+    final box = _box(canvas, text, textSize, padding, interline1, title.box.origin, title.box.offset);
+    canvas.rectangle(
+        rect: box, // Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight),
+        fill: NamedColor.fromString(title.box.backgroundColor),
+        outline: NamedColor.fromString(title.box.borderColor),
+        outlineWidthPixels: title.box.borderWidth);
+
+    var dy = box.top + textSize[0].height + padding[0];
+    for (var lineNo = 0; lineNo < text.length; ++lineNo) {
+      canvas.text(text[lineNo], Offset(box.left + padding[3], dy), sizePixels: fontSizePixels, textStyle: textStyle);
+      dy += textSize[lineNo].height * interline1;
+    }
+  }
+
+  Rect _box(DrawOn canvas, List<String> text, List<Size> textSize, List<double> padding, double interline1, String origin, Offset offsetPixels) {
     final boxWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding[3] + padding[1];
     final boxHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding[0] + padding[2];
 
     double boxX = 0.0, boxY = 0.0;
-    final origin = title.box.origin;
     switch (origin[0]) {
       case "T":
         boxY = canvas.viewport.top - offsetPixels.dy * canvas.pixelSize - boxHeight;
@@ -256,11 +269,8 @@ class AntigenicMapViewer {
       case "b":
         boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize;
         break;
-      case "C":
-        boxY = canvas.viewport.centerY - offsetPixels.dy * canvas.pixelSize - boxHeight;
-        break;
       case "c":
-        boxY = canvas.viewport.centerY + offsetPixels.dy * canvas.pixelSize;
+        boxY = canvas.viewport.centerY - offsetPixels.dy * canvas.pixelSize - boxHeight / 2;
         break;
     }
     switch (origin[1]) {
@@ -276,25 +286,13 @@ class AntigenicMapViewer {
       case "r":
         boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize;
         break;
-      case "C":
-        boxX = canvas.viewport.centerX - offsetPixels.dx * canvas.pixelSize - boxWidth;
-        break;
       case "c":
-        boxX = canvas.viewport.centerX + offsetPixels.dx * canvas.pixelSize;
+        boxX = canvas.viewport.centerX - offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
         break;
     }
 
-    canvas.rectangle(
-        rect: Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight),
-        fill: NamedColor.fromString(title.box.backgroundColor),
-        outline: NamedColor.fromString(title.box.borderColor),
-        outlineWidthPixels: title.box.borderWidth);
 
-    var dy = boxY + textSize[0].height + padding[0];
-    for (var lineNo = 0; lineNo < text.length; ++lineNo) {
-      canvas.text(text[lineNo], Offset(boxX + padding[3], dy), sizePixels: fontSizePixels, textStyle: textStyle);
-      dy += textSize[lineNo].height * interline1;
-    }
+    return Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight);
   }
 
   Future<Uint8List?> exportPdf() async {
