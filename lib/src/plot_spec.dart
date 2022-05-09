@@ -342,7 +342,8 @@ class Legend {
 
   bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
   PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get text => PlotText(data["T"]);
+  PlotText get text => PlotText(data["t"]);
+  PlotText get title => PlotText(data["T"]);
 
   final Map<String, dynamic> data;
   final List<LegendRow> legendRows;

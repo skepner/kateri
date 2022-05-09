@@ -229,7 +229,21 @@ class AntigenicMapViewer {
   void paintLegend(DrawOn canvas) {
     final legend = _data.plotSpec?.legend();
     if (legend != null && legend.shown) {
-      print(legend.legendRows);
+      final text = legend.legendRows.map((row) => row.text).toList();
+      final textStyle = legend.text.labelStyle, fontSize = legend.text.fontSize, interline1 = legend.text.interline + 1.0;
+      final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSize, textStyle: textStyle)).toList(growable: false);
+      final padding = [legend.box.padding_top, legend.box.padding_right, legend.box.padding_bottom, legend.box.padding_left].map((val) => val * canvas.pixelSize).toList();
+      final box = _box(canvas, text, textSize, padding, interline1, legend.box.origin, legend.box.offset);
+      canvas.rectangle(rect: box, fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
+      var dy = box.top + textSize[0].height + padding[0];
+      for (final titleText in legend.title.text) {
+        canvas.text(titleText, Offset(box.left + padding[3], dy), sizePixels: fontSize, textStyle: textStyle);
+        // dy += titleTextSize[lineNo].height * interline1;
+      }
+      for (var lineNo = 0; lineNo < text.length; ++lineNo) {
+        canvas.text(text[lineNo], Offset(box.left + padding[3], dy), sizePixels: fontSize, textStyle: textStyle);
+        dy += textSize[lineNo].height * interline1;
+      }
     }
   }
 
@@ -240,11 +254,7 @@ class AntigenicMapViewer {
     final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
 
     final box = _box(canvas, text, textSize, padding, interline1, title.box.origin, title.box.offset);
-    canvas.rectangle(
-        rect: box, // Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight),
-        fill: NamedColor.fromString(title.box.backgroundColor),
-        outline: NamedColor.fromString(title.box.borderColor),
-        outlineWidthPixels: title.box.borderWidth);
+    canvas.rectangle(rect: box, fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
 
     var dy = box.top + textSize[0].height + padding[0];
     for (var lineNo = 0; lineNo < text.length; ++lineNo) {
@@ -266,30 +276,30 @@ class AntigenicMapViewer {
         boxY = canvas.viewport.top + offsetPixels.dy * canvas.pixelSize;
         break;
       case "B":
-        boxY = canvas.viewport.bottom - offsetPixels.dy * canvas.pixelSize - boxHeight;
+        boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - boxHeight;
         break;
       case "b":
         boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize;
         break;
       case "c":
-        boxY = canvas.viewport.centerY - offsetPixels.dy * canvas.pixelSize - boxHeight / 2;
+        boxY = canvas.viewport.centerY + offsetPixels.dy * canvas.pixelSize - boxHeight / 2;
         break;
     }
     switch (origin[1]) {
       case "L":
-        boxX = canvas.viewport.left - offsetPixels.dx * canvas.pixelSize - boxWidth;
+        boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize - boxWidth;
         break;
       case "l":
         boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
         break;
       case "R":
-        boxX = canvas.viewport.right - offsetPixels.dx * canvas.pixelSize - boxWidth;
+        boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - boxWidth;
         break;
       case "r":
         boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize;
         break;
       case "c":
-        boxX = canvas.viewport.centerX - offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
+        boxX = canvas.viewport.centerX + offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
         break;
     }
 
