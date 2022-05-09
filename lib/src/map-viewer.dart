@@ -1,6 +1,5 @@
 // import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
 import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
@@ -235,36 +234,65 @@ class AntigenicMapViewer {
 
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    final text = const LineSplitter().convert(title.text()),
-        fontSizePixels = title.fontSize(),
-        textStyle = title.labelStyle(),
-        offsetPixels = title.offset(),
-        interline1 = title.interline() + 1.0,
-        padding = title.padding().map((val) => val * canvas.pixelSize).toList();
+    final text = title.text.text, fontSizePixels = title.text.fontSize, textStyle = title.text.labelStyle, offsetPixels = title.box.offset, interline1 = title.text.interline + 1.0;
+    final padding = [title.box.padding_top, title.box.padding_right, title.box.padding_bottom, title.box.padding_left].map((val) => val * canvas.pixelSize).toList();
     final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
-    var dy = 0.0;
-    if (offsetPixels.dy >= 0.0) {
-      dy = canvas.viewport.top + textSize[0].height + offsetPixels.dy * canvas.pixelSize + padding[0];
-    } else {
-      dy = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - padding[2] - textSize.skip(1).fold(0.0, (acc, ts) => acc + ts.height * interline1);
+
+    final boxWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding[3] + padding[1];
+    final boxHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding[0] + padding[2];
+
+    double boxX = 0.0, boxY = 0.0;
+    final origin = title.box.origin;
+    switch (origin[0]) {
+      case "T":
+        boxY = canvas.viewport.top - offsetPixels.dy * canvas.pixelSize - boxHeight;
+        break;
+      case "t":
+        boxY = canvas.viewport.top + offsetPixels.dy * canvas.pixelSize;
+        break;
+      case "B":
+        boxY = canvas.viewport.bottom - offsetPixels.dy * canvas.pixelSize - boxHeight;
+        break;
+      case "b":
+        boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize;
+        break;
+      case "C":
+        boxY = canvas.viewport.centerY - offsetPixels.dy * canvas.pixelSize - boxHeight;
+        break;
+      case "c":
+        boxY = canvas.viewport.centerY + offsetPixels.dy * canvas.pixelSize;
+        break;
+    }
+    switch (origin[1]) {
+      case "L":
+        boxX = canvas.viewport.left - offsetPixels.dx * canvas.pixelSize - boxWidth;
+        break;
+      case "l":
+        boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
+        break;
+      case "R":
+        boxX = canvas.viewport.right - offsetPixels.dx * canvas.pixelSize - boxWidth;
+        break;
+      case "r":
+        boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize;
+        break;
+      case "C":
+        boxX = canvas.viewport.centerX - offsetPixels.dx * canvas.pixelSize - boxWidth;
+        break;
+      case "c":
+        boxX = canvas.viewport.centerX + offsetPixels.dx * canvas.pixelSize;
+        break;
     }
 
-    // area
-    final areaWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding[1] + padding[3];
-    final areaHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding[0] + padding[2];
-    final areaX = offsetPixels.dx >= 0 ? (canvas.viewport.left + offsetPixels.dx * canvas.pixelSize) : (canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - areaWidth);
-    final areaY = offsetPixels.dy >= 0 ? (canvas.viewport.top + offsetPixels.dy * canvas.pixelSize) : (canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - areaHeight);
     canvas.rectangle(
-      rect: Rect.fromLTWH(areaX, areaY, areaWidth, areaHeight), fill: NamedColor.fromString(title.backgroundColor()), outline: NamedColor.fromString(title.borderColor()), outlineWidthPixels: title.borderWidth());
+        rect: Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight),
+        fill: NamedColor.fromString(title.box.backgroundColor),
+        outline: NamedColor.fromString(title.box.borderColor),
+        outlineWidthPixels: title.box.borderWidth);
 
+    var dy = boxY + textSize[0].height + padding[0];
     for (var lineNo = 0; lineNo < text.length; ++lineNo) {
-      var dx = 0.0;
-      if (offsetPixels.dx >= 0) {
-        dx = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize + padding[3];
-      } else {
-        dx = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - textSize[lineNo].width - padding[1];
-      }
-      canvas.text(text[lineNo], Offset(dx, dy), sizePixels: fontSizePixels, textStyle: textStyle);
+      canvas.text(text[lineNo], Offset(boxX + padding[3], dy), sizePixels: fontSizePixels, textStyle: textStyle);
       dy += textSize[lineNo].height * interline1;
     }
   }

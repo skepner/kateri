@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:convert';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'chart.dart';
@@ -298,78 +299,67 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
 // ----------------------------------------------------------------------
 
-abstract class _TitleLegendCommon {
-  Map<String, dynamic> get data;
+class PlotTitle {
+  PlotTitle([this.data = const <String, dynamic>{}]);
 
-  bool shown() => data["-"] == null || !data["-"];
+  String toString() => "PlotTitle($data)";
 
-  Offset offset() {
-    final offs = data["p"];
-    if (offs == null) return Offset(0.0, 0.0);
-    return Offset(offs[0].toDouble(), offs[1].toDouble());
-  }
+  bool get shown => !(data["-"] ?? false);
+  PlotBox get box => PlotBox.Title(data["B"]);
+  PlotText get text => PlotText(data["T"]);
 
-  // font
-  LabelStyle labelStyle() => LabelStyle(
+  final Map<String, dynamic> data;
+}
+
+// ----------------------------------------------------------------------
+
+class Legend {
+  Legend([this.data = const <String, dynamic>{}]);
+
+  String toString() => "Legend($data)";
+
+  bool get shown => !(data["-"] ?? false);
+  PlotBox get box => PlotBox.Legend(data["B"]);
+  PlotText get text => PlotText(data["T"]);
+
+  final Map<String, dynamic> data;
+}
+
+// ----------------------------------------------------------------------
+
+class PlotBox {
+  PlotBox.Title(Map<String, dynamic>? dat) : data = dat ?? <String, dynamic>{}, defaultBackgroundColor = "transparent", defaultBorderWidth = 0.0;
+  PlotBox.Legend(Map<String, dynamic>? dat) : data = dat ?? <String, dynamic>{}, defaultBackgroundColor = "white", defaultBorderWidth = 1.0;
+
+  String get origin => "bc"; // data["o"] ?? "tl";
+  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : const Offset(0.0, 0.0);
+  double get padding_top => data["p"]?["t"]?.toDouble() ?? 0.0;
+  double get padding_bottom => data["p"]?["b"]?.toDouble() ?? 0.0;
+  double get padding_left => data["p"]?["l"]?.toDouble() ?? 0.0;
+  double get padding_right => data["p"]?["r"]?.toDouble() ?? 0.0;
+  double get borderWidth => data["W"]?.toDouble() ?? defaultBorderWidth;
+  String get backgroundColor => data["F"] ?? defaultBackgroundColor;
+  String get borderColor => data["B"] ?? "black";
+
+  final Map<String, dynamic> data;
+  final String defaultBackgroundColor;
+  final double defaultBorderWidth;
+}
+
+// ----------------------------------------------------------------------
+
+class PlotText {
+  PlotText(Map<String, dynamic>? dat) : data = dat ?? <String, dynamic>{};
+
+  List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
+
+  LabelStyle get labelStyle => LabelStyle(
       color: NamedColor.fromString(data["c"] ?? "black"), fontFamily: labelFontFamilyFromString(data["f"]), fontStyle: fontStyleFromString(data["S"]), fontWeight: fontWeightFromString(data["W"]));
-  double fontSize() => data["s"]?.toDouble() ?? 16.0;
-  double interline() => data["i"]?.toDouble() ?? 0.2;
+  double get fontSize => data["s"]?.toDouble() ?? 16.0;
+  double get interline => data["i"]?.toDouble() ?? 0.2;
 
-  // area
-  List<double> padding() => data["A"]?["P"]?.map((val) => val.toDouble()) ?? <double>[0.0, 0.0, 0.0, 0.0];
-  String borderColor() => data["A"]?["O"] ?? "black";
+ final Map<String, dynamic> data;
 }
-
-// ----------------------------------------------------------------------
-
-class PlotTitle with _TitleLegendCommon {
-  PlotTitle([this._data = const <String, dynamic>{}]);
-
-  @override
-  String toString() => "PlotTitle($_data)";
-
-  @override
-  Map<String, dynamic> get data => _data;
-
-  String text() => data["t"] ?? "";
-
-  // area
-  double borderWidth() => data["A"]?["o"] ?? 0.0;
-  String backgroundColor() => data["A"]?["F"] ?? "transparent";
-
-  final Map<String, dynamic> _data;
-}
-
-// ----------------------------------------------------------------------
-
-class Legend with _TitleLegendCommon {
-  Legend([this._data = const <String, dynamic>{}]);
-
-  @override
-  String toString() => "Legend($_data)";
-
-  @override
-  Map<String, dynamic> get data => _data;
-
-  // area
-  double borderWidth() => data["A"]?["o"] ?? 1.0;
-  String backgroundColor() => data["A"]?["F"] ?? "white";
-
-  final Map<String, dynamic> _data;
-}
-
-// |             |     |      | "c" |     | "tl"                             | corner or center of the plot: t - top, c - center, b - bottom, l -left, r - right                                                                              |
-// |             |     |      | "C" |     | bool                             | add counter                                                                                                                                                    |
-// |             |     |      | "S" |     | 10.0                             | point size                                                                                                                                                     |
-// |             |     |      | "T" |     | object                           | title -> TextData                                                                                                                                              |
-// |             |     |      |     | "t" | str                              | title text                                                                                                                                                     |
-// |             |     |      |     | "f" | str                              | font face                                                                                                                                                      |
-// |             |     |      |     | "S" | str                              | font slant: "normal" (default), "italic"                                                                                                                       |
-// |             |     |      |     | "W" | str                              | font weight: "normal" (default), "bold"                                                                                                                        |
-// |             |     |      |     | "s" | float                            | label size, default 1.0                                                                                                                                        |
-// |             |     |      |     | "c" | color                            | label color, default: "black"                                                                                                                                  |
-// |             |     |      |     | "A" | object                           | plot spec of the area  -> AreaData                                                                                                                             |
-// |             |     |      | "z" |     | bool                             | show rows with zero count                                                                                                                                      |
 
 // ----------------------------------------------------------------------
 

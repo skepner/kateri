@@ -21,8 +21,10 @@ class Viewport {
   double get height => _aabb.max.y - _aabb.min.y;
   double get left => _aabb.min.x;
   double get right => _aabb.max.x;
+  double get centerX => (_aabb.min.x + _aabb.max.x) / 2;
   double get top => _aabb.min.y;
   double get bottom => _aabb.max.y;
+  double get centerY => (_aabb.min.y + _aabb.max.y) / 2;
 
   // /// Move center of this viewport to Vector3.all(0.0) and adjust points in the layout accordingly
   // void moveCenterToOrigin(Layout layout) {
