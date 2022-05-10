@@ -355,16 +355,21 @@ class PlotBox {
   PlotBox.Title(Map<String, dynamic>? dat)
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "transparent",
-        defaultBorderWidth = 0.0;
+        defaultBorderWidth = 0.0,
+        defaultPadding = BoxPadding.zero();
   PlotBox.Legend(Map<String, dynamic>? dat)
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "white",
-        defaultBorderWidth = 1.0;
+        defaultBorderWidth = 1.0,
+        defaultPadding = BoxPadding.all(0.0);
 
   String get origin => data["o"] ?? "tl";
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : const Offset(0.0, 0.0);
-  BoxPadding get padding =>
-      BoxPadding(top: data["p"]?["t"]?.toDouble() ?? 0.0, bottom: data["p"]?["b"]?.toDouble() ?? 0.0, left: data["p"]?["l"]?.toDouble() ?? 0.0, right: data["p"]?["r"]?.toDouble() ?? 0.0);
+  BoxPadding get padding => BoxPadding(
+      top: data["p"]?["t"]?.toDouble() ?? defaultPadding.top,
+      bottom: data["p"]?["b"]?.toDouble() ?? defaultPadding.bottom,
+      left: data["p"]?["l"]?.toDouble() ?? defaultPadding.left,
+      right: data["p"]?["r"]?.toDouble() ?? defaultPadding.right);
   double get borderWidth => data["W"]?.toDouble() ?? defaultBorderWidth;
   String get backgroundColor => data["F"] ?? defaultBackgroundColor;
   String get borderColor => data["B"] ?? "black";
@@ -372,11 +377,23 @@ class PlotBox {
   final Map<String, dynamic> data;
   final String defaultBackgroundColor;
   final double defaultBorderWidth;
+  final BoxPadding defaultPadding;
 }
 
 class BoxPadding {
   BoxPadding({required this.top, required this.bottom, required this.left, required this.right});
-  BoxPadding operator *(double pixelSize) => BoxPadding(top: pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
+  const BoxPadding.zero()
+      : top = 0.0,
+        bottom = 0.0,
+        left = 0.0,
+        right = 0.0;
+  BoxPadding.all(double val)
+      : top = val,
+        bottom = val,
+        left = val,
+        right = val;
+        BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
+        String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
   final double top, bottom, left, right;
 }
 
