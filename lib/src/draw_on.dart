@@ -81,8 +81,8 @@ enum LabelFontFamily { monospace, sansSerif, serif, helvetica, courier, times /*
 LabelFontFamily labelFontFamilyFromString(String? str) =>
   str == null ? LabelFontFamily.helvetica : LabelFontFamily.values.firstWhere((lff) => lff.toString().toLowerCase() == ("LabelFontFamily." + str.toLowerCase()));
 
-FontWeight fontWeightFromString(String? str) => str?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
-FontStyle fontStyleFromString(String? str) => str?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
+FontWeight fontWeightFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
+FontStyle fontStyleFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
 
 class LabelStyle {
   final Color color;

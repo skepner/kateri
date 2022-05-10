@@ -226,85 +226,92 @@ class AntigenicMapViewer {
     paintTitle(canvas);
   }
 
+  // ----------------------------------------------------------------------
+
   void paintLegend(DrawOn canvas) {
     final legend = _data.plotSpec?.legend();
     if (legend != null && legend.shown) {
-      final text = legend.legendRows.map((row) => row.text).toList();
-      final textStyle = legend.text.labelStyle, fontSize = legend.text.fontSize, interline1 = legend.text.interline + 1.0;
-      final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSize, textStyle: textStyle)).toList(growable: false);
-      final padding = [legend.box.padding_top, legend.box.padding_right, legend.box.padding_bottom, legend.box.padding_left].map((val) => val * canvas.pixelSize).toList();
-      final box = _box(canvas, text, textSize, padding, interline1, legend.box.origin, legend.box.offset);
-      canvas.rectangle(rect: box, fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
-      var dy = box.top + textSize[0].height + padding[0];
-      for (final titleText in legend.title.text) {
-        canvas.text(titleText, Offset(box.left + padding[3], dy), sizePixels: fontSize, textStyle: textStyle);
-        // dy += titleTextSize[lineNo].height * interline1;
-      }
-      for (var lineNo = 0; lineNo < text.length; ++lineNo) {
-        canvas.text(text[lineNo], Offset(box.left + padding[3], dy), sizePixels: fontSize, textStyle: textStyle);
-        dy += textSize[lineNo].height * interline1;
-      }
+      // final text = legend.legendRows.map((row) => row.text).toList();
+      // final textStyle = legend.rowStyle.labelStyle, fontSize = legend.rowStyle.fontSize, interline1 = legend.rowStyle.interline + 1.0;
+      // final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSize, textStyle: textStyle)).toList(growable: false);
+      // final padding = legend.box.padding;
+      // final box = _box(canvas, text, textSize, padding, interline1, legend.box.origin, legend.box.offset);
+      // canvas.rectangle(rect: box, fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
+      // var dy = box.top + textSize[0].height + padding.top;
+      // for (final titleText in legend.title.text) {
+      //   canvas.text(titleText, Offset(box.left + padding.left, dy), sizePixels: fontSize, textStyle: textStyle);
+      //   // dy += titleTextSize[lineNo].height * interline1;
+      // }
+      // for (var lineNo = 0; lineNo < text.length; ++lineNo) {
+      //   canvas.text(text[lineNo], Offset(box.left + padding.left, dy), sizePixels: fontSize, textStyle: textStyle);
+      //   dy += textSize[lineNo].height * interline1;
+      // }
     }
   }
 
   void paintTitle(DrawOn canvas) {
     final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    final text = title.text.text, fontSizePixels = title.text.fontSize, textStyle = title.text.labelStyle, interline1 = title.text.interline + 1.0;
-    final padding = [title.box.padding_top, title.box.padding_right, title.box.padding_bottom, title.box.padding_left].map((val) => val * canvas.pixelSize).toList();
-    final textSize = text.map((line) => canvas.textSize(line, sizePixels: fontSizePixels, textStyle: textStyle)).toList(growable: false);
+    final box = _BoxData(
+        canvas: canvas,
+        text: title.text.text,
+        textFontSize: title.text.fontSize,
+        textStyle: title.text.labelStyle,
+        textInterline: title.text.interline,
+        paddingPixels: title.box.padding,
+        offset: title.box.offset,
+        originDirection: title.box.origin);
 
-    final box = _box(canvas, text, textSize, padding, interline1, title.box.origin, title.box.offset);
-    canvas.rectangle(rect: box, fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
+    canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
 
-    var dy = box.top + textSize[0].height + padding[0];
-    for (var lineNo = 0; lineNo < text.length; ++lineNo) {
-      canvas.text(text[lineNo], Offset(box.left + padding[3], dy), sizePixels: fontSizePixels, textStyle: textStyle);
-      dy += textSize[lineNo].height * interline1;
+    var dy = box.origin.dy + box.textSize[0].height + box.padding.top;
+    for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
+      canvas.text(box.text[lineNo], Offset(box.origin.dx + box.padding.left, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+      dy += box.textSize[lineNo].height * (box.textInterline + 1.0);
     }
   }
 
-  Rect _box(DrawOn canvas, List<String> text, List<Size> textSize, List<double> padding, double interline1, String origin, Offset offsetPixels) {
-    final boxWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding[3] + padding[1];
-    final boxHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding[0] + padding[2];
+  // Rect _box(DrawOn canvas, List<String> text, List<Size> textSize, Padding padding, double interline1, String origin, Offset offsetPixels) {
+  //   final boxWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)) + padding.left + padding.right;
+  //   final boxHeight = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * interline1) + padding.top + padding.bottom;
 
-    double boxX = 0.0, boxY = 0.0;
-    switch (origin[0]) {
-      case "T":
-        boxY = canvas.viewport.top - offsetPixels.dy * canvas.pixelSize - boxHeight;
-        break;
-      case "t":
-        boxY = canvas.viewport.top + offsetPixels.dy * canvas.pixelSize;
-        break;
-      case "B":
-        boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - boxHeight;
-        break;
-      case "b":
-        boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize;
-        break;
-      case "c":
-        boxY = canvas.viewport.centerY + offsetPixels.dy * canvas.pixelSize - boxHeight / 2;
-        break;
-    }
-    switch (origin[1]) {
-      case "L":
-        boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize - boxWidth;
-        break;
-      case "l":
-        boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
-        break;
-      case "R":
-        boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - boxWidth;
-        break;
-      case "r":
-        boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize;
-        break;
-      case "c":
-        boxX = canvas.viewport.centerX + offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
-        break;
-    }
+  //   double boxX = 0.0, boxY = 0.0;
+  //   switch (origin[0]) {
+  //     case "T":
+  //       boxY = canvas.viewport.top - offsetPixels.dy * canvas.pixelSize - boxHeight;
+  //       break;
+  //     case "t":
+  //       boxY = canvas.viewport.top + offsetPixels.dy * canvas.pixelSize;
+  //       break;
+  //     case "B":
+  //       boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize - boxHeight;
+  //       break;
+  //     case "b":
+  //       boxY = canvas.viewport.bottom + offsetPixels.dy * canvas.pixelSize;
+  //       break;
+  //     case "c":
+  //       boxY = canvas.viewport.centerY + offsetPixels.dy * canvas.pixelSize - boxHeight / 2;
+  //       break;
+  //   }
+  //   switch (origin[1]) {
+  //     case "L":
+  //       boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize - boxWidth;
+  //       break;
+  //     case "l":
+  //       boxX = canvas.viewport.left + offsetPixels.dx * canvas.pixelSize;
+  //       break;
+  //     case "R":
+  //       boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize - boxWidth;
+  //       break;
+  //     case "r":
+  //       boxX = canvas.viewport.right + offsetPixels.dx * canvas.pixelSize;
+  //       break;
+  //     case "c":
+  //       boxX = canvas.viewport.centerX + offsetPixels.dx * canvas.pixelSize - boxWidth / 2;
+  //       break;
+  //   }
 
-    return Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight);
-  }
+  //   return Rect.fromLTWH(boxX, boxY, boxWidth, boxHeight);
+  // }
 
   Future<Uint8List?> exportPdf() async {
     if (_data.chart != null && _data.viewport != null) {
@@ -313,6 +320,80 @@ class AntigenicMapViewer {
     }
     return null;
   }
+}
+
+class _BoxData {
+  _BoxData(
+      {required DrawOn canvas,
+      required this.text,
+      this.titleText = const <String>[],
+      required this.textFontSize,
+      this.titleFontSize = 0.0,
+      required this.textStyle,
+      this.titleStyle = const LabelStyle(),
+      required this.textInterline,
+      this.titleInterline = 0.0,
+      required Offset offset,
+      required BoxPadding paddingPixels,
+      required String originDirection})
+      : textSize = text.map((line) => canvas.textSize(line, sizePixels: textFontSize, textStyle: textStyle)).toList(growable: false),
+        titleSize = titleText.map((line) => canvas.textSize(line, sizePixels: titleFontSize, textStyle: titleStyle)).toList(growable: false),
+        padding = paddingPixels * canvas.pixelSize {
+    _size(canvas);
+    origin = Offset(_originX(canvas, offset.dx, originDirection[1]), _originY(canvas, offset.dy, originDirection[0]));
+  }
+
+  Rect rect() => origin & size;
+
+  void _size(DrawOn canvas) {
+    var width = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)), height = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * (textInterline + 1.0));
+    if (titleSize.isNotEmpty) {
+      width = titleSize.fold<double>(width, (res, ts) => max(res, ts.width));
+      height += titleSize.skip(1).fold<double>(titleSize[0].height, (res, ts) => res + ts.height * (titleInterline + 1.0));
+    }
+    size = Size(width + padding.left + padding.right, height + padding.top + padding.bottom);
+  }
+
+  double _originX(DrawOn canvas, double offset, String originDirection) {
+    switch (originDirection) {
+      case "L":
+        return canvas.viewport.left + offset * canvas.pixelSize - size.width;
+      case "l":
+        return canvas.viewport.left + offset * canvas.pixelSize;
+      case "R":
+        return canvas.viewport.right + offset * canvas.pixelSize - size.width;
+      case "r":
+        return canvas.viewport.right + offset * canvas.pixelSize;
+      case "c":
+        return canvas.viewport.centerX + offset * canvas.pixelSize - size.width / 2;
+    }
+    return 0.0;
+  }
+
+  double _originY(DrawOn canvas, double offset, String originDirection) {
+    switch (originDirection) {
+      case "T":
+        return canvas.viewport.top - offset * canvas.pixelSize - size.height;
+      case "t":
+        return canvas.viewport.top + offset * canvas.pixelSize;
+      case "B":
+        return canvas.viewport.bottom + offset * canvas.pixelSize - size.height;
+      case "b":
+        return canvas.viewport.bottom + offset * canvas.pixelSize;
+      case "c":
+        return canvas.viewport.centerY + offset * canvas.pixelSize - size.height / 2;
+    }
+    return 0.0;
+  }
+
+  final List<String> text, titleText;
+  final List<Size> textSize, titleSize;
+  final double textFontSize, titleFontSize;
+  final LabelStyle textStyle, titleStyle;
+  final double textInterline, titleInterline;
+  late final BoxPadding padding;
+  late final Size size;
+  late final Offset origin;
 }
 
 
