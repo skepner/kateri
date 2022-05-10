@@ -161,13 +161,13 @@ class _DrawOnCanvas extends DrawOn {
     }
 
     canvas
-      // ..save()
-      .drawPath(
-          path,
-          Paint()
-            ..style = PaintingStyle.fill
-            ..color = fill
-            ..isAntiAlias = true);
+        // ..save()
+        .drawPath(
+            path,
+            Paint()
+              ..style = PaintingStyle.fill
+              ..color = fill
+              ..isAntiAlias = true);
     if (lineWidthPixels > 0) {
       canvas.drawPath(
           path,
@@ -181,14 +181,7 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void circle(
-      {required Offset center,
-      required double size,
-      Color fill = transparent,
-      Color outline = black,
-      double outlineWidthPixels = 1.0,
-      double rotation = noRotation,
-      double aspect = 1.0}) {
+  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
     canvas
       ..save()
       ..translate(center.dx, center.dy)
@@ -327,14 +320,14 @@ class _DrawOnCanvas extends DrawOn {
         ..lineTo(viewport.right, y);
     }
     canvas
-          // ..save()
-          .drawPath(
-              path,
-              Paint()
-                ..style = PaintingStyle.stroke
-                ..color = color
-                ..strokeWidth = lineWidthPixels * pixelSize
-                ..isAntiAlias = true)
+            // ..save()
+            .drawPath(
+                path,
+                Paint()
+                  ..style = PaintingStyle.stroke
+                  ..color = color
+                  ..strokeWidth = lineWidthPixels * pixelSize
+                  ..isAntiAlias = true)
         // ..restore()
         ;
   }

@@ -247,13 +247,17 @@ class AntigenicMapViewer {
 
       canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
 
+      final dx = box.origin.dx + box.padding.left;
       var dy = box.origin.dy + box.textSize[0].height + box.padding.top;
       for (var lineNo = 0; lineNo < box.titleText.length; ++lineNo) {
-        canvas.text(box.titleText[lineNo], Offset(box.origin.dx + box.padding.left, dy), sizePixels: box.titleFontSize, textStyle: box.titleStyle);
+        canvas.text(box.titleText[lineNo], Offset(dx, dy), sizePixels: box.titleFontSize, textStyle: box.titleStyle);
         dy += box.titleSize[lineNo].height * (box.titleInterline + 1.0);
       }
       for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
-        canvas.text(box.text[lineNo], Offset(box.origin.dx + box.padding.left, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        canvas.text(box.text[lineNo], Offset(dx, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        if (true || legend.addCounter) {
+          canvas.text(legend.legendRows[lineNo].count.toString(), Offset(dx + box.maxTextWidth, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        }
         dy += box.textSize[lineNo].height * (box.textInterline + 1.0);
       }
     }
@@ -313,7 +317,8 @@ class _BoxData {
   Rect rect() => origin & size;
 
   void _size(DrawOn canvas) {
-    var width = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width)), height = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * (textInterline + 1.0));
+    maxTextWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width));
+    var width = maxTextWidth, height = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * (textInterline + 1.0));
     if (titleSize.isNotEmpty) {
       width = titleSize.fold<double>(width, (res, ts) => max(res, ts.width));
       height += titleSize.skip(1).fold<double>(titleSize[0].height, (res, ts) => res + ts.height * (titleInterline + 1.0));
@@ -362,6 +367,7 @@ class _BoxData {
   late final BoxPadding padding;
   late final Size size;
   late final Offset origin;
+  late final double maxTextWidth;
 }
 
 

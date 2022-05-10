@@ -318,7 +318,7 @@ class PlotTitle {
 
   bool get shown => !(data["-"] ?? false);
   PlotBox get box => PlotBox.Title(data["B"]);
-  PlotText get text => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 16.0);
+  PlotText get text => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 42.0);
 
   final Map<String, dynamic> data;
 }
@@ -341,9 +341,12 @@ class Legend {
   String toString() => "Legend($data)";
 
   bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
+  bool get addCounter => data["C"] ?? false;
+  double get pointSize => data["S"] ?? 10.0;
+  bool get showRowsWithZeroCount => data["z"] ?? false;
   PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 16.0);
-  PlotText get title => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 16.0);
+  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0);
+  PlotText get title => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 36.0);
 
   final Map<String, dynamic> data;
   final List<LegendRow> legendRows;
@@ -356,15 +359,15 @@ class PlotBox {
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "transparent",
         defaultBorderWidth = 0.0,
-        defaultPadding = BoxPadding.zero();
+        defaultPadding = BoxPadding.zero(), defaultOrigin = "tl", defaultOffset = Offset(30, 30);
   PlotBox.Legend(Map<String, dynamic>? dat)
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "white",
         defaultBorderWidth = 1.0,
-        defaultPadding = BoxPadding.all(10.0);
+        defaultPadding = BoxPadding.all(10.0), defaultOrigin = "Bl", defaultOffset = Offset(20, -20);
 
-  String get origin => data["o"] ?? "tl";
-  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : const Offset(0.0, 0.0);
+  String get origin => data["o"] ?? defaultOrigin;
+  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : defaultOffset;
   BoxPadding get padding => BoxPadding(
       top: data["p"]?["t"]?.toDouble() ?? defaultPadding.top,
       bottom: data["p"]?["b"]?.toDouble() ?? defaultPadding.bottom,
@@ -378,6 +381,8 @@ class PlotBox {
   final String defaultBackgroundColor;
   final double defaultBorderWidth;
   final BoxPadding defaultPadding;
+  final String defaultOrigin;
+  final Offset defaultOffset;
 }
 
 class BoxPadding {
@@ -392,8 +397,8 @@ class BoxPadding {
         bottom = val,
         left = val,
         right = val;
-        BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
-        String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
+  BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
+  String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
   final double top, bottom, left, right;
 }
 
