@@ -361,7 +361,7 @@ class PlotBox {
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "white",
         defaultBorderWidth = 1.0,
-        defaultPadding = BoxPadding.all(0.0);
+        defaultPadding = BoxPadding.all(10.0);
 
   String get origin => data["o"] ?? "tl";
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : const Offset(0.0, 0.0);

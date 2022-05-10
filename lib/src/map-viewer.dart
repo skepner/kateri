@@ -318,6 +318,7 @@ class _BoxData {
       width = titleSize.fold<double>(width, (res, ts) => max(res, ts.width));
       height += titleSize.skip(1).fold<double>(titleSize[0].height, (res, ts) => res + ts.height * (titleInterline + 1.0));
     }
+    height += textSize[0].height * 0.4; // space at the bottom to somehow match font ascent
     size = Size(width + padding.left + padding.right, height + padding.top + padding.bottom);
   }
 
