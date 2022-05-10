@@ -311,6 +311,44 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
 // ----------------------------------------------------------------------
 
+class _Defaults {
+  const _Defaults.title()
+      : fontWeight = "bold",
+        fontSize = 28,
+        interline = 0.2,
+        backgroundColor = "transparent",
+        borderColor = "black",
+        borderWidth = 0.0,
+        padding = const BoxPadding.zero(),
+        originDirection = "tl",
+        offset = const Offset(30, 30);
+  const _Defaults.legend({this.fontWeight = "normal", this.interline = 0.3})
+      : fontSize = 20,
+        backgroundColor = "white",
+        borderColor = "black",
+        borderWidth = 1.0,
+        padding = const BoxPadding.hw(10.0, 15.0),
+        originDirection = "Bl",
+        offset = const Offset(20, -20);
+  const _Defaults.legendTitle() : this.legend(fontWeight: "bold", interline: 0.2);
+
+  final String fontWeight;
+  final double fontSize;
+  final double interline;
+  final String backgroundColor;
+  final String borderColor;
+  final double borderWidth;
+  final BoxPadding padding;
+  final String originDirection;
+  final Offset offset;
+}
+
+const _plotTitleDefaults = _Defaults.title();
+const _legendDefaults = _Defaults.legend();
+const _legendTitleDefaults = _Defaults.legendTitle();
+
+// ----------------------------------------------------------------------
+
 class PlotTitle {
   PlotTitle([this.data = const <String, dynamic>{}]);
 
@@ -318,7 +356,7 @@ class PlotTitle {
 
   bool get shown => !(data["-"] ?? false);
   PlotBox get box => PlotBox.Title(data["B"]);
-  PlotText get text => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 42.0);
+  PlotText get text => PlotText(data["T"], _plotTitleDefaults);
 
   final Map<String, dynamic> data;
 }
@@ -342,11 +380,11 @@ class Legend {
 
   bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
   bool get addCounter => data["C"] ?? false;
-  double get pointSize => data["S"] ?? 36.0;
+  double get pointSize => data["S"] ?? _legendDefaults.fontSize;
   bool get showRowsWithZeroCount => data["z"] ?? false;
   PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0, defaultInterline: 0.0);
-  PlotText get title => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 36.0);
+  PlotText get rowStyle => PlotText(data["t"], _legendDefaults);
+  PlotText get title => PlotText(data["T"], _legendTitleDefaults);
 
   final Map<String, dynamic> data;
   final List<LegendRow> legendRows;
@@ -357,32 +395,24 @@ class Legend {
 class PlotBox {
   PlotBox.Title(Map<String, dynamic>? dat)
       : data = dat ?? <String, dynamic>{},
-        defaultBackgroundColor = "transparent",
-        defaultBorderWidth = 0.0,
-        defaultPadding = BoxPadding.zero(), defaultOrigin = "tl", defaultOffset = Offset(30, 30);
+        _defaults = _Defaults.title();
   PlotBox.Legend(Map<String, dynamic>? dat)
       : data = dat ?? <String, dynamic>{},
-        defaultBackgroundColor = "white",
-        defaultBorderWidth = 1.0,
-        defaultPadding = BoxPadding.hw(10.0, 20.0), defaultOrigin = "Bl", defaultOffset = Offset(20, -20);
+        _defaults = _Defaults.legend();
 
-  String get origin => data["o"] ?? defaultOrigin;
-  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : defaultOffset;
+  String get originDirection => data["o"] ?? _defaults.originDirection;
+  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : _defaults.offset;
   BoxPadding get padding => BoxPadding(
-      top: data["p"]?["t"]?.toDouble() ?? defaultPadding.top,
-      bottom: data["p"]?["b"]?.toDouble() ?? defaultPadding.bottom,
-      left: data["p"]?["l"]?.toDouble() ?? defaultPadding.left,
-      right: data["p"]?["r"]?.toDouble() ?? defaultPadding.right);
-  double get borderWidth => data["W"]?.toDouble() ?? defaultBorderWidth;
-  String get backgroundColor => data["F"] ?? defaultBackgroundColor;
-  String get borderColor => data["B"] ?? "black";
+      top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
+      bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
+      left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
+      right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
+  double get borderWidth => data["W"]?.toDouble() ?? _defaults.borderWidth;
+  String get backgroundColor => data["F"] ?? _defaults.backgroundColor;
+  String get borderColor => data["B"] ?? _defaults.borderColor;
 
   final Map<String, dynamic> data;
-  final String defaultBackgroundColor;
-  final double defaultBorderWidth;
-  final BoxPadding defaultPadding;
-  final String defaultOrigin;
-  final Offset defaultOffset;
+  final _Defaults _defaults;
 }
 
 class BoxPadding {
@@ -392,12 +422,12 @@ class BoxPadding {
         bottom = 0.0,
         left = 0.0,
         right = 0.0;
-  BoxPadding.all(double val)
+  const BoxPadding.all(double val)
       : top = val,
         bottom = val,
         left = val,
         right = val;
-  BoxPadding.hw(double vert, double horiz)
+  const BoxPadding.hw(double vert, double horiz)
       : top = vert,
         bottom = vert,
         left = horiz,
@@ -411,7 +441,7 @@ class BoxPadding {
 // ----------------------------------------------------------------------
 
 class PlotText {
-  PlotText(Map<String, dynamic>? dat, {this.defaultFontWeight = "normal", this.defaultFontSize = 16.0, this.defaultInterline = 0.2}) : data = dat ?? <String, dynamic>{};
+  PlotText(Map<String, dynamic>? dat, this._defaults) : data = dat ?? <String, dynamic>{};
 
   List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
 
@@ -419,14 +449,12 @@ class PlotText {
       color: NamedColor.fromString(data["c"] ?? "black"),
       fontFamily: labelFontFamilyFromString(data["f"]),
       fontStyle: fontStyleFromString(data["S"]),
-      fontWeight: fontWeightFromString(data["W"], defaultFontWeight));
-  double get fontSize => data["s"]?.toDouble() ?? defaultFontSize;
-  double get interline => data["i"]?.toDouble() ?? defaultInterline;
+      fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
+  double get fontSize => data["s"]?.toDouble() ?? _defaults.fontSize;
+  double get interline => data["i"]?.toDouble() ?? _defaults.interline;
 
   final Map<String, dynamic> data;
-  final String defaultFontWeight;
-  final double defaultFontSize;
-  final double defaultInterline;
+  final _Defaults _defaults;
 }
 
 // ----------------------------------------------------------------------

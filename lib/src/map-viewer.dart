@@ -254,7 +254,7 @@ class AntigenicMapViewer {
           paddingPixels: legend.box.padding,
           paddingAddition: BoxPadding(left: pointSpace, right: countLeftPadding + maxCountTextWidth),
           offset: legend.box.offset,
-          originDirection: legend.box.origin);
+          originDirection: legend.box.originDirection);
 
       canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
 
@@ -296,7 +296,7 @@ class AntigenicMapViewer {
         textInterline: title.text.interline,
         paddingPixels: title.box.padding,
         offset: title.box.offset,
-        originDirection: title.box.origin);
+        originDirection: title.box.originDirection);
 
     canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
 
