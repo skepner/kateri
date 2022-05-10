@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
-import 'dart:typed_data';       // Uint8List
+import 'dart:typed_data'; // Uint8List
 import 'dart:math' as math;
 import 'package:pdf/pdf.dart';
 // import 'package:pdf/src/pdf/obj/type1_font.dart';
@@ -15,7 +15,6 @@ import 'viewport.dart';
 String fontKey(LabelStyle style) => "${style.fontFamily} ${style.fontWeight} ${style.fontStyle}";
 
 class CanvasPdf extends CanvasRoot {
-
   CanvasPdf(Size canvasSize)
       : doc = PdfDocument(),
         _fonts = <String, PdfFont>{},
@@ -67,7 +66,6 @@ class CanvasPdf extends CanvasRoot {
       await Process.run("open-and-back-to-emacs", [filename]);
     }
   }
-
 
   PdfFont getFont(String key) {
     var font = _fonts[key];
@@ -157,8 +155,7 @@ class _DrawOnPdf extends DrawOn {
   double get pixelSize => _pixelSize;
 
   @override
-  void transform(Matrix4 transformation) {
-  }
+  void transform(Matrix4 transformation) {}
 
   // ----------------------------------------------------------------------
   // 2D
@@ -264,14 +261,7 @@ class _DrawOnPdf extends DrawOn {
   }
 
   @override
-  void circle(
-      {required Offset center,
-      required double size,
-      Color fill = transparent,
-      Color outline = black,
-      double outlineWidthPixels = 1.0,
-      double rotation = noRotation,
-      double aspect = 1.0}) {
+  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
     _canvas
       ..saveContext()
       ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
@@ -334,6 +324,8 @@ class _DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
+  static const fontScaleToMatchCanvas = 1.02;
+
   @override
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     final colorC = PdfColor.fromInt(textStyle.color.value);
@@ -344,14 +336,15 @@ class _DrawOnPdf extends DrawOn {
         ..scale(1.0, -1.0))
       ..setGraphicState(PdfGraphicState(strokeOpacity: colorC.alpha, fillOpacity: colorC.alpha))
       ..setFillColor(colorC)
-      ..drawString(_canvasPdf.getFont(fontKey(textStyle)), sizePixels * pixelSize * 1.0, text, 0.0, 0.0)
+      ..drawString(_canvasPdf.getFont(fontKey(textStyle)), sizePixels * pixelSize * fontScaleToMatchCanvas, text, 0.0, 0.0)
       ..restoreContext();
   }
 
   @override
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
     final metrics = _canvasPdf.getFont(fontKey(textStyle)).stringMetrics(text);
-    return Size(metrics.width, metrics.height) * (sizePixels * pixelSize * 1.0);
+    const height = 1.0;         // instead of metrics.height (1.156) to match canvas font size
+    return Size(metrics.width, height) * (sizePixels * pixelSize * fontScaleToMatchCanvas);
   }
 
   @override

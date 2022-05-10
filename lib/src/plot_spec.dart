@@ -342,10 +342,10 @@ class Legend {
 
   bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
   bool get addCounter => data["C"] ?? false;
-  double get pointSize => data["S"] ?? 32.0;
+  double get pointSize => data["S"] ?? 36.0;
   bool get showRowsWithZeroCount => data["z"] ?? false;
   PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0, defaultInterline: 0.3);
+  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0, defaultInterline: 0.0);
   PlotText get title => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 36.0);
 
   final Map<String, dynamic> data;

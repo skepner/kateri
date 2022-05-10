@@ -295,7 +295,7 @@ class _DrawOnCanvas extends DrawOn {
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()}) {
     const precisionFactor = 1000.0; // TextPainter returns size in whole units, we increase precision
     final painter = _textPainter(text, precisionFactor, textStyle);
-    return Size(painter.width, painter.height) * sizePixels * pixelSize / precisionFactor;
+    return Size(painter.width, painter.height) * (sizePixels * pixelSize / precisionFactor);
   }
 
   TextPainter _textPainter(String text, double fontSize, LabelStyle textStyle) {
