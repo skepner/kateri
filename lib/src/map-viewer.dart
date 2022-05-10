@@ -4,6 +4,7 @@ import 'dart:typed_data'; // Uint8List
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart' as vec;
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -236,8 +237,9 @@ class AntigenicMapViewer {
       final countTextWidth = legend.addCounter
           ? legend.legendRows.map((row) => row.count.toString()).map((txt) => canvas.textSize(txt, sizePixels: textFontSize, textStyle: textStyle)).map((sz) => sz.width).toList()
           : <double>[];
-      final pointSize = legend.pointSize * canvas.pixelSize;
-      final pointSpace = pointSize * 2.0;
+      final pointSizePixels = legend.pointSize;
+      final pointSize = pointSizePixels * canvas.pixelSize;
+      final pointSpace = pointSize * (legend.rowStyle.interline + 1.2);
       final maxCountTextWidth = countTextWidth.fold<double>(0.0, max);
       final box = _BoxData(
           canvas: canvas,
@@ -256,13 +258,24 @@ class AntigenicMapViewer {
 
       canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(legend.box.backgroundColor), outline: NamedColor.fromString(legend.box.borderColor), outlineWidthPixels: legend.box.borderWidth);
 
+      // canvas.rectangle(rect: box.origin & Size(box.padding.left, box.size.height));
       final dx = box.origin.dx + box.padding.left;
       var dy = box.origin.dy + box.textSize[0].height + box.padding.top;
       for (var lineNo = 0; lineNo < box.titleText.length; ++lineNo) {
-        canvas.text(box.titleText[lineNo], Offset(dx, dy), sizePixels: box.titleFontSize, textStyle: box.titleStyle);
+        final size = canvas.textSize(box.titleText[lineNo], sizePixels: box.titleFontSize, textStyle: box.titleStyle);
+        final textDx = dx + (box.size.width - box.padding.left - box.padding.right - size.width) / 2; // title centered
+        canvas.text(box.titleText[lineNo], Offset(textDx, dy), sizePixels: box.titleFontSize, textStyle: box.titleStyle);
         dy += box.titleSize[lineNo].height * (box.titleInterline + 1.0);
       }
       for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
+        final pointSpec = legend.legendRows[lineNo].point;
+        canvas.point(
+            center: vec.Vector3(dx + pointSize / 2, dy - box.textSize[lineNo].height * 0.35, 0.0),
+            sizePixels: pointSizePixels,
+            shape: pointSpec.shape,
+            fill: pointSpec.fill,
+            outline: pointSpec.outline,
+            outlineWidthPixels: pointSpec.outlineWidthPixels);
         canvas.text(box.text[lineNo], Offset(dx + pointSpace, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
         if (legend.addCounter) {
           canvas.text(legend.legendRows[lineNo].count.toString(), Offset(dx + pointSpace + box.maxTextWidth + countLeftPadding + maxCountTextWidth - countTextWidth[lineNo], dy),

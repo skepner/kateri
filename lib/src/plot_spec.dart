@@ -345,7 +345,7 @@ class Legend {
   double get pointSize => data["S"] ?? 32.0;
   bool get showRowsWithZeroCount => data["z"] ?? false;
   PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0);
+  PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0, defaultInterline: 0.3);
   PlotText get title => PlotText(data["T"], defaultFontWeight: "bold", defaultFontSize: 36.0);
 
   final Map<String, dynamic> data;
@@ -364,7 +364,7 @@ class PlotBox {
       : data = dat ?? <String, dynamic>{},
         defaultBackgroundColor = "white",
         defaultBorderWidth = 1.0,
-        defaultPadding = BoxPadding.all(10.0), defaultOrigin = "Bl", defaultOffset = Offset(20, -20);
+        defaultPadding = BoxPadding.hw(10.0, 20.0), defaultOrigin = "Bl", defaultOffset = Offset(20, -20);
 
   String get origin => data["o"] ?? defaultOrigin;
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : defaultOffset;
@@ -397,6 +397,11 @@ class BoxPadding {
         bottom = val,
         left = val,
         right = val;
+  BoxPadding.hw(double vert, double horiz)
+      : top = vert,
+        bottom = vert,
+        left = horiz,
+        right = horiz;
   BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
   BoxPadding operator +(BoxPadding rhs) => BoxPadding(top: top + rhs.top, bottom: bottom + rhs.bottom, left: left + rhs.left, right: right + rhs.right);
   String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
@@ -406,7 +411,7 @@ class BoxPadding {
 // ----------------------------------------------------------------------
 
 class PlotText {
-  PlotText(Map<String, dynamic>? dat, {this.defaultFontWeight = "normal", this.defaultFontSize = 16.0}) : data = dat ?? <String, dynamic>{};
+  PlotText(Map<String, dynamic>? dat, {this.defaultFontWeight = "normal", this.defaultFontSize = 16.0, this.defaultInterline = 0.2}) : data = dat ?? <String, dynamic>{};
 
   List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
 
@@ -416,11 +421,12 @@ class PlotText {
       fontStyle: fontStyleFromString(data["S"]),
       fontWeight: fontWeightFromString(data["W"], defaultFontWeight));
   double get fontSize => data["s"]?.toDouble() ?? defaultFontSize;
-  double get interline => data["i"]?.toDouble() ?? 0.2;
+  double get interline => data["i"]?.toDouble() ?? defaultInterline;
 
   final Map<String, dynamic> data;
   final String defaultFontWeight;
   final double defaultFontSize;
+  final double defaultInterline;
 }
 
 // ----------------------------------------------------------------------
