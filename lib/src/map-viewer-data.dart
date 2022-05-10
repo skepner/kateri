@@ -40,8 +40,9 @@ class AntigenicMapViewerData {
   void setChart(Chart aChart) {
     chart = aChart;
     projection = chart!.projections[0];
-    viewport = projection!.viewport();
-    print(viewport);
+    final projectionViewport = projection!.viewport();
+    print("projection $viewport");
+    viewport = projectionViewport;
     plotSpec = null;
     _chartBeingLoaded = false;
     _callbacks.hideMessage();
