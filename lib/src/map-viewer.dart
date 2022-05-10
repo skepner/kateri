@@ -231,17 +231,26 @@ class AntigenicMapViewer {
   void paintLegend(DrawOn canvas) {
     final legend = _data.plotSpec?.legend();
     if (legend != null && legend.shown) {
+      final textFontSize = legend.rowStyle.fontSize, textStyle = legend.rowStyle.labelStyle;
+      final countLeftPadding = legend.addCounter ? textFontSize * canvas.pixelSize * 0.5 : 0.0;
+      final countTextWidth = legend.addCounter
+          ? legend.legendRows.map((row) => row.count.toString()).map((txt) => canvas.textSize(txt, sizePixels: textFontSize, textStyle: textStyle)).map((sz) => sz.width).toList()
+          : <double>[];
+      final pointSize = legend.pointSize * canvas.pixelSize;
+      final pointSpace = pointSize * 2.0;
+      final maxCountTextWidth = countTextWidth.fold<double>(0.0, max);
       final box = _BoxData(
           canvas: canvas,
           text: legend.legendRows.map((row) => row.text).toList(),
           titleText: legend.title.text,
-          textFontSize: legend.rowStyle.fontSize,
+          textFontSize: textFontSize,
           titleFontSize: legend.title.fontSize,
-          textStyle: legend.rowStyle.labelStyle,
+          textStyle: textStyle,
           titleStyle: legend.title.labelStyle,
           textInterline: legend.rowStyle.interline,
           titleInterline: legend.title.interline,
           paddingPixels: legend.box.padding,
+          paddingAddition: BoxPadding(left: pointSpace, right: countLeftPadding + maxCountTextWidth),
           offset: legend.box.offset,
           originDirection: legend.box.origin);
 
@@ -254,9 +263,10 @@ class AntigenicMapViewer {
         dy += box.titleSize[lineNo].height * (box.titleInterline + 1.0);
       }
       for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
-        canvas.text(box.text[lineNo], Offset(dx, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
-        if (true || legend.addCounter) {
-          canvas.text(legend.legendRows[lineNo].count.toString(), Offset(dx + box.maxTextWidth, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        canvas.text(box.text[lineNo], Offset(dx + pointSpace, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        if (legend.addCounter) {
+          canvas.text(legend.legendRows[lineNo].count.toString(), Offset(dx + pointSpace + box.maxTextWidth + countLeftPadding + maxCountTextWidth - countTextWidth[lineNo], dy),
+              sizePixels: box.textFontSize, textStyle: box.textStyle);
         }
         dy += box.textSize[lineNo].height * (box.textInterline + 1.0);
       }
@@ -306,17 +316,18 @@ class _BoxData {
       this.titleInterline = 0.0,
       required Offset offset,
       required BoxPadding paddingPixels,
+      BoxPadding paddingAddition = const BoxPadding.zero(), // for legend points and counts (scaled)
       required String originDirection})
       : textSize = text.map((line) => canvas.textSize(line, sizePixels: textFontSize, textStyle: textStyle)).toList(growable: false),
         titleSize = titleText.map((line) => canvas.textSize(line, sizePixels: titleFontSize, textStyle: titleStyle)).toList(growable: false),
         padding = paddingPixels * canvas.pixelSize {
-    _size(canvas);
+    _size(canvas, paddingAddition);
     origin = Offset(_originX(canvas, offset.dx, originDirection[1]), _originY(canvas, offset.dy, originDirection[0]));
   }
 
   Rect rect() => origin & size;
 
-  void _size(DrawOn canvas) {
+  void _size(DrawOn canvas, BoxPadding paddingAddition) {
     maxTextWidth = textSize.fold<double>(0.0, (res, ts) => max(res, ts.width));
     var width = maxTextWidth, height = textSize.skip(1).fold<double>(textSize[0].height, (res, ts) => res + ts.height * (textInterline + 1.0));
     if (titleSize.isNotEmpty) {
@@ -324,7 +335,7 @@ class _BoxData {
       height += titleSize.skip(1).fold<double>(titleSize[0].height, (res, ts) => res + ts.height * (titleInterline + 1.0));
     }
     height += textSize[0].height * 0.4; // space at the bottom to somehow match font ascent
-    size = Size(width + padding.left + padding.right, height + padding.top + padding.bottom);
+    size = Size(width + padding.left + padding.right + paddingAddition.left + paddingAddition.right, height + padding.top + padding.bottom + paddingAddition.top + paddingAddition.bottom);
   }
 
   double _originX(DrawOn canvas, double offset, String originDirection) {

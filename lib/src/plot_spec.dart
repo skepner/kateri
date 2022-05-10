@@ -342,7 +342,7 @@ class Legend {
 
   bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
   bool get addCounter => data["C"] ?? false;
-  double get pointSize => data["S"] ?? 10.0;
+  double get pointSize => data["S"] ?? 32.0;
   bool get showRowsWithZeroCount => data["z"] ?? false;
   PlotBox get box => PlotBox.Legend(data["B"]);
   PlotText get rowStyle => PlotText(data["t"], defaultFontWeight: "normal", defaultFontSize: 36.0);
@@ -386,7 +386,7 @@ class PlotBox {
 }
 
 class BoxPadding {
-  BoxPadding({required this.top, required this.bottom, required this.left, required this.right});
+  BoxPadding({this.top = 0.0, this.bottom = 0.0, this.left = 0.0, this.right = 0.0});
   const BoxPadding.zero()
       : top = 0.0,
         bottom = 0.0,
@@ -398,6 +398,7 @@ class BoxPadding {
         left = val,
         right = val;
   BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
+  BoxPadding operator +(BoxPadding rhs) => BoxPadding(top: top + rhs.top, bottom: bottom + rhs.bottom, left: left + rhs.left, right: right + rhs.right);
   String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
   final double top, bottom, left, right;
 }
