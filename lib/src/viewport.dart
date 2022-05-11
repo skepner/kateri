@@ -39,6 +39,8 @@ class Viewport {
   double get bottom => _aabb.max.y;
   double get centerY => (_aabb.min.y + _aabb.max.y) / 2;
 
+  double aspectRatio() => width / height;
+
   // /// Move center of this viewport to Vector3.all(0.0) and adjust points in the layout accordingly
   // void moveCenterToOrigin(Layout layout) {
   //   for (var ind = 0; ind < layout.length; ++ind) {

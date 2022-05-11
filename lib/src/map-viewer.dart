@@ -32,11 +32,9 @@ class PdfIntent extends Intent {
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.aspectRatio = 1.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)})
-      : super(key: key);
+  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)}) : super(key: key);
 
   final double width;
-  final double aspectRatio;
   final double borderWidth;
   final Color borderColor;
   final bool openExportedPdf;
@@ -67,7 +65,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
   void initState() {
     super.initState();
     // width = widget.width;
-    aspectRatio = widget.aspectRatio;
+    aspectRatio = 1.0;
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     _data.openExportedPdf = widget.openExportedPdf;
@@ -123,7 +121,11 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
 
   @override
   void updateCallback() {
-    setState(() {/* AntigenicMapViewerData updated */});
+    setState(() {
+      /* AntigenicMapViewerData updated */
+      aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
+      print("aspectRatio $aspectRatio");
+    });
   }
 
   @override
@@ -287,23 +289,25 @@ class AntigenicMapViewer {
   }
 
   void paintTitle(DrawOn canvas) {
-    final title = _data.plotSpec?.plotTitle() ?? PlotTitle();
-    final box = _BoxData(
-        canvas: canvas,
-        text: title.text.text,
-        textFontSize: title.text.fontSize,
-        textStyle: title.text.labelStyle,
-        textInterline: title.text.interline,
-        paddingPixels: title.box.padding,
-        offset: title.box.offset,
-        originDirection: title.box.originDirection);
+    final title = _data.plotSpec?.plotTitle();
+    if (title != null && title.shown) {
+      final box = _BoxData(
+          canvas: canvas,
+          text: title.text.text,
+          textFontSize: title.text.fontSize,
+          textStyle: title.text.labelStyle,
+          textInterline: title.text.interline,
+          paddingPixels: title.box.padding,
+          offset: title.box.offset,
+          originDirection: title.box.originDirection);
 
-    canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
+      canvas.rectangle(rect: box.rect(), fill: NamedColor.fromString(title.box.backgroundColor), outline: NamedColor.fromString(title.box.borderColor), outlineWidthPixels: title.box.borderWidth);
 
-    var dy = box.origin.dy + box.textSize[0].height + box.padding.top;
-    for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
-      canvas.text(box.text[lineNo], Offset(box.origin.dx + box.padding.left, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
-      dy += box.textSize[lineNo].height * (box.textInterline + 1.0);
+      var dy = box.origin.dy + box.textSize[0].height + box.padding.top;
+      for (var lineNo = 0; lineNo < box.text.length; ++lineNo) {
+        canvas.text(box.text[lineNo], Offset(box.origin.dx + box.padding.left, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
+        dy += box.textSize[lineNo].height * (box.textInterline + 1.0);
+      }
     }
   }
 

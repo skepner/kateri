@@ -16,8 +16,8 @@ abstract class PlotSpec {
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
   int priority();
-  PlotTitle plotTitle();
-  Legend legend();
+  PlotTitle? plotTitle() => null;
+  Legend? legend() => null;
   Viewport? viewport() => null;
 
   Color colorFromSpec(String? spec, Color dflt) {
@@ -135,12 +135,6 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
   @override
   bool _addPointSpecByCloning() => false;
 
-  @override
-  PlotTitle plotTitle() => PlotTitle();
-
-  @override
-  Legend legend() => Legend();
-
   // ----------------------------------------------------------------------
 
   final Chart _chart;
@@ -177,10 +171,10 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   bool _addPointSpecByCloning() => true;
 
   @override
-  PlotTitle plotTitle() => PlotTitle(_data["T"] ?? {});
+  PlotTitle? plotTitle() => _data["T"] != null ? PlotTitle(_data["T"]) : null;
 
   @override
-  Legend legend() => Legend(_data["L"] ?? {}, _legendRows);
+  Legend? legend() => _data["L"] != null ? Legend(_data["L"], _legendRows) : null;
 
   void apply(List<dynamic> data, [int recursionLevel = 1]) {
     if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.apply: too deep recursion");
@@ -510,12 +504,6 @@ class PlotSpecLegacy extends PlotSpec {
 
   @override
   int priority() => 998;
-
-  @override
-  PlotTitle plotTitle() => PlotTitle();
-
-  @override
-  Legend legend() => Legend();
 
   final Chart _chart;
   final Map<String, dynamic> _data;
