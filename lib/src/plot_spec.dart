@@ -7,6 +7,7 @@ import 'draw_on.dart';
 import 'color.dart';
 import 'error.dart';
 import 'cast.dart';
+import 'viewport.dart';
 
 // ----------------------------------------------------------------------
 
@@ -17,6 +18,7 @@ abstract class PlotSpec {
   int priority();
   PlotTitle plotTitle();
   Legend legend();
+  Viewport? viewport() => null;
 
   Color colorFromSpec(String? spec, Color dflt) {
     if (spec != null && spec.isNotEmpty) {
@@ -161,6 +163,9 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   @override
   List<int> drawingOrder() => _drawingOrder;
+
+  @override
+  Viewport? viewport() => Viewport.originSizeList(_data["V"].map((value) => value.toDouble()).cast<double>().toList());
 
   @override
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];

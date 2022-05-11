@@ -7,6 +7,19 @@ typedef Layout = List<Vector3?>;
 // ----------------------------------------------------------------------
 
 class Viewport {
+  Viewport.originSizeList(List<double> values) {
+    switch (values.length) {
+      case 4: // left, top, width, height
+        _aabb = Aabb3.minMax(Vector3(values[0], values[1], 0.0), Vector3(values[0] + values[2], values[1] + values[3], 0.0));
+        break;
+      case 3: // left, top, width, height=width
+        _aabb = Aabb3.minMax(Vector3(values[0], values[1], 0.0), Vector3(values[0] + values[2], values[1] + values[2], 0.0));
+        break;
+      default:
+        throw FormatException("cannot infer viewport from $values");
+    }
+  }
+
   Viewport.hullLayout(Layout layout) {
     var present = layout.where(notNull).cast<Vector3>();
     if (present.isNotEmpty) {
