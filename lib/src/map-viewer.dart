@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 import 'package:window_manager/window_manager.dart';
+import 'package:universal_platform/universal_platform.dart';
+import 'package:side_navigation/side_navigation.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -58,6 +60,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late double borderWidth;
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
+  int toggleButtonsSelected = 0;
 
   static const plotStyleMenuWidth = 200.0;
   static const minMapWidth = 500.0;
@@ -73,9 +76,11 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     _data.openExportedPdf = widget.openExportedPdf;
-    // await windowManager.setSize(Size(widget.width, widget.width));
-    windowManager.addListener(this);
-    windowManager.ensureInitialized();
+
+    if (UniversalPlatform.isMacOS) {
+      windowManager.addListener(this);
+      windowManager.ensureInitialized();
+    }
     super.initState();
   }
 
@@ -107,9 +112,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(
                   child: Container(
-                      // margin: const EdgeInsets.all(10.0),
                       decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-                      // width: 1000.0,
                       child: AspectRatio(
                           aspectRatio: aspectRatio,
                           child: Scaffold(
@@ -127,13 +130,30 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                                     ))
                               ]))))),
               Container(
-                  width: plotStyleMenuWidth,
-                  child: ListView(padding: EdgeInsets.zero, children: [
-                    ElevatedButton(child: const Text("CCCCcccc"), onPressed: () {}),
-                    ListTile(title: const Text("XXxxXX"), hoverColor: Colors.yellow),
-                    ListTile(title: const Text("AAAAA")),
-                    ListTile(title: const Text("BBBBB")),
-                  ])),
+                // width: plotStyleMenuWidth,
+                child: SideNavigationBar(
+                  selectedIndex: toggleButtonsSelected,
+                  items: const [
+                    SideNavigationBarItem(
+                      icon: Icons.dashboard,
+                      label: 'Dashboard',
+                    ),
+                    SideNavigationBarItem(
+                      icon: Icons.person,
+                      label: 'Account',
+                    ),
+                    SideNavigationBarItem(
+                      icon: Icons.settings,
+                      label: 'Settings',
+                    ),
+                  ],
+                  onTap: (index) {
+                    setState(() {
+                      toggleButtonsSelected = index;
+                    });
+                  },
+                ),
+              ),
             ]))));
   }
 
@@ -175,14 +195,14 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   void onWindowResized() async {
-      final windowSize = await windowManager.getSize();
-      var targetWidth = windowSize.width;
-      if ((targetWidth - plotStyleMenuWidth) < minMapWidth) {
-        targetWidth = minMapWidth + plotStyleMenuWidth;
-      }
-      final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + 30.0);
-      final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
-      if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
+    final windowSize = await windowManager.getSize();
+    var targetWidth = windowSize.width;
+    if ((targetWidth - plotStyleMenuWidth) < minMapWidth) {
+      targetWidth = minMapWidth + plotStyleMenuWidth;
+    }
+    final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + 30.0);
+    final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
+    if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
   }
 }
 
