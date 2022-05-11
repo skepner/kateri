@@ -34,6 +34,7 @@ class AntigenicMapViewerData {
   bool _chartBeingLoaded = false;
   Socket? _socket;
   late bool openExportedPdf;
+  Size antigenicMapPainterSize = Size.zero; // to auto-resize window
 
   AntigenicMapViewerData(this._callbacks);
 

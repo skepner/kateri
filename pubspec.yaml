@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.17.0
   universal_platform: ^1.0.0+1
   typed_data: ^1.3.0
+  window_manager: ^0.2.3
 
   # open ace file
   file_picker: ^4.5.1
