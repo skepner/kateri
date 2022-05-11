@@ -32,7 +32,7 @@ class PdfIntent extends Intent {
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewWidget extends StatefulWidget {
-  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.openExportedPdf = true, this.borderWidth = 5.0, this.borderColor = const Color(0xFF000000)}) : super(key: key);
+  const AntigenicMapViewWidget({Key? key, this.width = 500.0, this.openExportedPdf = true, this.borderWidth = 1.0, this.borderColor = const Color(0xFF808080)}) : super(key: key);
 
   final double width;
   final double borderWidth;
@@ -80,6 +80,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
 
   @override
   Widget build(BuildContext context) {
+    print(context);
     _data.buildStarted();
     antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
     return Shortcuts(
@@ -95,26 +96,35 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> impleme
               PdfIntent: CallbackAction<PdfIntent>(onInvoke: (PdfIntent intent) => _data.exportPdf()),
             },
             child: Focus(
-                child: Container(
-                    // margin: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-                    // width: width,
-                    child: AspectRatio(
-                        aspectRatio: aspectRatio,
-                        child: Scaffold(
-                            key: scaffoldKey,
-                            // appBar: AppBar(), //title: Text("Kateri")),
-                            drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                            body: Stack(children: <Widget>[
-                              CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                              Positioned(
-                                  left: 0,
-                                  top: 0,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.menu),
-                                    onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                                  ))
-                            ])))))));
+                child: Row(children: [
+              Container(
+                  // margin: const EdgeInsets.all(10.0),
+                  decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+                  // width: 1000.0,
+                  child: AspectRatio(
+                      aspectRatio: aspectRatio,
+                      child: Scaffold(
+                          key: scaffoldKey,
+                          // appBar: AppBar(), //title: Text("Kateri")),
+                          drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
+                          body: Stack(children: <Widget>[
+                            CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                            Positioned(
+                                left: 0,
+                                top: 0,
+                                child: IconButton(
+                                  icon: const Icon(Icons.menu),
+                                  onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                                ))
+                          ])))),
+              Container(
+                  width: 100.0,
+                  child: ListView(padding: EdgeInsets.zero, children: [
+                    ListTile(title: const Text("XXxxXX")),
+                    ListTile(title: const Text("AAAAA")),
+                    ListTile(title: const Text("BBBBB")),
+                  ])),
+            ]))));
   }
 
   // ----------------------------------------------------------------------
@@ -397,6 +407,5 @@ class _BoxData {
   late final Offset origin;
   late final double maxTextWidth;
 }
-
 
 // ======================================================================
