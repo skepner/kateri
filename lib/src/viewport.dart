@@ -53,7 +53,7 @@ class Viewport {
 
   /// extend viewport so it's corners are at the whole number vectors, then re-center layout within this viewport
   void roundAndRecenter(Layout layout) {
-    final roundedSize = (_aabb.max - _aabb.min)..ceil();
+    final roundedSize = (_aabb.max - _aabb.min + Vector3.all(1.0))..ceil();
     final roundedHalfSize = roundedSize / 2;
     final roundedHalfSizeCeiled = Vector3.copy(roundedSize)..ceil();
     final origCenter = _aabb.center;
