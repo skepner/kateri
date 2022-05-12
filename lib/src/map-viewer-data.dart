@@ -30,22 +30,20 @@ class AntigenicMapViewerData {
   Chart? chart;
   Projection? projection;
   vp.Viewport? viewport;
-  PlotSpec? plotSpec;
   bool _chartBeingLoaded = false;
   Socket? _socket;
   late bool openExportedPdf;
   Size antigenicMapPainterSize = Size.zero; // to auto-resize window
+  List<PlotSpec> plotSpecs = <PlotSpec>[];
+  int currentPlotSpecIndex = 0;
 
   AntigenicMapViewerData(this._callbacks);
 
   void setChart(Chart aChart) {
     chart = aChart;
     projection = chart!.projections[0];
-    plotSpec = chart!.plotSpecs(projection)[0];
-    final projectionViewport = projection!.viewport();
-    print("projection $projectionViewport");
-    viewport = plotSpec!.viewport() ?? projectionViewport;
-    print("used       $viewport");
+    plotSpecs = chart!.plotSpecs(projection);
+    setPlotSpec(0);
     _chartBeingLoaded = false;
     _callbacks.hideMessage();
     _callbacks.updateCallback();
@@ -59,7 +57,6 @@ class AntigenicMapViewerData {
     chart = null;
     projection = null;
     viewport = null;
-    plotSpec = null;
     _chartBeingLoaded = false;
     _callbacks.updateCallback();
   }
@@ -70,6 +67,17 @@ class AntigenicMapViewerData {
       setChart(Chart(await decompressFile(chartFilename!)));
     }
   }
+
+  void setPlotSpec(int index) {
+    if (chart != null && index < plotSpecs.length) {
+      currentPlotSpecIndex = index;
+      viewport = plotSpecs[index].viewport() ?? projection!.viewport();
+      print("projection ${projection!.viewport()}");
+      print("used       $viewport");
+    }
+  }
+
+  PlotSpec get currentPlotSpec => plotSpecs[currentPlotSpecIndex];
 
   bool empty() => chart != null;
 

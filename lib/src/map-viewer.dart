@@ -60,7 +60,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late double borderWidth;
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
-  int toggleButtonsSelected = 0;
 
   static const plotStyleMenuWidth = 200.0;
   static const minMapWidth = 500.0;
@@ -132,24 +131,11 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
               Container(
                 // width: plotStyleMenuWidth,
                 child: SideNavigationBar(
-                  selectedIndex: toggleButtonsSelected,
-                  items: const [
-                    SideNavigationBarItem(
-                      icon: Icons.dashboard,
-                      label: 'Dashboard',
-                    ),
-                    SideNavigationBarItem(
-                      icon: Icons.person,
-                      label: 'Account',
-                    ),
-                    SideNavigationBarItem(
-                      icon: Icons.settings,
-                      label: 'Settings',
-                    ),
-                  ],
+                  selectedIndex: _data.currentPlotSpecIndex,
+                  items: _data.plotSpecs.map<String>((ps) => ps.title()).map<SideNavigationBarItem>((name) => SideNavigationBarItem(icon: Icons.dashboard, label: name)).toList(),
                   onTap: (index) {
                     setState(() {
-                      toggleButtonsSelected = index;
+                      _data.setPlotSpec(index);
                     });
                   },
                 ),
@@ -278,12 +264,11 @@ class AntigenicMapViewer {
   }
 
   void paintOn(DrawOn canvas) {
-    _data.plotSpec ??= _data.chart!.plotSpecs(_data.projection)[0];
     canvas.grid();
     final layout = _data.projection!.transformedLayout();
-    for (final pointNo in _data.plotSpec!.drawingOrder()) {
+    for (final pointNo in _data.currentPlotSpec.drawingOrder()) {
       if (layout[pointNo] != null) {
-        canvas.pointOfPlotSpec(layout[pointNo]!, _data.plotSpec![pointNo]);
+        canvas.pointOfPlotSpec(layout[pointNo]!, _data.currentPlotSpec[pointNo]);
       }
     }
     paintLegend(canvas);
@@ -293,7 +278,7 @@ class AntigenicMapViewer {
   // ----------------------------------------------------------------------
 
   void paintLegend(DrawOn canvas) {
-    final legend = _data.plotSpec?.legend();
+    final legend = _data.currentPlotSpec.legend();
     if (legend != null && legend.shown) {
       final textFontSize = legend.rowStyle.fontSize, textStyle = legend.rowStyle.labelStyle;
       final countLeftPadding = legend.addCounter ? textFontSize * canvas.pixelSize * 0.5 : 0.0;
@@ -350,7 +335,7 @@ class AntigenicMapViewer {
   }
 
   void paintTitle(DrawOn canvas) {
-    final title = _data.plotSpec?.plotTitle();
+    final title = _data.currentPlotSpec.plotTitle();
     if (title != null && title.shown) {
       final box = _BoxData(
           canvas: canvas,

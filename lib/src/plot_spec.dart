@@ -12,7 +12,8 @@ import 'viewport.dart';
 // ----------------------------------------------------------------------
 
 abstract class PlotSpec {
-  String title();
+  String name();
+  String title() => name();
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
   int priority();
@@ -119,7 +120,7 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
   }
 
   @override
-  String title() => "Default";
+  String name() => "Default";
 
   @override
   List<int> drawingOrder() {
@@ -153,13 +154,16 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   }
 
   @override
-  String title() => _data["t"] ?? _name;
+  String name() => _name;
+
+  @override
+  String title() => _data["t"] ?? name();
 
   @override
   List<int> drawingOrder() => _drawingOrder;
 
   @override
-  Viewport? viewport() => Viewport.originSizeList(_data["V"].map((value) => value.toDouble()).cast<double>().toList());
+  Viewport? viewport() => _data["V"] != null ? Viewport.originSizeList(_data["V"].map((value) => value.toDouble()).cast<double>().toList()) : null;
 
   @override
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
@@ -492,7 +496,7 @@ class PlotSpecLegacy extends PlotSpec {
   }
 
   @override
-  String title() => "Legacy";
+  String name() => "Legacy";
 
   @override
   List<int> drawingOrder() {
