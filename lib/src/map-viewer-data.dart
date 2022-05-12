@@ -16,7 +16,7 @@ import 'plot_spec.dart';
 // ======================================================================
 
 abstract class AntigenicMapViewerCallbacks {
-  void updateCallback();
+  void updateCallback({int? plotSpecIndex});
   void showMessage(String text, {Color backgroundColor = Colors.red});
   void hideMessage();
   Future<Uint8List?> exportPdf();
@@ -43,10 +43,9 @@ class AntigenicMapViewerData {
     chart = aChart;
     projection = chart!.projections[0];
     plotSpecs = chart!.plotSpecs(projection);
-    setPlotSpec(0);
     _chartBeingLoaded = false;
     _callbacks.hideMessage();
-    _callbacks.updateCallback();
+    _callbacks.updateCallback(plotSpecIndex: 0);
   }
 
   void setChartFromBytes(Uint8List bytes) {
@@ -73,7 +72,7 @@ class AntigenicMapViewerData {
       currentPlotSpecIndex = index;
       viewport = plotSpecs[index].viewport() ?? projection!.viewport();
       print("projection ${projection!.viewport()}");
-      print("used       $viewport");
+      print("used       $viewport  aspect:${viewport!.aspectRatio()}");
     }
   }
 

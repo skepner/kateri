@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 import 'package:window_manager/window_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
-import 'package:side_navigation/side_navigation.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -128,16 +127,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                                       onPressed: () => scaffoldKey.currentState?.openDrawer(),
                                     ))
                               ]))))),
-              Container(
-                // width: plotStyleMenuWidth,
-                child: SideNavigationBar(
-                  selectedIndex: _data.currentPlotSpecIndex,
-                  items: _data.plotSpecs.map<String>((ps) => ps.title()).map<SideNavigationBarItem>((name) => SideNavigationBarItem(icon: Icons.dashboard, label: name)).toList(),
-                  onTap: (index) {
-                    setState(() {
-                      _data.setPlotSpec(index);
-                    });
-                  },
+              SizedBox(
+                width: plotStyleMenuWidth,
+                child: ListView(
+                  children: plotStyleMenu(),
                 ),
               ),
             ]))));
@@ -145,12 +138,32 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   // ----------------------------------------------------------------------
 
+  List<ListTile> plotStyleMenu() {
+    return _data.plotSpecs
+        .asMap()
+        .entries
+        .map<ListTile>((entry) => ListTile(
+            title: Text(entry.value.title()),
+            // selectedTileColor: Color(0xFFF0F0FF)
+            selected: entry.key == _data.currentPlotSpecIndex,
+            enableFeedback: false,
+            onTap: () {
+              updateCallback(plotSpecIndex: entry.key);
+            }))
+        .toList();
+  }
+
+  // ----------------------------------------------------------------------
+
   @override
-  void updateCallback() {
+  void updateCallback({int? plotSpecIndex}) {
+    if (plotSpecIndex != null && plotSpecIndex != _data.currentPlotSpecIndex) {
+      _data.setPlotSpec(plotSpecIndex);
+      aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
+      onWindowResized();
+    }
     setState(() {
       /* AntigenicMapViewerData updated */
-      aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
-      print("aspectRatio $aspectRatio");
     });
   }
 
@@ -240,7 +253,6 @@ class AntigenicMapPainter extends CustomPainter {
     final stopwatch = Stopwatch()..start();
     _data.antigenicMapPainterSize = size; // to auto-resize window
     viewer.paint(CanvasFlutter(canvas, size));
-    // print("[paint] ${chart?.antigens.length}:${chart?.sera.length} ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
     if (stopwatch.elapsedMicroseconds > 100) {
       print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
     }
