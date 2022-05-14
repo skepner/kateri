@@ -35,7 +35,7 @@ class AntigenicMapViewerData {
   late bool openExportedPdf;
   Size antigenicMapPainterSize = Size.zero; // to auto-resize window
   List<PlotSpec> plotSpecs = <PlotSpec>[];
-  int currentPlotSpecIndex = 0;
+  int currentPlotSpecIndex = -1;
 
   AntigenicMapViewerData(this._callbacks);
 
@@ -45,6 +45,7 @@ class AntigenicMapViewerData {
     plotSpecs = chart!.plotSpecs(projection);
     _chartBeingLoaded = false;
     _callbacks.hideMessage();
+    currentPlotSpecIndex = -1;
     _callbacks.updateCallback(plotSpecIndex: 0);
   }
 
@@ -57,6 +58,7 @@ class AntigenicMapViewerData {
     projection = null;
     viewport = null;
     _chartBeingLoaded = false;
+    currentPlotSpecIndex = -1;
     _callbacks.updateCallback();
   }
 
