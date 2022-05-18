@@ -28,7 +28,5 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSSystemAdministrationUsageDescription</key>
-	<string>The operation being performed by Kateri requires elevated permission (Full Disk Access).</string>
 </dict>
 </plist>

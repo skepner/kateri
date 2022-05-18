@@ -8,7 +8,7 @@
 PRODUCT_NAME = kateri
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = org.antigenic-cartogrphy.kateri
+PRODUCT_BUNDLE_IDENTIFIER = com.example.kateri
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 antigenic-cartogrphy.org. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2022 com.example. All rights reserved.
