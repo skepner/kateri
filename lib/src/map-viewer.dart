@@ -371,7 +371,8 @@ class AntigenicMapViewer {
 
   Future<Uint8List?> exportPdf() async {
     if (_data.chart != null && _data.viewport != null) {
-      final canvasPdf = CanvasPdf(Size(1000.0, 1000.0 / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
+      const canvasPdfWidth = 1000.0;
+      final canvasPdf = CanvasPdf(Size(canvasPdfWidth, canvasPdfWidth / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
       return canvasPdf.bytes();
     }
     return null;
