@@ -196,18 +196,13 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     final points = selectPoints(entry["T"], entry["A"]);
     if (points.isNotEmpty) {
       for (final pointNo in points) {
-        modifyPointPlotSpec(pointSpec[pointNo], entry);
+        modifyPointPlotSpec(entry, pointSpec[pointNo]);
       }
       raiseLowerPoints(entry["D"], points);
     }
     final legend = entry["L"];
     if (legend != null) {
-      var point = PointPlotSpec();
-      if (points.isNotEmpty) {
-        point = pointSpec[points[0]];
-      } else {
-        modifyPointPlotSpec(point, entry);
-      }
+      final point = points.isNotEmpty ? PointPlotSpec.from(pointSpec[points[0]]) : modifyPointPlotSpec(entry, PointPlotSpec());
       _legendRows.add(LegendRow(text: legend["t"] ?? "", point: point, count: points.length, priority: legend["p"] ?? 0));
     }
   }
@@ -254,7 +249,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     }
   }
 
-  static void modifyPointPlotSpec(PointPlotSpec spec, Map<String, dynamic> mod) {
+  static PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec) {
     mod.forEach((modKey, modValue) {
       switch (modKey) {
         case "S":
@@ -283,6 +278,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           break;
       }
     });
+    return spec;
   }
 
   static PointShape pointShapeFromString(String src) {
