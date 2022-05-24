@@ -66,32 +66,32 @@ abstract class _DefaultPointSpecs {
 
   void makeDefaultPointSpecs({required Chart chart, required Function isReferenceAntigen}) {
     chart.antigens.asMap().forEach((agNo, antigen) {
-      if (isReferenceAntigen(agNo)) {
-        if (antigen.isReassortant) {
-          _addPointSpec(referenceReassortant);
-        } else if (antigen.isEgg) {
-          _addPointSpec(referenceEgg);
+        if (isReferenceAntigen(agNo)) {
+          if (antigen.isReassortant) {
+            _addPointSpec(referenceReassortant);
+          } else if (antigen.isEgg) {
+            _addPointSpec(referenceEgg);
+          } else {
+            _addPointSpec(referenceCell);
+          }
         } else {
-          _addPointSpec(referenceCell);
+          if (antigen.isReassortant) {
+            _addPointSpec(testReassortant);
+          } else if (antigen.isEgg) {
+            _addPointSpec(testEgg);
+          } else {
+            _addPointSpec(testCell);
+          }
         }
-      } else {
-        if (antigen.isReassortant) {
-          _addPointSpec(testReassortant);
-        } else if (antigen.isEgg) {
-          _addPointSpec(testEgg);
-        } else {
-          _addPointSpec(testCell);
-        }
-      }
     });
     chart.sera.asMap().forEach((srNo, serum) {
-      if (serum.isReassortant) {
-        _addPointSpec(serumReassortant);
-      } else if (serum.isEgg) {
-        _addPointSpec(serumEgg);
-      } else {
-        _addPointSpec(serumCell);
-      }
+        if (serum.isReassortant) {
+          _addPointSpec(serumReassortant);
+        } else if (serum.isEgg) {
+          _addPointSpec(serumEgg);
+        } else {
+          _addPointSpec(serumCell);
+        }
     });
   }
 
@@ -191,7 +191,10 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
     if (entry["R"] != null) {
       // reference to another style
-      apply(_chart.data["c"]["R"][entry["R"]]?["A"] ?? [], recursionLevel + 1);
+      final referenced = _chart.data["c"]["R"][entry["R"]];
+      if (referenced != null) {
+        apply(referenced["A"] ?? [], recursionLevel + 1);
+      }
     }
     final points = selectPoints(entry["T"], entry["A"]);
     if (points.isNotEmpty) {
@@ -241,42 +244,42 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
     switch (raiseLower) {
       case "r":
-        break;
+      break;
       case "l":
-        break;
+      break;
       default:
-        break;
+      break;
     }
   }
 
   static PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec) {
     mod.forEach((modKey, modValue) {
-      switch (modKey) {
-        case "S":
+        switch (modKey) {
+          case "S":
           spec.shape = pointShapeFromString(modValue);
           break;
-        case "F":
+          case "F":
           spec.fill = NamedColor.fromString(modValue);
           break;
-        case "O":
+          case "O":
           spec.outline = NamedColor.fromString(modValue);
           break;
-        case "o":
+          case "o":
           spec.outlineWidthPixels = modValue.toDouble();
           break;
-        case "s":
+          case "s":
           spec.sizePixels = modValue.toDouble();
           break;
-        case "r":
+          case "r":
           spec.rotation = modValue.toDouble();
           break;
-        case "a":
+          case "a":
           spec.aspect = modValue.toDouble();
           break;
-        case "-":
+          case "-":
           spec.shown = !(modValue as bool);
           break;
-      }
+        }
     });
     return spec;
   }
@@ -284,15 +287,15 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   static PointShape pointShapeFromString(String src) {
     switch (src[0].toUpperCase()) {
       case "C":
-        return PointShape.circle;
+      return PointShape.circle;
       case "B":
-        return PointShape.box;
+      return PointShape.box;
       case "T":
-        return PointShape.triangle;
+      return PointShape.triangle;
       case "E":
-        return PointShape.egg;
+      return PointShape.egg;
       case "U":
-        return PointShape.uglyegg;
+      return PointShape.uglyegg;
     }
     return PointShape.circle;
   }
@@ -312,23 +315,23 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
 class _Defaults {
   const _Defaults.title()
-      : fontWeight = "bold",
-        fontSize = 28,
-        interline = 0.2,
-        backgroundColor = "transparent",
-        borderColor = "black",
-        borderWidth = 0.0,
-        padding = const BoxPadding.zero(),
-        originDirection = "tl",
-        offset = const Offset(30, 30);
+  : fontWeight = "bold",
+  fontSize = 28,
+  interline = 0.2,
+  backgroundColor = "transparent",
+  borderColor = "black",
+  borderWidth = 0.0,
+  padding = const BoxPadding.zero(),
+  originDirection = "tl",
+  offset = const Offset(30, 30);
   const _Defaults.legend({this.fontWeight = "normal", this.interline = 0.3})
-      : fontSize = 20,
-        backgroundColor = "white",
-        borderColor = "black",
-        borderWidth = 1.0,
-        padding = const BoxPadding.hw(10.0, 15.0),
-        originDirection = "Bl",
-        offset = const Offset(20, -20);
+  : fontSize = 20,
+  backgroundColor = "white",
+  borderColor = "black",
+  borderWidth = 1.0,
+  padding = const BoxPadding.hw(10.0, 15.0),
+  originDirection = "Bl",
+  offset = const Offset(20, -20);
   const _Defaults.legendTitle() : this.legend(fontWeight: "bold", interline: 0.2);
 
   final String fontWeight;
@@ -393,19 +396,19 @@ class Legend {
 
 class PlotBox {
   PlotBox.Title(Map<String, dynamic>? dat)
-      : data = dat ?? <String, dynamic>{},
-        _defaults = _Defaults.title();
+  : data = dat ?? <String, dynamic>{},
+  _defaults = _Defaults.title();
   PlotBox.Legend(Map<String, dynamic>? dat)
-      : data = dat ?? <String, dynamic>{},
-        _defaults = _Defaults.legend();
+  : data = dat ?? <String, dynamic>{},
+  _defaults = _Defaults.legend();
 
   String get originDirection => data["o"] ?? _defaults.originDirection;
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : _defaults.offset;
   BoxPadding get padding => BoxPadding(
-      top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
-      bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
-      left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
-      right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
+    top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
+    bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
+    left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
+    right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
   double get borderWidth => data["W"]?.toDouble() ?? _defaults.borderWidth;
   String get backgroundColor => data["F"] ?? _defaults.backgroundColor;
   String get borderColor => data["B"] ?? _defaults.borderColor;
@@ -417,20 +420,20 @@ class PlotBox {
 class BoxPadding {
   BoxPadding({this.top = 0.0, this.bottom = 0.0, this.left = 0.0, this.right = 0.0});
   const BoxPadding.zero()
-      : top = 0.0,
-        bottom = 0.0,
-        left = 0.0,
-        right = 0.0;
+  : top = 0.0,
+  bottom = 0.0,
+  left = 0.0,
+  right = 0.0;
   const BoxPadding.all(double val)
-      : top = val,
-        bottom = val,
-        left = val,
-        right = val;
+  : top = val,
+  bottom = val,
+  left = val,
+  right = val;
   const BoxPadding.hw(double vert, double horiz)
-      : top = vert,
-        bottom = vert,
-        left = horiz,
-        right = horiz;
+  : top = vert,
+  bottom = vert,
+  left = horiz,
+  right = horiz;
   BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
   BoxPadding operator +(BoxPadding rhs) => BoxPadding(top: top + rhs.top, bottom: bottom + rhs.bottom, left: left + rhs.left, right: right + rhs.right);
   String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
@@ -445,10 +448,10 @@ class PlotText {
   List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
 
   LabelStyle get labelStyle => LabelStyle(
-      color: NamedColor.fromString(data["c"] ?? "black"),
-      fontFamily: labelFontFamilyFromString(data["f"]),
-      fontStyle: fontStyleFromString(data["S"]),
-      fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
+    color: NamedColor.fromString(data["c"] ?? "black"),
+    fontFamily: labelFontFamilyFromString(data["f"]),
+    fontStyle: fontStyleFromString(data["S"]),
+    fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
   double get fontSize => data["s"]?.toDouble() ?? _defaults.fontSize;
   double get interline => data["i"]?.toDouble() ?? _defaults.interline;
 
@@ -469,20 +472,20 @@ class PlotSpecLegacy extends PlotSpec {
       spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {
         case "C":
-          spec.shape = PointShape.circle;
-          break;
+        spec.shape = PointShape.circle;
+        break;
         case "B":
-          spec.shape = PointShape.box;
-          break;
+        spec.shape = PointShape.box;
+        break;
         case "T":
-          spec.shape = PointShape.triangle;
-          break;
+        spec.shape = PointShape.triangle;
+        break;
         case "E":
-          spec.shape = PointShape.egg;
-          break;
+        spec.shape = PointShape.egg;
+        break;
         case "U":
-          spec.shape = PointShape.uglyegg;
-          break;
+        spec.shape = PointShape.uglyegg;
+        break;
       }
       spec.rotation = entry["r"]?.toDouble() ?? noRotation;
       spec.aspect = entry["a"]?.toDouble() ?? aspectNormal;
