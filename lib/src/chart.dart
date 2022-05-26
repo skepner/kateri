@@ -45,7 +45,7 @@ class Chart extends _JsonAccess {
     final specs = <PlotSpec>[];
     if (_hasPlotSpecSemantic) {
       data["c"]["R"].forEach((name, plotSpecData) {
-        specs.add(PlotSpecSemantic(this, projection ?? projections[0], name, plotSpecData));
+          specs.add(PlotSpecSemantic(this, projection ?? projections[0], name, plotSpecData));
       });
     }
     if (_hasPlotSpecLegacy) {
@@ -131,15 +131,15 @@ class Info extends _JsonAccess {
     final subtype = data["V"];
     switch (subtype) {
       case "A(H1N1)":
-        return "h1";
+      return "h1";
       case "A(H3N2)":
-        return "h3";
+      return "h3";
       case "B":
-        return "b";
+      return "b";
       case null:
-        return null;
+      return null;
       default:
-        return subtype;
+      return subtype;
     }
   }
 }
@@ -183,9 +183,9 @@ typedef Sera = List<Serum>;
 
 class Projection extends _JsonAccess {
   Projection(_JsonData data)
-      : layout = data["l"].map<Vector3?>(_layoutElement).toList(),
-        _transformation = _makeTransformation(data["t"]),
-        super(data) {
+  : layout = data["l"].map<Vector3?>(_layoutElement).toList(),
+  _transformation = _makeTransformation(data["t"]),
+  super(data) {
     _makeTransformedLayout();
   }
 
@@ -213,13 +213,13 @@ class Projection extends _JsonAccess {
     switch (src.length) {
       case 0:
       case 1:
-        return null;
+      return null;
       case 2:
-        return Vector3(src[0], src[1], 0.0);
+      return Vector3(src[0], src[1], 0.0);
       case 3:
-        return Vector3(src[0], src[1], src[2]);
+      return Vector3(src[0], src[1], src[2]);
       default:
-        return null;
+      return null;
     }
   }
 
@@ -228,9 +228,9 @@ class Projection extends _JsonAccess {
       final data = List<double>.from(source.map<double>((value) => value.toDouble())); // using map, some values may represented as int and then source.cast<double>() fails
       switch (source.length) {
         case 4:
-          return Matrix4.identity()..setUpper2x2(Matrix2.fromList(data));
+        return Matrix4.identity()..setUpper2x2(Matrix2.fromList(data));
         case 6:
-          return Matrix4.identity()..copyRotation(Matrix3.fromList(data));
+        return Matrix4.identity()..copyRotation(Matrix3.fromList(data));
       }
     }
     return Matrix4.identity();
@@ -253,17 +253,25 @@ typedef Projections = List<Projection>;
 
 // ----------------------------------------------------------------------
 
-bool semanticMatch(Map<String, dynamic> selector, Map<String, dynamic> attributes) {
-  // print(attributes);
-  return selector.entries.fold(true, (value, en) {
-      if (!value) return false;
-      if (en.value is bool) return en.value && attributes.containsKey(en.key);
-
-      final attrVal = attributes[en.key];
-      if (attrVal == null) return false;
-      if (attrVal is List) return attrVal.contains(en.value);
-      return attrVal == en.value;
-  });
+bool semanticMatch(String semanticKey, dynamic semanticValue, Map<String, dynamic> attributes) {
+  if (semanticValue is bool) return semanticValue && attributes.containsKey(semanticKey);
+  final attrVal = attributes[semanticKey];
+  if (attrVal == null) return false;
+  if (attrVal is List) return attrVal.contains(semanticValue);
+  return attrVal == semanticValue;
 }
+
+// bool semanticMatch(Map<String, dynamic> selector, Map<String, dynamic> attributes) {
+//   // print(attributes);
+//   return selector.entries.fold(true, (result, en) {
+//       if (!result) return false;
+//       if (en.value is bool) return en.value && attributes.containsKey(en.key);
+
+//       final attrVal = attributes[en.key];
+//       if (attrVal == null) return false;
+//       if (attrVal is List) return attrVal.contains(en.value);
+//       return attrVal == en.value;
+//   });
+// }
 
 // ----------------------------------------------------------------------

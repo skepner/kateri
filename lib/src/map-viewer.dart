@@ -253,7 +253,7 @@ class AntigenicMapPainter extends CustomPainter {
     final stopwatch = Stopwatch()..start();
     _data.antigenicMapPainterSize = size; // to auto-resize window
     viewer.paint(CanvasFlutter(canvas, size));
-    if (stopwatch.elapsedMicroseconds > 100) {
+    if (stopwatch.elapsedMicroseconds > 5000) {
       print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
     }
   }

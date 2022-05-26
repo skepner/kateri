@@ -211,16 +211,29 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   }
 
   List<int> selectPoints(Map<String, dynamic>? selector, dynamic antigensOnly) {
-    bool match(Map<String, dynamic> semantic) {
-      return selector != null ? semanticMatch(selector, semantic) : true; // select all if selector absent
+    bool match(int pointNo, Map<String, dynamic> semantic) {
+      if (selector != null) {
+        return selector.entries.fold(true, (result, en) {
+            if (!result) return false;
+            if (en.key == "!i") return pointNo == en.value;
+            if (en.key == "!D") { // date range
+              print(">> WARNING: selectPoints: matching by date range ${en.key}: ${en.value} is not implemented in plot_spec.dart");
+              return false;
+            }
+            return semanticMatch(en.key, en.value, semantic);
+        });
+      }
+      else {
+        return true; // select all if selector absent
+      }
     }
 
     final selected = <int>[];
     if (castToBool(antigensOnly, ifNull: true)) {
-      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(_chart.antigens[agNo].semantic))); //
+      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(agNo, _chart.antigens[agNo].semantic))); //
     }
     if (!castToBool(antigensOnly, ifNull: false)) {
-      selected.addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(_chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+      selected.addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
   }
