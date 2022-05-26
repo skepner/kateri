@@ -292,6 +292,17 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           case "-":
           spec.shown = !(modValue as bool);
           break;
+          case "l":
+          spec.label = pointLabelFromMap(modValue);
+          break;
+          case "T":             // selector, processed earlier
+          case "D":             // order, processed in applyEntry()
+          case "A":             // antigens only, processed in selectPoints()
+          case "L":             // legend row, processed in applyEntry()
+          break;
+          default:
+          print(">> WARNING: modifyPointPlotSpec: unknown key $modKey: $modValue");
+          break;
         }
     });
     return spec;
@@ -311,6 +322,48 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       return PointShape.uglyegg;
     }
     return PointShape.circle;
+  }
+
+  static PointLabel pointLabelFromMap(Map<String, dynamic> source) {
+    print(">>>> label $source");
+    final label = PointLabel(source["t"] ?? "");
+    // source.forEach((key, val) {
+    //     switch (key) {
+    //       // case "-":                // if label is hidden
+    //       // label.shown = !val;
+    //       // break;
+    //       case "p":                // [x, y]: label offset (2D only), list of two doubles, default is [0, 1] means under point
+    //       label.offset = Offset(val[0].toDouble(), val[1].toDouble());
+    //       break;
+    //       case "f":                // font face
+    //       label.fontFamily = labelFontFamilyFromString(val);
+    //       break;
+    //       case "S":                // font slant: "normal" (default), "italic"
+    //       label.fontStyleFromString(val);
+    //       break;
+    //       case "W":                // font weight: "normal" (default), "bold"
+    //       label.fontWeightFromString(val);
+    //       break;
+    //       case "s":                // label size, default 16.0
+    //       label.sizePixels = val.toDouble();
+    //       break;
+    //       case "c":                // label color, default: "black"
+    //       label.color = colorFromSpec(val, BLACK);
+    //       break;
+    //       case "r":                // label rotation, default 0.0
+    //       label.rotation = val.toDouble();
+    //       break;
+    //       // case "i":                // addtional interval between lines as a fraction of line height
+    //       // break;
+    //       // case "t":
+    //       // label.text = val;
+    //       // break;
+    //       default:
+    //       print(">> WARNING: pointLabelFromMap: unknown point label specification key $key: $val");
+    //       break;
+    //     }
+    // });
+    return label;
   }
 
   final Chart _chart;
