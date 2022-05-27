@@ -20,20 +20,6 @@ abstract class PlotSpec {
   PlotTitle? plotTitle() => null;
   Legend? legend() => null;
   Viewport? viewport() => null;
-
-  static Color colorFromSpec(String? spec, Color dflt) {
-    if (spec != null && spec.isNotEmpty) {
-      spec = spec.toUpperCase();
-      if (spec[0] == "#") {
-        if (spec.length == 7) return Color(int.parse(spec.substring(1, 7), radix: 16) + 0xFF000000);
-        // if (spec.length == 4) return Color(int.parse(spec.substring(1, 4), radix: 16) + 0xFF000000);
-        if (spec.length == 9) return Color(int.parse(spec.substring(1, 7), radix: 16));
-      } else if (spec == "T" || spec == "TRANSPARENT") {
-        return transparent;
-      }
-    }
-    return dflt;
-  }
 }
 
 // ----------------------------------------------------------------------
@@ -348,7 +334,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           args[const Symbol("sizePixels")] = val.toDouble();
           break;
         case "c": // label color, default: "black"
-          args[const Symbol("color")] = PlotSpec.colorFromSpec(val, black);
+          args[const Symbol("color")] = NamedColor.fromStringOr(val, black);
           break;
         case "r": // label rotation, default 0.0
           args[const Symbol("rotation")] = val.toDouble();
@@ -364,6 +350,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       }
     });
 
+    // print("$args");
     return Function.apply(PointLabel.apply, [], args);
   }
 
@@ -533,8 +520,8 @@ class PlotSpecLegacy extends PlotSpec {
     for (final entry in _data["P"] ?? []) {
       final spec = PointPlotSpec();
       if (!(entry["+"] ?? true)) spec.shown = false;
-      spec.fill = PlotSpec.colorFromSpec(entry["F"], transparent);
-      spec.outline = PlotSpec.colorFromSpec(entry["O"], black);
+      spec.fill = NamedColor.fromStringOr(entry["F"], transparent);
+      spec.outline = NamedColor.fromStringOr(entry["O"], black);
       spec.outlineWidthPixels = entry["o"]?.toDouble() ?? 1.0;
       spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {

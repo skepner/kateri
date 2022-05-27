@@ -35,15 +35,21 @@ extension NamedColor on Color {
           return Color(int.parse(src.replaceFirst('#', ''), radix: 16));
       }
     } else {
-      return _colorNames[src] ?? Colors.pink;
+      return _colorNames[src.toLowerCase()] ?? Colors.pink;
     }
     return Colors.pink;
+  }
+
+  static Color fromStringOr(String? src, Color dflt) {
+    if (src != null && src.isNotEmpty) return fromString(src);
+    return dflt;
   }
 }
 
 // ----------------------------------------------------------------------
 
 const _colorNames = <String, Color>{
+  "t": transparent,
   "transparent": transparent,
   "black": black,
   "gray": gray,
