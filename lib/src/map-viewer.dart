@@ -283,6 +283,7 @@ class AntigenicMapViewer {
         canvas.pointOfPlotSpec(layout[pointNo]!, _data.currentPlotSpec[pointNo]);
       }
     }
+    canvas.drawDelayedText();
     paintLegend(canvas);
     paintTitle(canvas);
   }

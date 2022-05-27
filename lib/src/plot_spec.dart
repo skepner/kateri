@@ -21,7 +21,7 @@ abstract class PlotSpec {
   Legend? legend() => null;
   Viewport? viewport() => null;
 
-  Color colorFromSpec(String? spec, Color dflt) {
+  static Color colorFromSpec(String? spec, Color dflt) {
     if (spec != null && spec.isNotEmpty) {
       spec = spec.toUpperCase();
       if (spec[0] == "#") {
@@ -66,32 +66,32 @@ abstract class _DefaultPointSpecs {
 
   void makeDefaultPointSpecs({required Chart chart, required Function isReferenceAntigen}) {
     chart.antigens.asMap().forEach((agNo, antigen) {
-        if (isReferenceAntigen(agNo)) {
-          if (antigen.isReassortant) {
-            _addPointSpec(referenceReassortant);
-          } else if (antigen.isEgg) {
-            _addPointSpec(referenceEgg);
-          } else {
-            _addPointSpec(referenceCell);
-          }
+      if (isReferenceAntigen(agNo)) {
+        if (antigen.isReassortant) {
+          _addPointSpec(referenceReassortant);
+        } else if (antigen.isEgg) {
+          _addPointSpec(referenceEgg);
         } else {
-          if (antigen.isReassortant) {
-            _addPointSpec(testReassortant);
-          } else if (antigen.isEgg) {
-            _addPointSpec(testEgg);
-          } else {
-            _addPointSpec(testCell);
-          }
+          _addPointSpec(referenceCell);
         }
+      } else {
+        if (antigen.isReassortant) {
+          _addPointSpec(testReassortant);
+        } else if (antigen.isEgg) {
+          _addPointSpec(testEgg);
+        } else {
+          _addPointSpec(testCell);
+        }
+      }
     });
     chart.sera.asMap().forEach((srNo, serum) {
-        if (serum.isReassortant) {
-          _addPointSpec(serumReassortant);
-        } else if (serum.isEgg) {
-          _addPointSpec(serumEgg);
-        } else {
-          _addPointSpec(serumCell);
-        }
+      if (serum.isReassortant) {
+        _addPointSpec(serumReassortant);
+      } else if (serum.isEgg) {
+        _addPointSpec(serumEgg);
+      } else {
+        _addPointSpec(serumCell);
+      }
     });
   }
 
@@ -214,16 +214,16 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     bool match(int pointNo, Map<String, dynamic> semantic) {
       if (selector != null) {
         return selector.entries.fold(true, (result, en) {
-            if (!result) return false;
-            if (en.key == "!i") return pointNo == en.value;
-            if (en.key == "!D") { // date range
-              print(">> WARNING: selectPoints: matching by date range ${en.key}: ${en.value} is not implemented in plot_spec.dart");
-              return false;
-            }
-            return semanticMatch(en.key, en.value, semantic);
+          if (!result) return false;
+          if (en.key == "!i") return pointNo == en.value;
+          if (en.key == "!D") {
+            // date range
+            print(">> WARNING: selectPoints: matching by date range ${en.key}: ${en.value} is not implemented in plot_spec.dart");
+            return false;
+          }
+          return semanticMatch(en.key, en.value, semantic);
         });
-      }
-      else {
+      } else {
         return true; // select all if selector absent
       }
     }
@@ -233,7 +233,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(agNo, _chart.antigens[agNo].semantic))); //
     }
     if (!castToBool(antigensOnly, ifNull: false)) {
-      selected.addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+      selected
+          .addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
   }
@@ -257,53 +258,53 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
     switch (raiseLower) {
       case "r":
-      break;
+        break;
       case "l":
-      break;
+        break;
       default:
-      break;
+        break;
     }
   }
 
   static PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec) {
     mod.forEach((modKey, modValue) {
-        switch (modKey) {
-          case "S":
+      switch (modKey) {
+        case "S":
           spec.shape = pointShapeFromString(modValue);
           break;
-          case "F":
+        case "F":
           spec.fill = NamedColor.fromString(modValue);
           break;
-          case "O":
+        case "O":
           spec.outline = NamedColor.fromString(modValue);
           break;
-          case "o":
+        case "o":
           spec.outlineWidthPixels = modValue.toDouble();
           break;
-          case "s":
+        case "s":
           spec.sizePixels = modValue.toDouble();
           break;
-          case "r":
+        case "r":
           spec.rotation = modValue.toDouble();
           break;
-          case "a":
+        case "a":
           spec.aspect = modValue.toDouble();
           break;
-          case "-":
+        case "-":
           spec.shown = !(modValue as bool);
           break;
-          case "l":
-          spec.label = pointLabelFromMap(modValue);
+        case "l":
+          spec.label = pointLabelFromAce(modValue);
           break;
-          case "T":             // selector, processed earlier
-          case "D":             // order, processed in applyEntry()
-          case "A":             // antigens only, processed in selectPoints()
-          case "L":             // legend row, processed in applyEntry()
+        case "T": // selector, processed earlier
+        case "D": // order, processed in applyEntry()
+        case "A": // antigens only, processed in selectPoints()
+        case "L": // legend row, processed in applyEntry()
           break;
-          default:
+        default:
           print(">> WARNING: modifyPointPlotSpec: unknown key $modKey: $modValue");
           break;
-        }
+      }
     });
     return spec;
   }
@@ -311,59 +312,59 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   static PointShape pointShapeFromString(String src) {
     switch (src[0].toUpperCase()) {
       case "C":
-      return PointShape.circle;
+        return PointShape.circle;
       case "B":
-      return PointShape.box;
+        return PointShape.box;
       case "T":
-      return PointShape.triangle;
+        return PointShape.triangle;
       case "E":
-      return PointShape.egg;
+        return PointShape.egg;
       case "U":
-      return PointShape.uglyegg;
+        return PointShape.uglyegg;
     }
     return PointShape.circle;
   }
 
-  static PointLabel pointLabelFromMap(Map<String, dynamic> source) {
-    print(">>>> label $source");
-    final label = PointLabel(source["t"] ?? "");
-    // source.forEach((key, val) {
-    //     switch (key) {
-    //       // case "-":                // if label is hidden
-    //       // label.shown = !val;
-    //       // break;
-    //       case "p":                // [x, y]: label offset (2D only), list of two doubles, default is [0, 1] means under point
-    //       label.offset = Offset(val[0].toDouble(), val[1].toDouble());
-    //       break;
-    //       case "f":                // font face
-    //       label.fontFamily = labelFontFamilyFromString(val);
-    //       break;
-    //       case "S":                // font slant: "normal" (default), "italic"
-    //       label.fontStyleFromString(val);
-    //       break;
-    //       case "W":                // font weight: "normal" (default), "bold"
-    //       label.fontWeightFromString(val);
-    //       break;
-    //       case "s":                // label size, default 16.0
-    //       label.sizePixels = val.toDouble();
-    //       break;
-    //       case "c":                // label color, default: "black"
-    //       label.color = colorFromSpec(val, BLACK);
-    //       break;
-    //       case "r":                // label rotation, default 0.0
-    //       label.rotation = val.toDouble();
-    //       break;
-    //       // case "i":                // addtional interval between lines as a fraction of line height
-    //       // break;
-    //       // case "t":
-    //       // label.text = val;
-    //       // break;
-    //       default:
-    //       print(">> WARNING: pointLabelFromMap: unknown point label specification key $key: $val");
-    //       break;
-    //     }
-    // });
-    return label;
+  static PointLabel pointLabelFromAce(Map<String, dynamic> source) {
+    final args = <Symbol, dynamic>{};
+    source.forEach((key, val) {
+      switch (key) {
+        case "t":
+          args[const Symbol("text")] = val;
+          break;
+        case "p": // [x, y]: label offset (2D only), list of two doubles, default is [0, 1] means under point
+          args[const Symbol("offset")] = Offset(val[0].toDouble(), val[1].toDouble());
+          break;
+        case "f": // font face
+          args[const Symbol("fontFamily")] = labelFontFamilyFromString(val);
+          break;
+        case "S": // font slant: "normal" (default), "italic"
+          args[const Symbol("fontStyle")] = fontStyleFromString(val);
+          break;
+        case "W": // font weight: "normal" (default), "bold"
+          args[const Symbol("fontWeight")] = fontWeightFromString(val);
+          break;
+        case "s": // label size, default 16.0
+          args[const Symbol("sizePixels")] = val.toDouble();
+          break;
+        case "c": // label color, default: "black"
+          args[const Symbol("color")] = PlotSpec.colorFromSpec(val, black);
+          break;
+        case "r": // label rotation, default 0.0
+          args[const Symbol("rotation")] = val.toDouble();
+          break;
+        // case "-":                // if label is hidden
+        // args[const Symbol("shown")] = !val;
+        // break;
+        // case "i":                // addtional interval between lines as a fraction of line height
+        // break;
+        default:
+          print(">> WARNING: pointLabelFromAce: unknown point label specification key $key: $val");
+          break;
+      }
+    });
+
+    return Function.apply(PointLabel.apply, [], args);
   }
 
   final Chart _chart;
@@ -381,23 +382,23 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
 class _Defaults {
   const _Defaults.title()
-  : fontWeight = "bold",
-  fontSize = 28,
-  interline = 0.2,
-  backgroundColor = "transparent",
-  borderColor = "black",
-  borderWidth = 0.0,
-  padding = const BoxPadding.zero(),
-  originDirection = "tl",
-  offset = const Offset(30, 30);
+      : fontWeight = "bold",
+        fontSize = 28,
+        interline = 0.2,
+        backgroundColor = "transparent",
+        borderColor = "black",
+        borderWidth = 0.0,
+        padding = const BoxPadding.zero(),
+        originDirection = "tl",
+        offset = const Offset(30, 30);
   const _Defaults.legend({this.fontWeight = "normal", this.interline = 0.3})
-  : fontSize = 20,
-  backgroundColor = "white",
-  borderColor = "black",
-  borderWidth = 1.0,
-  padding = const BoxPadding.hw(10.0, 15.0),
-  originDirection = "Bl",
-  offset = const Offset(20, -20);
+      : fontSize = 20,
+        backgroundColor = "white",
+        borderColor = "black",
+        borderWidth = 1.0,
+        padding = const BoxPadding.hw(10.0, 15.0),
+        originDirection = "Bl",
+        offset = const Offset(20, -20);
   const _Defaults.legendTitle() : this.legend(fontWeight: "bold", interline: 0.2);
 
   final String fontWeight;
@@ -462,19 +463,19 @@ class Legend {
 
 class PlotBox {
   PlotBox.Title(Map<String, dynamic>? dat)
-  : data = dat ?? <String, dynamic>{},
-  _defaults = _Defaults.title();
+      : data = dat ?? <String, dynamic>{},
+        _defaults = _Defaults.title();
   PlotBox.Legend(Map<String, dynamic>? dat)
-  : data = dat ?? <String, dynamic>{},
-  _defaults = _Defaults.legend();
+      : data = dat ?? <String, dynamic>{},
+        _defaults = _Defaults.legend();
 
   String get originDirection => data["o"] ?? _defaults.originDirection;
   Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : _defaults.offset;
   BoxPadding get padding => BoxPadding(
-    top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
-    bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
-    left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
-    right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
+      top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
+      bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
+      left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
+      right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
   double get borderWidth => data["W"]?.toDouble() ?? _defaults.borderWidth;
   String get backgroundColor => data["F"] ?? _defaults.backgroundColor;
   String get borderColor => data["B"] ?? _defaults.borderColor;
@@ -486,20 +487,20 @@ class PlotBox {
 class BoxPadding {
   BoxPadding({this.top = 0.0, this.bottom = 0.0, this.left = 0.0, this.right = 0.0});
   const BoxPadding.zero()
-  : top = 0.0,
-  bottom = 0.0,
-  left = 0.0,
-  right = 0.0;
+      : top = 0.0,
+        bottom = 0.0,
+        left = 0.0,
+        right = 0.0;
   const BoxPadding.all(double val)
-  : top = val,
-  bottom = val,
-  left = val,
-  right = val;
+      : top = val,
+        bottom = val,
+        left = val,
+        right = val;
   const BoxPadding.hw(double vert, double horiz)
-  : top = vert,
-  bottom = vert,
-  left = horiz,
-  right = horiz;
+      : top = vert,
+        bottom = vert,
+        left = horiz,
+        right = horiz;
   BoxPadding operator *(double pixelSize) => BoxPadding(top: top * pixelSize, bottom: bottom * pixelSize, left: left * pixelSize, right: right * pixelSize);
   BoxPadding operator +(BoxPadding rhs) => BoxPadding(top: top + rhs.top, bottom: bottom + rhs.bottom, left: left + rhs.left, right: right + rhs.right);
   String toString() => "BoxPadding(top: $top, bottom: $bottom, left: $left, right: $right)";
@@ -514,10 +515,10 @@ class PlotText {
   List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
 
   LabelStyle get labelStyle => LabelStyle(
-    color: NamedColor.fromString(data["c"] ?? "black"),
-    fontFamily: labelFontFamilyFromString(data["f"]),
-    fontStyle: fontStyleFromString(data["S"]),
-    fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
+      color: NamedColor.fromString(data["c"] ?? "black"),
+      fontFamily: labelFontFamilyFromString(data["f"]),
+      fontStyle: fontStyleFromString(data["S"]),
+      fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
   double get fontSize => data["s"]?.toDouble() ?? _defaults.fontSize;
   double get interline => data["i"]?.toDouble() ?? _defaults.interline;
 
@@ -532,26 +533,26 @@ class PlotSpecLegacy extends PlotSpec {
     for (final entry in _data["P"] ?? []) {
       final spec = PointPlotSpec();
       if (!(entry["+"] ?? true)) spec.shown = false;
-      spec.fill = colorFromSpec(entry["F"], transparent);
-      spec.outline = colorFromSpec(entry["O"], black);
+      spec.fill = PlotSpec.colorFromSpec(entry["F"], transparent);
+      spec.outline = PlotSpec.colorFromSpec(entry["O"], black);
       spec.outlineWidthPixels = entry["o"]?.toDouble() ?? 1.0;
       spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {
         case "C":
-        spec.shape = PointShape.circle;
-        break;
+          spec.shape = PointShape.circle;
+          break;
         case "B":
-        spec.shape = PointShape.box;
-        break;
+          spec.shape = PointShape.box;
+          break;
         case "T":
-        spec.shape = PointShape.triangle;
-        break;
+          spec.shape = PointShape.triangle;
+          break;
         case "E":
-        spec.shape = PointShape.egg;
-        break;
+          spec.shape = PointShape.egg;
+          break;
         case "U":
-        spec.shape = PointShape.uglyegg;
-        break;
+          spec.shape = PointShape.uglyegg;
+          break;
       }
       spec.rotation = entry["r"]?.toDouble() ?? noRotation;
       spec.aspect = entry["a"]?.toDouble() ?? aspectNormal;

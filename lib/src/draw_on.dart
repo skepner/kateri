@@ -77,9 +77,17 @@ class PointPlotSpec {
 
 // ----------------------------------------------------------------------
 
-enum LabelFontFamily { monospace, sansSerif, serif, helvetica, courier, times /* , symbol, zapf */ }
+enum LabelFontFamily {
+  monospace,
+  sansSerif,
+  serif,
+  helvetica,
+  courier,
+  times /* , symbol, zapf */
+}
+
 LabelFontFamily labelFontFamilyFromString(String? str) =>
-  str == null ? LabelFontFamily.helvetica : LabelFontFamily.values.firstWhere((lff) => lff.toString().toLowerCase() == ("LabelFontFamily." + str.toLowerCase()));
+    str == null ? LabelFontFamily.helvetica : LabelFontFamily.values.firstWhere((lff) => lff.toString().toLowerCase() == ("LabelFontFamily." + str.toLowerCase()));
 
 FontWeight fontWeightFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
 FontStyle fontStyleFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
@@ -106,15 +114,27 @@ class PointLabel extends LabelStyle {
   final double sizePixels;
   final double rotation;
 
-  const PointLabel(this.text,
-      {this.offset = const Offset(0.0, 1.0),
-      this.sizePixels = 24,
-      this.rotation = 0.0,
-      Color color = black,
-      LabelFontFamily fontFamily = LabelFontFamily.helvetica,
-      FontStyle fontStyle = FontStyle.normal,
-      FontWeight fontWeight = FontWeight.normal})
+  const PointLabel.fromArgs(
+      {required this.text,
+      required this.offset,
+      required this.sizePixels,
+      required this.rotation,
+      required Color color,
+      required LabelFontFamily fontFamily,
+      required FontStyle fontStyle,
+      required FontWeight fontWeight})
       : super(color: color, fontFamily: fontFamily, fontStyle: fontStyle, fontWeight: fontWeight);
+
+  static PointLabel apply(
+          {String text = "",
+          Offset offset = const Offset(0.0, 1.0),
+          double sizePixels = 24.0,
+          double rotation = 0.0,
+          Color color = black,
+          LabelFontFamily fontFamily = LabelFontFamily.helvetica,
+          FontStyle fontStyle = FontStyle.normal,
+          FontWeight fontWeight = FontWeight.normal}) =>
+      PointLabel.fromArgs(text: text, offset: offset, sizePixels: sizePixels, rotation: rotation, color: color, fontFamily: fontFamily, fontStyle: fontStyle, fontWeight: fontWeight);
 
   PointLabel.from(PointLabel src)
       : offset = src.offset,
