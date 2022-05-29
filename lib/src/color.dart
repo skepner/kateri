@@ -86,7 +86,7 @@ class ColorAndModifier {
     if (source > 0.5) {
       return 1.0;
     } else if (source == 0.0) {
-      return 0.5;
+      return 0.7;
     } else {
       return source * 2.0;
     }
