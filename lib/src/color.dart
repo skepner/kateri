@@ -64,13 +64,16 @@ class ColorAndModifier {
   void modify(String toAdd) {
     if (toAdd.isNotEmpty) {
       if (toAdd[0] == ":") {
-        if (_modifier == ":pale" && toAdd == ":bright") {
+        if (toAdd == ":bright") {
           _modifier = null;
         } else if (toAdd == ":pale") {
           _modifier = toAdd;
+        } else {
+          print(">> WARNING: unknown color modifier \"$toAdd\"");
         }
       } else {
         _color = toAdd;
+        _modifier = null;
       }
     }
   }
