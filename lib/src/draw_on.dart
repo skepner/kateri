@@ -184,8 +184,6 @@ abstract class DrawOn {
 
   void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
-  // legend
-
   void point(
       {required Vector3 center,
       required double sizePixels,
