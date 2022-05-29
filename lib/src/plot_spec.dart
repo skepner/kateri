@@ -38,7 +38,7 @@ class _DefaultDrawingOrder {
 // ----------------------------------------------------------------------
 
 abstract class _DefaultPointSpecs {
-  void initDefaultPointSpecs({required Color testAntigenFill, required Color outline}) {
+  void initDefaultPointSpecs({required ColorAndModifier testAntigenFill, required ColorAndModifier outline}) {
     referenceCell = PointPlotSpec.referenceCell(outline);
     referenceEgg = PointPlotSpec.referenceEgg(outline);
     referenceReassortant = PointPlotSpec.referenceReassortant(outline);
@@ -100,7 +100,7 @@ abstract class _DefaultPointSpecs {
 
 class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
   PlotSpecDefault(this._chart, this._projection) {
-    initDefaultPointSpecs(testAntigenFill: green, outline: black);
+    initDefaultPointSpecs(testAntigenFill: ColorAndModifier("green"), outline: ColorAndModifier("black"));
     makeDefaultDrawingOrder(_chart, _projection);
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
   }
@@ -132,7 +132,7 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
 
 class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
   PlotSpecSemantic(this._chart, this._projection, this._name, this._data) {
-    initDefaultPointSpecs(testAntigenFill: gray80, outline: gray80);
+    initDefaultPointSpecs(testAntigenFill: ColorAndModifier("gray80"), outline: ColorAndModifier("gray80"));
     makeDefaultDrawingOrder(_chart, _projection);
     _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
     makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
@@ -259,10 +259,10 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           spec.shape = pointShapeFromString(modValue);
           break;
         case "F":
-          spec.fill = NamedColor.fromString(modValue);
+          spec.fill.modify(modValue);
           break;
         case "O":
-          spec.outline = NamedColor.fromString(modValue);
+          spec.outline.modify(modValue);
           break;
         case "o":
           spec.outlineWidthPixels = modValue.toDouble();
@@ -335,7 +335,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           args[const Symbol("sizePixels")] = val.toDouble();
           break;
         case "c": // label color, default: "black"
-          args[const Symbol("color")] = NamedColor.fromStringOr(val, black);
+          args[const Symbol("color")] = NamedColor.fromStringOr(val, "black");
           break;
         case "r": // label rotation, default 0.0
           args[const Symbol("rotation")] = val.toDouble();
@@ -521,8 +521,8 @@ class PlotSpecLegacy extends PlotSpec {
     for (final entry in _data["P"] ?? []) {
       final spec = PointPlotSpec();
       if (!(entry["+"] ?? true)) spec.shown = false;
-      spec.fill = NamedColor.fromStringOr(entry["F"], transparent);
-      spec.outline = NamedColor.fromStringOr(entry["O"], black);
+      spec.fill = ColorAndModifier(entry["F"] ?? "transparent");
+      spec.outline = ColorAndModifier(entry["O"] ?? "black");
       spec.outlineWidthPixels = entry["o"]?.toDouble() ?? 1.0;
       spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {

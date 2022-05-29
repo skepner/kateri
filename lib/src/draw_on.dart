@@ -30,8 +30,8 @@ class PointPlotSpec {
   bool shown = true;
   double sizePixels = testSize;
   PointShape shape = PointShape.circle;
-  Color fill = transparent;
-  Color outline = black;
+  ColorAndModifier fill = ColorAndModifier("transparent").copy();
+  ColorAndModifier outline = ColorAndModifier("black").copy();
   double outlineWidthPixels = 1.0;
   double rotation = noRotation;
   double aspect = aspectNormal;
@@ -42,8 +42,8 @@ class PointPlotSpec {
       : shown = src.shown,
         sizePixels = src.sizePixels,
         shape = src.shape,
-        fill = src.fill,
-        outline = src.outline,
+        fill = src.fill.copy(),
+        outline = src.outline.copy(),
         outlineWidthPixels = src.outlineWidthPixels,
         rotation = src.rotation,
         aspect = src.aspect {
@@ -98,7 +98,7 @@ class LabelStyle {
   final FontWeight fontWeight;
   final FontStyle fontStyle;
 
-  const LabelStyle({this.color = black, this.fontFamily = LabelFontFamily.helvetica, this.fontStyle = FontStyle.normal, this.fontWeight = FontWeight.normal});
+  const LabelStyle({this.color = const Color(0xFF000000), this.fontFamily = LabelFontFamily.helvetica, this.fontStyle = FontStyle.normal, this.fontWeight = FontWeight.normal});
   LabelStyle.from(LabelStyle src)
       : color = src.color,
         fontFamily = src.fontFamily,
@@ -130,7 +130,7 @@ class PointLabel extends LabelStyle {
           Offset offset = const Offset(0.0, 1.0),
           double sizePixels = 24.0,
           double rotation = 0.0,
-          Color color = black,
+          Color color = const Color(0xFF000000),
           LabelFontFamily fontFamily = LabelFontFamily.helvetica,
           FontStyle fontStyle = FontStyle.normal,
           FontWeight fontWeight = FontWeight.normal}) =>
@@ -182,7 +182,7 @@ abstract class DrawOn {
   // 2D
   // ----------------------------------------------------------------------
 
-  void path(List<Offset> vertices, {Color outline = black, Color fill = transparent, double lineWidthPixels = 1.0, bool close = true});
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true});
 
   // legend
 
@@ -190,8 +190,8 @@ abstract class DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = transparent,
-      Color outline = black,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = noRotation,
       double aspect = 1.0,
@@ -202,8 +202,8 @@ abstract class DrawOn {
         center: center,
         sizePixels: plotSpec.sizePixels,
         shape: plotSpec.shape,
-        fill: plotSpec.fill,
-        outline: plotSpec.outline,
+        fill: plotSpec.fill.color,
+        outline: plotSpec.outline.color,
         outlineWidthPixels: plotSpec.outlineWidthPixels,
         rotation: plotSpec.rotation,
         aspect: plotSpec.aspect,
@@ -227,16 +227,16 @@ abstract class DrawOn {
     delayedText(label.text, Offset(center.x + offset.dx, center.y + offset.dy), sizePixels: label.sizePixels, rotation: label.rotation, textStyle: label);
   }
 
-  void line(Offset p1, Offset p2, {Color outline = black, double lineWidthPixels = 1.0}) {
+  void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
     path([p1, p2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
   }
 
   void arrow(Offset p1, Offset p2,
-      {Color outline = black,
+      {Color outline = const Color(0xFF000000),
       double lineWidthPixels = 1.0,
-      Color headOutline = black,
+      Color headOutline = const Color(0xFF000000),
       double headOutlineWidthPixels = 1.0,
-      Color headFill = black,
+      Color headFill = const Color(0xFF000000),
       double headLengthPixels = 15.0,
       double headAspect = 0.5}) {
     final vec = p2 - p1;
@@ -255,9 +255,9 @@ abstract class DrawOn {
         aspect: headAspect);
   }
 
-  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0});
+  void circle({required Offset center, required double size, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0});
 
-  void rectangle({required Rect rect, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0}) {
+  void rectangle({required Rect rect, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0}) {
     path([rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft], fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels, close: true);
   }
 
@@ -265,10 +265,10 @@ abstract class DrawOn {
     required Offset center,
     required double radius,
     required double angle,
-    Color fill = transparent,
-    Color outlineCircle = black,
+    Color fill = const Color(0x00000000),
+    Color outlineCircle = const Color(0xFF000000),
     double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = black,
+    Color outlineRadius = const Color(0xFF000000),
     double outlineRadiusWidthPixels = 1.0,
     double rotation = noRotation, // noRotation - first radius in upright
   });
@@ -299,8 +299,8 @@ abstract class DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = transparent,
-      Color outline = black,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = noRotation,
       double aspect = 1.0});

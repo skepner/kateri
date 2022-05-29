@@ -69,8 +69,8 @@ class _DrawOnCanvas extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = transparent,
-      Color outline = black,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = noRotation,
       double aspect = 1.0,
@@ -151,7 +151,7 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void path(List<Offset> vertices, {Color outline = black, Color fill = transparent, double lineWidthPixels = 1.0, bool close = true}) {
+  void path(List<Offset> vertices, {Color outline = const Color(0xFF000000), Color fill = const Color(0x00000000), double lineWidthPixels = 1.0, bool close = true}) {
     var path = Path()..moveTo(vertices[0].dx, vertices[0].dy);
     for (var vertix in vertices.getRange(1, vertices.length)) {
       path.lineTo(vertix.dx, vertix.dy);
@@ -181,7 +181,7 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void circle({required Offset center, required double size, Color fill = transparent, Color outline = black, double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
+  void circle({required Offset center, required double size, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
     canvas
       ..save()
       ..translate(center.dx, center.dy)
@@ -210,10 +210,10 @@ class _DrawOnCanvas extends DrawOn {
     required Offset center,
     required double radius,
     required double angle,
-    Color fill = transparent,
-    Color outlineCircle = black,
+    Color fill = const Color(0x00000000),
+    Color outlineCircle = const Color(0xFF000000),
     double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = black,
+    Color outlineRadius = const Color(0xFF000000),
     double outlineRadiusWidthPixels = 1.0,
     double rotation = noRotation, // noRotation - first radius in upright
   }) {
@@ -341,8 +341,8 @@ class _DrawOnCanvas extends DrawOn {
       {required Vector3 center,
       required double sizePixels,
       PointShape shape = PointShape.circle,
-      Color fill = transparent,
-      Color outline = black,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
       double rotation = noRotation,
       double aspect = 1.0}) {
@@ -359,10 +359,10 @@ class _DrawOnCanvas extends DrawOn {
       //   const Color(0xFF0000FF),
       // ],
       colors: [
-        white,
+        const Color(0xFFFFFFFF),
         fill,
         // Colors.blue,
-        // black,
+        // const Color(0xFF000000),
       ],
       // stops: [
       //   0.0, 0.9, 1.0

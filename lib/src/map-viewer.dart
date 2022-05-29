@@ -334,8 +334,8 @@ class AntigenicMapViewer {
             center: vec.Vector3(dx + pointSize / 2, dy - box.textSize[lineNo].height * 0.35, 0.0),
             sizePixels: pointSizePixels,
             shape: pointSpec.shape,
-            fill: pointSpec.fill,
-            outline: pointSpec.outline,
+            fill: pointSpec.fill.color,
+            outline: pointSpec.outline.color,
             outlineWidthPixels: pointSpec.outlineWidthPixels);
         canvas.text(box.text[lineNo], Offset(dx + pointSpace, dy), sizePixels: box.textFontSize, textStyle: box.textStyle);
         if (legend.addCounter) {
