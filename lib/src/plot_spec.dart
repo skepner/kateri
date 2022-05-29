@@ -282,6 +282,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         case "l":
           spec.label = pointLabelFromAce(modValue);
           break;
+        case "R": // reference to another style, processed in applyEntry()
         case "T": // selector, processed earlier
         case "D": // order, processed in applyEntry()
         case "A": // antigens only, processed in selectPoints()
