@@ -176,10 +176,10 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
     if (entry["R"] != null) {
-      // reference to another style
-      final referenced = _chart.data["c"]["R"][entry["R"]];
-      if (referenced != null) {
-        apply(referenced["A"] ?? [], recursionLevel + 1);
+      // parent style
+      final parentStyle = _chart.data["c"]["R"][entry["R"]];
+      if (parentStyle != null) {
+        apply(parentStyle["A"] ?? [], recursionLevel + 1);
       }
     }
     final points = selectPoints(entry["T"], entry["A"]);
