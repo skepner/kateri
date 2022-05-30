@@ -35,9 +35,11 @@ extension NamedColor on Color {
           return Color(int.parse(src.replaceFirst('#', ''), radix: 16));
       }
     } else {
-      return _colorNames[src.toLowerCase()] ?? Colors.pink;
+      final color = _colorNames[src.toLowerCase()];
+      if (color != null) return color;
     }
-    return Colors.pink;
+    print(">> WARNING: unrecognized color: \"$src\"");
+    return  Colors.pink;
   }
 
   static Color fromStringOr(String? src, String dflt) {
@@ -109,9 +111,10 @@ const _colorNames = <String, Color>{
   "t": Color(0x00000000),
   "transparent": Color(0x00000000),
   "black": Color(0xFF000000),
-  "gray": Color(0xFFBEBEBE),
   "grey": Color(0xFFBEBEBE),
+  "gray": Color(0xFFBEBEBE),
   "grey80": Color(0xFFCCCCCC),
+  "gray80": Color(0xFFCCCCCC),
   "white": Color(0xFFFFFFFF),
   "red": Color(0xFFFF0000),
   "green": Color(0xFF00FF00),
