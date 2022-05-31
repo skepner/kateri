@@ -167,9 +167,9 @@ class Antigen extends _AntigenSerum {
   String get date => data["D"] ?? "";
   List<String> get labIds => data["l"] ?? [];
 
-  bool withinDateRange(String first, String last, {bool withoutDate = true}) {
+  bool withinDateRange(String first, String last) {
     final dat = date;
-    if (dat.isEmpty) return withoutDate;
+    if (dat.isEmpty) return first.isEmpty; // antigen without date is within range if first is empty, i.e. it is kinda at the beginning of all dates
     return (first.isEmpty || first.compareTo(dat) <= 0) && (last.isEmpty || last.compareTo(dat) > 0);
   }
 }

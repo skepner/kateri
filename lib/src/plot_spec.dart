@@ -172,12 +172,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       applyEntry(en as Map<String, dynamic>, recursionLevel);
     }
     _legendRows.sort((e1, e2) => e1.priority.compareTo(e2.priority));
-    if (name() == "-ts-2022-01") {
-      for (var p_no = 0; p_no < pointSpec.length; ++p_no) {
-        if (pointSpec[p_no].shown) print("$p_no");
-      }
-      print("${name()} applied");
-    }
   }
 
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
@@ -216,7 +210,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           if (en.key == "!D") {
             // date range
             if (pointNo >= _chart.antigens.length) return false;
-            final within = _chart.antigens[pointNo].withinDateRange(en.value[0] as String, en.value[1] as String, withoutDate: true);
+            final within = _chart.antigens[pointNo].withinDateRange(en.value[0] as String, en.value[1] as String);
             // print("$pointNo ${_chart.antigens[pointNo].date} -- ${en.value} -> $within");
             return within;
           }
