@@ -166,6 +166,12 @@ class Antigen extends _AntigenSerum {
 
   String get date => data["D"] ?? "";
   List<String> get labIds => data["l"] ?? [];
+
+  bool withinDateRange(String first, String last, {bool withoutDate = true}) {
+    final dat = date;
+    if (dat.isEmpty) return withoutDate;
+    return (first.isEmpty || first.compareTo(dat) <= 0) && (last.isEmpty || last.compareTo(dat) > 0);
+  }
 }
 
 typedef Antigens = List<Antigen>;

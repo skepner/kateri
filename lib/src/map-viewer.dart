@@ -280,7 +280,10 @@ class AntigenicMapViewer {
     final layout = _data.projection!.transformedLayout();
     for (final pointNo in _data.currentPlotSpec.drawingOrder()) {
       if (layout[pointNo] != null) {
-        canvas.pointOfPlotSpec(layout[pointNo]!, _data.currentPlotSpec[pointNo]);
+        final pointPlotSpec = _data.currentPlotSpec[pointNo];
+        if (pointPlotSpec.shown) {
+          canvas.pointOfPlotSpec(layout[pointNo]!, pointPlotSpec);
+        }
       }
     }
     canvas.drawDelayedText();
