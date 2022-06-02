@@ -399,16 +399,29 @@ abstract class DrawOn {
       final gap = math.pi / dash / 2;
       final singleAngle = (math.pi * 2.0) / dash;
       final dashes = (sector.angle / singleAngle).round();
+      // fill
+      if (fill.alpha > 0.0) {
+        this.sector(
+            center: center,
+            radius: radius,
+            sector: sector,
+            fill:fill,
+            outlineCircle: const Color(0x00000000),
+            outlineCircleWidthPixels: 0.0,
+            outlineRadiusWidthPixels: 0.0);
+      }
+      // dashed circle outline
       for (int i = 0; i < dashes; i++) {
         this.sector(
             center: center,
             radius: radius,
             sector: Sector(sector.begin + gap + singleAngle * i, singleAngle - gap * 2.0),
-            fill: fill,
+            fill: const Color(0x00000000),
             outlineCircle: outline,
             outlineCircleWidthPixels: outlineWidthPixels,
             outlineRadiusWidthPixels: 0.0);
       }
+      // dashed radius lines
       if (radiusWidthPixels > 0.0 && radiusOutline.alpha > 0.0) {
         this.sector(
             center: center,
