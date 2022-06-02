@@ -214,6 +214,43 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
+  void arc(
+      {required Vector3 center,
+      required double radius,
+      required Sector sector, // 0.0 is upright
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0}) {
+    canvas
+      ..save()
+      ..translate(center.x, center.y)
+      ..rotate(sector.begin);
+    final arc = (-Offset(radius, radius)) & Size(radius * 2, radius * 2);
+    if (fill.alpha > 0) {
+      canvas.drawPath(
+          Path()
+            ..moveTo(0.0, 0.0)
+            ..lineTo(0.0, -radius)
+            ..arcTo(arc, -math.pi / 2, sector.angle, true)
+            ..lineTo(0.0, 0.0),
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = fill
+            ..isAntiAlias = true);
+    }
+    if (outlineWidthPixels > 0 && outline.alpha > 0) {
+      canvas.drawPath(
+          Path()..arcTo(arc, -math.pi / 2, sector.angle, true),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = outline
+            ..strokeWidth = outlineWidthPixels * pixelSize
+            ..isAntiAlias = true);
+    }
+    canvas.restore();
+  }
+
+  @override
   void sector({
     required Vector3 center,
     required double radius,

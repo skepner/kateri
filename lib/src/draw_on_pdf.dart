@@ -274,6 +274,42 @@ class _DrawOnPdf extends DrawOn {
   }
 
   @override
+  void arc(
+      {required Vector3 center,
+      required double radius,
+      required Sector sector, // 0.0 is upright
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0}) {
+    _canvas
+      ..saveContext()
+      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)..rotateZ(sector.begin));
+    final otherPointOnArc = Offset(math.sin(sector.angle) * radius, -math.cos(sector.angle) * radius);
+    if (fill.alpha > 0) {
+      final fillc = PdfColor.fromInt(fill.value);
+      _canvas
+        ..moveTo(0.0, 0.0)
+        ..lineTo(0.0, -radius)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
+        ..lineTo(0.0, 0.0)
+        ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha))
+        ..setFillColor(fillc)
+        ..fillPath();
+    }
+    if (outlineWidthPixels > 0 && outline.alpha > 0) {
+      final outlineCircleC = PdfColor.fromInt(outline.value);
+      _canvas
+        ..moveTo(0.0, -radius)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
+        ..setGraphicState(PdfGraphicState(strokeOpacity: outlineCircleC.alpha))
+        ..setStrokeColor(outlineCircleC)
+        ..setLineWidth(outlineWidthPixels * pixelSize)
+        ..strokePath();
+    }
+    _canvas.restoreContext();
+  }
+
+  @override
   void sector({
     required Vector3 center,
     required double radius,

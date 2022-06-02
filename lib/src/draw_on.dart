@@ -337,6 +337,14 @@ abstract class DrawOn {
       double rotation = noRotation,
       double aspect = 1.0});
 
+  void arc(
+      {required Vector3 center,
+      required double radius,
+      required Sector sector, // 0.0 is upright
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0});
+
   void circleDashed(
       {required Vector3 center,
       required double radius,
@@ -401,25 +409,17 @@ abstract class DrawOn {
       final dashes = (sector.angle / singleAngle).round();
       // fill
       if (fill.alpha > 0.0) {
-        this.sector(
-            center: center,
-            radius: radius,
-            sector: sector,
-            fill:fill,
-            outlineCircle: const Color(0x00000000),
-            outlineCircleWidthPixels: 0.0,
-            outlineRadiusWidthPixels: 0.0);
+        this.sector(center: center, radius: radius, sector: sector, fill: fill, outlineCircle: const Color(0x00000000), outlineCircleWidthPixels: 0.0, outlineRadiusWidthPixels: 0.0);
       }
       // dashed circle outline
       for (int i = 0; i < dashes; i++) {
-        this.sector(
+        arc(
             center: center,
             radius: radius,
             sector: Sector(sector.begin + gap + singleAngle * i, singleAngle - gap * 2.0),
             fill: const Color(0x00000000),
-            outlineCircle: outline,
-            outlineCircleWidthPixels: outlineWidthPixels,
-            outlineRadiusWidthPixels: 0.0);
+            outline: outline,
+            outlineWidthPixels: outlineWidthPixels);
       }
       // dashed radius lines
       if (radiusWidthPixels > 0.0 && radiusOutline.alpha > 0.0) {
