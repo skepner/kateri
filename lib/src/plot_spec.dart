@@ -291,7 +291,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           break;
         case "CI": // serum circle
           spec.serumCircle = serumCircleData(modValue, pointNo);
-          // debug("serumCircle ${spec.serumCircle}");
           break;
         case "R": // reference to another style, processed in applyEntry()
         case "T": // selector, processed earlier
@@ -320,7 +319,11 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
           fill: NamedColor.fromString(mod["F"] ?? "transparent"),
           dash: mod["d"] ?? 0,
-          angles: mod["a"]);
+          angles: mod["a"],
+          radiusOutline: mod["r"]?["O"],
+          radiusWidthPixels: mod["r"]?["o"],
+          radiusDash: mod["r"]?["d"]
+        );
     } catch (err) {
       error("serumCircleData: $err $mod");
       return null;

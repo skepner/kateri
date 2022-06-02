@@ -181,10 +181,10 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void circle({required Offset center, required double size, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
+  void circle({required Vector3 center, required double radius, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
     canvas
       ..save()
-      ..translate(center.dx, center.dy)
+      ..translate(center.x, center.y)
       ..rotate(rotation)
       ..scale(aspect, 1.0);
 
@@ -192,14 +192,14 @@ class _DrawOnCanvas extends DrawOn {
       ..style = PaintingStyle.fill
       ..color = fill
       ..isAntiAlias = true;
-    canvas.drawCircle(Offset.zero, size / 2, paint);
+    canvas.drawCircle(Offset.zero, radius, paint);
 
     if (outlineWidthPixels > 0) {
       paint
         ..color = outline
         ..strokeWidth = outlineWidthPixels * pixelSize
         ..style = PaintingStyle.stroke;
-      canvas.drawCircle(Offset.zero, size / 2, paint);
+      canvas.drawCircle(Offset.zero, radius, paint);
     }
 
     canvas.restore();
@@ -207,7 +207,7 @@ class _DrawOnCanvas extends DrawOn {
 
   @override
   void sector({
-    required Offset center,
+    required Vector3 center,
     required double radius,
     required double angle,
     Color fill = const Color(0x00000000),
@@ -219,7 +219,7 @@ class _DrawOnCanvas extends DrawOn {
   }) {
     canvas
       ..save()
-      ..translate(center.dx, center.dy)
+      ..translate(center.x, center.y)
       ..rotate(rotation);
     final arc = (-Offset(radius, radius)) & Size(radius * 2, radius * 2);
     if (fill.alpha > 0) {

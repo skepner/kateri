@@ -261,21 +261,21 @@ class _DrawOnPdf extends DrawOn {
   }
 
   @override
-  void circle({required Offset center, required double size, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
+  void circle({required Vector3 center, required double radius, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)
+      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)
         ..rotateZ(rotation)
         ..scale(aspect, 1.0));
     _setColorsLineWidth(fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels);
-    _canvas.drawEllipse(0.0, 0.0, size / 2, size / 2);
+    _canvas.drawEllipse(0.0, 0.0, radius, radius);
     _fillAndStroke(outlineWidthPixels);
     _canvas.restoreContext();
   }
 
   @override
   void sector({
-    required Offset center,
+    required Vector3 center,
     required double radius,
     required double angle,
     Color fill = const Color(0x00000000),
@@ -287,7 +287,7 @@ class _DrawOnPdf extends DrawOn {
   }) {
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(center.dx, center.dy, 0)..rotateZ(rotation));
+      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)..rotateZ(rotation));
     final otherPointOnArc = Offset(math.sin(angle) * radius, -math.cos(angle) * radius);
     if (fill.alpha > 0) {
       final fillc = PdfColor.fromInt(fill.value);

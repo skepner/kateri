@@ -1,9 +1,11 @@
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:vector_math/vector_math_64.dart';
 
-import 'viewport.dart';
 import 'color.dart';
+import 'viewport.dart';
+import 'error.dart';
 
 // ----------------------------------------------------------------------
 
@@ -236,6 +238,10 @@ abstract class DrawOn {
         rotation: plotSpec.rotation,
         aspect: plotSpec.aspect,
         label: plotSpec.label);
+    if (plotSpec.serumCircle != null) {
+      // debug(plotSpec.serumCircle.toString());
+      circle(center: center, radius: plotSpec.serumCircle!.radius);
+    }
   }
 
   void addPointLabel({required Vector3 center, required double sizePixels, required double outlineWidthPixels, required PointLabel label, required bool delayed}) {
@@ -284,8 +290,8 @@ abstract class DrawOn {
   }
 
   void circle(
-      {required Offset center,
-      required double size,
+      {required Vector3 center,
+      required double radius,
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
@@ -297,7 +303,7 @@ abstract class DrawOn {
   }
 
   void sector({
-    required Offset center,
+    required Vector3 center,
     required double radius,
     required double angle,
     Color fill = const Color(0x00000000),
