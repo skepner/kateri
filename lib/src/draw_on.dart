@@ -226,9 +226,15 @@ class Sector {
   final double begin;
   final double angle;
 
-  Sector(double bb, double an) : begin = an >= 0.0 ? bb : bb + an, angle = an.abs();
-  const Sector.wholeCircle() : begin = 0.0, angle = math.pi * 2.0;
-  Sector.fromTwoAngles(double a1, double a2) : begin = a2 >= a1 ? a1 : a2, angle = (a2 - a1).abs();
+  Sector(double bb, double an)
+      : begin = an >= 0.0 ? bb : bb + an,
+        angle = an.abs();
+  const Sector.wholeCircle()
+      : begin = 0.0,
+        angle = math.pi * 2.0;
+  Sector.fromTwoAngles(double a1, double a2)
+      : begin = a2 >= a1 ? a1 : a2,
+        angle = (a2 - a1).abs();
 
   bool get wholeCircle => angle >= math.pi * 2.0;
 }
@@ -346,7 +352,7 @@ abstract class DrawOn {
       circle(center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, rotation: rotation, aspect: aspect);
     } else {
       sectorDashed(
-        center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, dash: dash, sector: const Sector.wholeCircle(), radiusWidthPixels: 0.0, radiusDash: 0);
+          center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, dash: dash, sector: const Sector.wholeCircle(), radiusWidthPixels: 0.0, radiusDash: 0);
     }
   }
 
@@ -402,6 +408,17 @@ abstract class DrawOn {
             outlineCircle: outline,
             outlineCircleWidthPixels: outlineWidthPixels,
             outlineRadiusWidthPixels: 0.0);
+      }
+      if (radiusWidthPixels > 0.0 && radiusOutline.alpha > 0.0) {
+        this.sector(
+            center: center,
+            radius: radius,
+            sector: sector,
+            fill: const Color(0x00000000),
+            outlineCircle: const Color(0x00000000),
+            outlineCircleWidthPixels: 0.0,
+            outlineRadius: radiusOutline,
+            outlineRadiusWidthPixels: radiusWidthPixels);
       }
     }
   }
