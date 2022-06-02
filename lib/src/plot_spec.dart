@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'dart:convert';
 import 'package:vector_math/vector_math_64.dart';
@@ -319,8 +320,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           outline: NamedColor.fromString(mod["O"] ?? "blue"),
           outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
           fill: NamedColor.fromString(mod["F"] ?? "transparent"),
-          dash: dash,
-          angles: mod["a"],
+          dash: 40, // dash,
+          angles: mod["a"] ?? <double>[0, math.pi / 3],
           radiusOutline: mod["r"]?["O"],
           radiusWidthPixels: mod["r"]?["o"],
           radiusDash: mod["r"]?["d"]);

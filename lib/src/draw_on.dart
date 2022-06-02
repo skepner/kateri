@@ -191,7 +191,21 @@ class SerumCircle {
   void draw(DrawOn canvas) {
     // debug(toString());
     if (center != null) {
-      canvas.circleDashed(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill, dash: 200);
+      if (angles == null) {
+        canvas.circleDashed(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill, dash: dash);
+      } else {
+        canvas.sectorDashed(
+            center: center!,
+            radius: radius,
+            outline: outline,
+            outlineWidthPixels: outlineWidthPixels,
+            fill: fill,
+            dash: dash,
+            angles: angles!,
+            radiusOutline: radiusOutline ?? outline,
+            radiusWidthPixels: radiusWidthPixels ?? outlineWidthPixels,
+            radiusDash: radiusDash ?? dash);
+      }
     }
   }
 }
@@ -321,7 +335,15 @@ abstract class DrawOn {
       final gap = math.pi / dash / 2;
       final singleAngle = (math.pi * 2.0) / dash;
       for (int i = 0; i < dash; i++) {
-        sector(center: center, radius: radius, rotation: gap + singleAngle * i, angle: singleAngle - gap * 2.0, fill: fill, outlineCircle: outline, outlineCircleWidthPixels: outlineWidthPixels, outlineRadiusWidthPixels: 0.0);
+        sector(
+            center: center,
+            radius: radius,
+            rotation: gap + singleAngle * i,
+            angle: singleAngle - gap * 2.0,
+            fill: fill,
+            outlineCircle: outline,
+            outlineCircleWidthPixels: outlineWidthPixels,
+            outlineRadiusWidthPixels: 0.0);
       }
     }
   }
@@ -341,6 +363,34 @@ abstract class DrawOn {
     double outlineRadiusWidthPixels = 1.0,
     double rotation = noRotation, // noRotation - first radius in upright
   });
+
+  void sectorDashed(
+      {required Vector3 center,
+      required double radius,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double aspect = 1.0,
+      required int dash,
+      required List<double> angles,
+      Color radiusOutline = const Color(0xFF000000),
+      double radiusWidthPixels = 1.0,
+      required int radiusDash}) {
+    if (dash == 0) {
+      sector(
+          center: center,
+          radius: radius,
+          rotation: angles[0],
+          angle: angles[1],
+          fill: fill,
+          outlineCircle: outline,
+          outlineCircleWidthPixels: outlineWidthPixels,
+          outlineRadius: radiusOutline,
+          outlineRadiusWidthPixels: radiusWidthPixels);
+    } else {
+      debug("sectorDashed angles: $angles");
+    }
+  }
 
   void text(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()});
 
