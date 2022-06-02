@@ -314,14 +314,14 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       final circleData = _chart.sera[serumNo].semantic["CI${mod['u']?.round() ?? 2}"];
       if (circleData == null) throw DataError("no serum circle data for fold ${mod['u']}");
       final radius = ((mod["T"] ?? false) ? circleData["e"] : circleData["t"])?.toDouble();
-      final dash = (radius != null ? (mod["d"] ?? 0) : 200);
+      final dash = (radius != null ? (mod["d"] ?? 0) : 100);
       return SerumCircle(
           radius: radius ?? mod["u"]?.toDouble() ?? 2.0,
           outline: NamedColor.fromString(mod["O"] ?? "blue"),
           outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
-          fill: NamedColor.fromString(mod["F"] ?? "transparent"), // Color(0x40FFA500)
-          dash: mod["O"] == "blue"? 40 : 0, // dash,
-          sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : Sector(math.pi / 3, math.pi * 1.1),
+          fill: NamedColor.fromString(mod["F"] ?? "transparent"),
+          dash: dash,
+          sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : null,
           radiusOutline: mod["r"]?["O"],
           radiusWidthPixels: mod["r"]?["o"],
           radiusDash: mod["r"]?["d"]);

@@ -309,56 +309,6 @@ class _DrawOnPdf extends DrawOn {
     _canvas.restoreContext();
   }
 
-  @override
-  void sector({
-    required Vector3 center,
-    required double radius,
-    required Sector sector,
-    Color fill = const Color(0x00000000),
-    Color outlineCircle = const Color(0xFF000000),
-    double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = const Color(0xFF000000),
-    double outlineRadiusWidthPixels = 1.0
-  }) {
-    _canvas
-      ..saveContext()
-      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)..rotateZ(sector.begin));
-    final otherPointOnArc = Offset(math.sin(sector.angle) * radius, -math.cos(sector.angle) * radius);
-    if (fill.alpha > 0) {
-      final fillc = PdfColor.fromInt(fill.value);
-      _canvas
-        ..moveTo(0.0, 0.0)
-        ..lineTo(0.0, -radius)
-        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
-        ..lineTo(0.0, 0.0)
-        ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha))
-        ..setFillColor(fillc)
-        ..fillPath();
-    }
-    if (outlineCircleWidthPixels > 0 && outlineCircle.alpha > 0) {
-      final outlineCircleC = PdfColor.fromInt(outlineCircle.value);
-      _canvas
-        ..moveTo(0.0, -radius)
-        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
-        ..setGraphicState(PdfGraphicState(strokeOpacity: outlineCircleC.alpha))
-        ..setStrokeColor(outlineCircleC)
-        ..setLineWidth(outlineCircleWidthPixels * pixelSize)
-        ..strokePath();
-    }
-    if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
-      final outlineRadiusC = PdfColor.fromInt(outlineRadius.value);
-      _canvas
-        ..moveTo(0.0, -radius)
-        ..lineTo(0.0, 0.0)
-        ..lineTo(otherPointOnArc.dx, otherPointOnArc.dy)
-        ..setGraphicState(PdfGraphicState(strokeOpacity: outlineRadiusC.alpha))
-        ..setStrokeColor(outlineRadiusC)
-        ..setLineWidth(outlineRadiusWidthPixels * pixelSize)
-        ..strokePath();
-    }
-    _canvas.restoreContext();
-  }
-
   static const fontScaleToMatchCanvas = 1.02;
 
   @override

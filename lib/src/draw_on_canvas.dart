@@ -250,59 +250,6 @@ class _DrawOnCanvas extends DrawOn {
     canvas.restore();
   }
 
-  @override
-  void sector({
-    required Vector3 center,
-    required double radius,
-    required Sector sector,
-    Color fill = const Color(0x00000000),
-    Color outlineCircle = const Color(0xFF000000),
-    double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = const Color(0xFF000000),
-    double outlineRadiusWidthPixels = 1.0
-  }) {
-    canvas
-      ..save()
-      ..translate(center.x, center.y)
-      ..rotate(sector.begin);
-    final arc = (-Offset(radius, radius)) & Size(radius * 2, radius * 2);
-    if (fill.alpha > 0) {
-      canvas.drawPath(
-          Path()
-            ..moveTo(0.0, 0.0)
-            ..lineTo(0.0, -radius)
-            ..arcTo(arc, -math.pi / 2, sector.angle, true)
-            ..lineTo(0.0, 0.0),
-          Paint()
-            ..style = PaintingStyle.fill
-            ..color = fill
-            ..isAntiAlias = true);
-    }
-    if (outlineCircleWidthPixels > 0 && outlineCircle.alpha > 0) {
-      canvas.drawPath(
-          Path()..arcTo(arc, -math.pi / 2, sector.angle, true),
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = outlineCircle
-            ..strokeWidth = outlineCircleWidthPixels * pixelSize
-            ..isAntiAlias = true);
-    }
-    if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
-      canvas.drawPath(
-          Path()
-            ..moveTo(0.0, -radius)
-            ..lineTo(0.0, 0.0)
-            ..lineTo(math.sin(sector.angle) * radius, -math.cos(sector.angle) * radius),
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = outlineRadius
-            ..strokeWidth = outlineRadiusWidthPixels * pixelSize
-            ..isAntiAlias = true);
-    }
-
-    canvas.restore();
-  }
-
   static String _labelFont(LabelFontFamily fontFamily) {
     switch (fontFamily) {
       case LabelFontFamily.monospace:

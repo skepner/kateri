@@ -237,6 +237,7 @@ class Sector {
         angle = (a2 - a1).abs();
 
   bool get wholeCircle => angle >= math.pi * 2.0;
+  double get end => begin + angle;
 }
 
 // ----------------------------------------------------------------------
@@ -302,6 +303,13 @@ abstract class DrawOn {
 
   void line(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0}) {
     path([p1, p2], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
+  }
+
+  void lineDashed(Offset p1, Offset p2, {Color outline = const Color(0xFF000000), double lineWidthPixels = 1.0, int dash = 10}) {
+    final dxy = (p2 - p1) / (dash + 0.5);
+    for (double dno = 0.0; dno <= dash; ++dno) {
+      path([p1 + dxy * dno, p1 + dxy * (dno + 0.5)], outline: outline, lineWidthPixels: lineWidthPixels, close: false);
+    }
   }
 
   void arrow(Offset p1, Offset p2,
@@ -376,7 +384,14 @@ abstract class DrawOn {
       Color outlineCircle = const Color(0xFF000000),
       double outlineCircleWidthPixels = 1.0,
       Color outlineRadius = const Color(0xFF000000),
-      double outlineRadiusWidthPixels = 1.0});
+      double outlineRadiusWidthPixels = 1.0}) {
+    arc(center: center, radius: radius, sector: sector, fill: fill, outline: outlineCircle, outlineWidthPixels: outlineCircleWidthPixels);
+    if (outlineRadiusWidthPixels > 0 && outlineRadius.alpha > 0) {
+      line(Offset(center.x, center.y), Offset(center.x + math.sin(sector.begin) * radius, center.y - math.cos(sector.begin) * radius),
+          outline: outlineRadius, lineWidthPixels: outlineRadiusWidthPixels);
+      line(Offset(center.x, center.y), Offset(center.x + math.sin(sector.end) * radius, center.y - math.cos(sector.end) * radius), outline: outlineRadius, lineWidthPixels: outlineRadiusWidthPixels);
+    }
+  }
 
   void sectorDashed(
       {required Vector3 center,
@@ -423,15 +438,11 @@ abstract class DrawOn {
       }
       // dashed radius lines
       if (radiusWidthPixels > 0.0 && radiusOutline.alpha > 0.0) {
-        this.sector(
-            center: center,
-            radius: radius,
-            sector: sector,
-            fill: const Color(0x00000000),
-            outlineCircle: const Color(0x00000000),
-            outlineCircleWidthPixels: 0.0,
-            outlineRadius: radiusOutline,
-            outlineRadiusWidthPixels: radiusWidthPixels);
+        final lineDash = dash ~/ 7;
+        lineDashed(Offset(center.x, center.y), Offset(center.x + math.sin(sector.begin) * radius, center.y - math.cos(sector.begin) * radius),
+            outline: radiusOutline, lineWidthPixels: radiusWidthPixels, dash: lineDash);
+        lineDashed(Offset(center.x, center.y), Offset(center.x + math.sin(sector.end) * radius, center.y - math.cos(sector.end) * radius),
+            outline: radiusOutline, lineWidthPixels: radiusWidthPixels, dash: lineDash);
       }
     }
   }
