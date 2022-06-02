@@ -48,6 +48,7 @@ class _DrawOnCanvas extends DrawOn {
   _DrawOnCanvas(this.canvas, this.canvasSize, vp.Viewport viewport)
       : _pixelSize = viewport.width / canvasSize.width,
         super(viewport) {
+    canvas.clipRect(Rect.fromLTWH(0.0, 0.0, canvasSize.width, canvasSize.height));
     canvas.scale(canvasSize.width / viewport.width);
     canvas.translate(-viewport.left, -viewport.top);
   }
@@ -181,7 +182,14 @@ class _DrawOnCanvas extends DrawOn {
   }
 
   @override
-  void circle({required Vector3 center, required double radius, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0}) {
+  void circle(
+      {required Vector3 center,
+      required double radius,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = noRotation,
+      double aspect = 1.0}) {
     canvas
       ..save()
       ..translate(center.x, center.y)

@@ -162,6 +162,7 @@ class DelayedText {
 // ----------------------------------------------------------------------
 
 class SerumCircle {
+  Vector3? center;
   final double radius;
   final Color outline;
   final double outlineWidthPixels;
@@ -172,7 +173,7 @@ class SerumCircle {
   final double? radiusWidthPixels;
   final int? radiusDash;
 
-  const SerumCircle(
+  SerumCircle(
       {required this.radius,
       required this.outline,
       required this.outlineWidthPixels,
@@ -186,6 +187,13 @@ class SerumCircle {
   @override
   String toString() =>
       "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, angles: $angles, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
+
+  void draw(DrawOn canvas) {
+    // debug(plotSpec.serumCircle.toString());
+    if (center != null) {
+      canvas.circle(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill);
+    }
+  }
 }
 
 // ======================================================================
@@ -202,9 +210,10 @@ abstract class CanvasRoot {
 
 abstract class DrawOn {
   final Viewport viewport;
-  final List<DelayedText> _delayedText;
+  final List<DelayedText> _delayedText = <DelayedText>[];
+  final List<SerumCircle> _delayedSerumCircle = <SerumCircle>[];
 
-  DrawOn(this.viewport) : _delayedText = <DelayedText>[];
+  DrawOn(this.viewport);
 
   double get pixelSize;
 
@@ -238,10 +247,7 @@ abstract class DrawOn {
         rotation: plotSpec.rotation,
         aspect: plotSpec.aspect,
         label: plotSpec.label);
-    if (plotSpec.serumCircle != null) {
-      // debug(plotSpec.serumCircle.toString());
-      circle(center: center, radius: plotSpec.serumCircle!.radius);
-    }
+    delayedSerumCircle(center, plotSpec.serumCircle);
   }
 
   void addPointLabel({required Vector3 center, required double sizePixels, required double outlineWidthPixels, required PointLabel label, required bool delayed}) {
@@ -319,12 +325,24 @@ abstract class DrawOn {
   /// return size of text in the current scale units
   Size textSize(String text, {double sizePixels = 20.0, LabelStyle textStyle = const LabelStyle()});
 
-  /// Text to be written by drawDelayedText(), i.e. on top of everything
+  // ----------------------------------------------------------------------
+
+  /// Text to be written by drawDelayed(), i.e. on top of everything
   void delayedText(String text, Offset origin, {double sizePixels = 20.0, double rotation = 0.0, LabelStyle textStyle = const LabelStyle()}) {
     _delayedText.add(DelayedText(text, origin, sizePixels, rotation, textStyle));
   }
 
-  void drawDelayedText() {
+  void delayedSerumCircle(Vector3 center, SerumCircle? serumCircle) {
+    if (serumCircle != null) {
+      serumCircle.center = center;
+      _delayedSerumCircle.add(serumCircle);
+    }
+  }
+
+  void drawDelayed() {
+    for (var serumCircle in _delayedSerumCircle) {
+      serumCircle.draw(this);
+    }
     for (var textData in _delayedText) {
       text(textData.text, textData.origin, sizePixels: textData.sizePixels, rotation: textData.rotation, textStyle: textData.textStyle);
     }

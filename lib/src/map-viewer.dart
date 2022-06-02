@@ -286,7 +286,7 @@ class AntigenicMapViewer {
         }
       }
     }
-    canvas.drawDelayedText();
+    canvas.drawDelayed();
     paintLegend(canvas);
     paintTitle(canvas);
   }
