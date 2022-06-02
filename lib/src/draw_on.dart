@@ -36,6 +36,7 @@ class PointPlotSpec {
   double rotation = noRotation;
   double aspect = aspectNormal;
   PointLabel? label;
+  SerumCircle? serumCircle;
 
   PointPlotSpec();
   PointPlotSpec.from(PointPlotSpec src)
@@ -158,6 +159,31 @@ class DelayedText {
 
 // ----------------------------------------------------------------------
 
+class SerumCircle {
+  final double radius;
+  final Color outline;
+  final double outlineWidthPixels;
+  final Color fill;
+  final int dash;
+  final List<double>? angles;
+  final Color? radiusOutline;
+  final double? radiusWidthPixels;
+  final int? radiusDash;
+
+  const SerumCircle(
+      {required this.radius,
+      required this.outline,
+      required this.outlineWidthPixels,
+      required this.fill,
+      required this.dash,
+      this.angles,
+      this.radiusOutline,
+      this.radiusWidthPixels,
+      this.radiusDash});
+}
+
+// ======================================================================
+
 abstract class CanvasRoot {
   CanvasRoot(this.size);
 
@@ -253,7 +279,14 @@ abstract class DrawOn {
         aspect: headAspect);
   }
 
-  void circle({required Offset center, required double size, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0, double rotation = noRotation, double aspect = 1.0});
+  void circle(
+      {required Offset center,
+      required double size,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = noRotation,
+      double aspect = 1.0});
 
   void rectangle({required Rect rect, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0}) {
     path([rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft], fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels, close: true);

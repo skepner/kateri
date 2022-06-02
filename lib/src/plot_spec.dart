@@ -185,7 +185,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     final points = selectPoints(entry["T"], entry["A"]);
     if (points.isNotEmpty) {
       for (final pointNo in points) {
-        modifyPointPlotSpec(entry, pointSpec[pointNo]);
+        modifyPointPlotSpec(entry, pointSpec[pointNo], pointNo: pointNo);
       }
       raiseLowerPoints(entry["D"], points);
     }
@@ -202,11 +202,11 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   }
 
   List<int> selectPoints(Map<String, dynamic>? selector, dynamic antigensOnly) {
-    bool match(int pointNo, Map<String, dynamic> semantic) {
+    bool match(int pointNo, int agSrNo, Map<String, dynamic> semantic) {
       if (selector != null) {
         return selector.entries.fold(true, (result, en) {
           if (!result) return false;
-          if (en.key == "!i") return pointNo == en.value;
+          if (en.key == "!i") return agSrNo == en.value;
           if (en.key == "!D") {
             // date range
             if (pointNo >= _chart.antigens.length) return false;
@@ -223,11 +223,11 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
     final selected = <int>[];
     if (castToBool(antigensOnly, ifNull: true)) {
-      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(agNo, _chart.antigens[agNo].semantic))); //
+      selected.addAll(Iterable<int>.generate(_chart.antigens.length).where((agNo) => match(agNo, agNo, _chart.antigens[agNo].semantic))); //
     }
     if (!castToBool(antigensOnly, ifNull: false)) {
-      selected
-          .addAll(Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
+      selected.addAll(
+          Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], ref[0], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
   }
@@ -259,7 +259,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     }
   }
 
-  static PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec) {
+  PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec, {int? pointNo}) {
     mod.forEach((modKey, modValue) {
       switch (modKey) {
         case "S":
@@ -289,6 +289,9 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         case "l":
           spec.label = pointLabelFromAce(modValue);
           break;
+        case "CI": // serum circle
+          spec.serumCircle = serumCircleData(modValue, pointNo);
+          break;
         case "R": // reference to another style, processed in applyEntry()
         case "T": // selector, processed earlier
         case "D": // order, processed in applyEntry()
@@ -296,11 +299,26 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         case "L": // legend row, processed in applyEntry()
           break;
         default:
-          print(">> WARNING: modifyPointPlotSpec: unknown key $modKey: $modValue");
+          warning("modifyPointPlotSpec: unknown key $modKey: $modValue");
           break;
       }
     });
     return spec;
+  }
+
+  SerumCircle? serumCircleData(Map<String, dynamic> mod, int? pointNo) {
+    try {
+      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
+      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
+      final circleData = _chart.sera[serumNo].semantic["CI${mod['u']?.round() ?? 2}"];
+      if (circleData == null) throw DataError("no serum circle data for fold ${mod['u']}");
+      final radius = ((mod["T"] ?? false) ? circleData["e"] : circleData["t"])?.toDouble();
+      warning("serumCircleData $serumNo $circleData ${_chart.sera[serumNo].semantic} not implemented");
+      return SerumCircle(radius: radius ?? mod["u"]?.toDouble() ?? 2.0, outline: NamedColor.fromString("cyan"), outlineWidthPixels: 5.0, fill: const Color(0x80FF0000), dash: 0);
+    } catch (err) {
+      error("serumCircleData: $err $mod");
+      return null;
+    }
   }
 
   static PointShape pointShapeFromString(String src) {
