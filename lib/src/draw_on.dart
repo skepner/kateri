@@ -189,9 +189,9 @@ class SerumCircle {
       "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, angles: $angles, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
 
   void draw(DrawOn canvas) {
-    // debug(plotSpec.serumCircle.toString());
+    // debug(toString());
     if (center != null) {
-      canvas.circle(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill);
+      canvas.circleDashed(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill, dash: 200);
     }
   }
 }
@@ -303,6 +303,28 @@ abstract class DrawOn {
       double outlineWidthPixels = 1.0,
       double rotation = noRotation,
       double aspect = 1.0});
+
+  void circleDashed(
+      {required Vector3 center,
+      required double radius,
+      Color fill = const Color(0x00000000),
+      Color outline = const Color(0xFF000000),
+      double outlineWidthPixels = 1.0,
+      double rotation = noRotation,
+      double aspect = 1.0,
+      required int dash}) {
+    if (dash == 0 || aspect != 1.0) {
+      // no dash
+      if (dash != 0) warning("dashed circle with aspect $aspect is not supported, solid circle is drawn");
+      circle(center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, rotation: rotation, aspect: aspect);
+    } else {
+      final gap = math.pi / dash / 2;
+      final singleAngle = (math.pi * 2.0) / dash;
+      for (int i = 0; i < dash; i++) {
+        sector(center: center, radius: radius, rotation: gap + singleAngle * i, angle: singleAngle - gap * 2.0, fill: fill, outlineCircle: outline, outlineCircleWidthPixels: outlineWidthPixels, outlineRadiusWidthPixels: 0.0);
+      }
+    }
+  }
 
   void rectangle({required Rect rect, Color fill = const Color(0x00000000), Color outline = const Color(0xFF000000), double outlineWidthPixels = 1.0}) {
     path([rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft], fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels, close: true);
