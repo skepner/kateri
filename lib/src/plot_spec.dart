@@ -291,6 +291,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           break;
         case "CI": // serum circle
           spec.serumCircle = serumCircleData(modValue, pointNo);
+          // debug("serumCircle ${spec.serumCircle}");
           break;
         case "R": // reference to another style, processed in applyEntry()
         case "T": // selector, processed earlier
@@ -313,8 +314,13 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       final circleData = _chart.sera[serumNo].semantic["CI${mod['u']?.round() ?? 2}"];
       if (circleData == null) throw DataError("no serum circle data for fold ${mod['u']}");
       final radius = ((mod["T"] ?? false) ? circleData["e"] : circleData["t"])?.toDouble();
-      warning("serumCircleData $serumNo $circleData ${_chart.sera[serumNo].semantic} not implemented");
-      return SerumCircle(radius: radius ?? mod["u"]?.toDouble() ?? 2.0, outline: NamedColor.fromString("cyan"), outlineWidthPixels: 5.0, fill: const Color(0x80FF0000), dash: 0);
+      return SerumCircle(
+          radius: radius ?? mod["u"]?.toDouble() ?? 2.0,
+          outline: NamedColor.fromString(mod["O"] ?? "blue"),
+          outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
+          fill: NamedColor.fromString(mod["F"] ?? "transparent"),
+          dash: mod["d"] ?? 0,
+          angles: mod["a"]);
     } catch (err) {
       error("serumCircleData: $err $mod");
       return null;

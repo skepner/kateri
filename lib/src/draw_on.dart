@@ -180,6 +180,10 @@ class SerumCircle {
       this.radiusOutline,
       this.radiusWidthPixels,
       this.radiusDash});
+
+  @override
+  String toString() =>
+      "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, angles: $angles, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
 }
 
 // ======================================================================
