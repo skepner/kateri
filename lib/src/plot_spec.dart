@@ -320,8 +320,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           outline: NamedColor.fromString(mod["O"] ?? "blue"),
           outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
           fill: NamedColor.fromString(mod["F"] ?? "transparent"),
-          dash: 40, // dash,
-          angles: mod["a"] ?? <double>[0, math.pi / 3],
+          dash: mod["O"] == "blue"? 40 : 0, // dash,
+          sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : Sector(math.pi / 3, math.pi * 1.1),
           radiusOutline: mod["r"]?["O"],
           radiusWidthPixels: mod["r"]?["o"],
           radiusDash: mod["r"]?["d"]);

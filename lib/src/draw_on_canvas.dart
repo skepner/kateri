@@ -217,25 +217,24 @@ class _DrawOnCanvas extends DrawOn {
   void sector({
     required Vector3 center,
     required double radius,
-    required double angle,
+    required Sector sector,
     Color fill = const Color(0x00000000),
     Color outlineCircle = const Color(0xFF000000),
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = const Color(0xFF000000),
-    double outlineRadiusWidthPixels = 1.0,
-    double rotation = noRotation, // noRotation - first radius in upright
+    double outlineRadiusWidthPixels = 1.0
   }) {
     canvas
       ..save()
       ..translate(center.x, center.y)
-      ..rotate(rotation);
+      ..rotate(sector.begin);
     final arc = (-Offset(radius, radius)) & Size(radius * 2, radius * 2);
     if (fill.alpha > 0) {
       canvas.drawPath(
           Path()
             ..moveTo(0.0, 0.0)
             ..lineTo(0.0, -radius)
-            ..arcTo(arc, -math.pi / 2, angle, true)
+            ..arcTo(arc, -math.pi / 2, sector.angle, true)
             ..lineTo(0.0, 0.0),
           Paint()
             ..style = PaintingStyle.fill
@@ -244,7 +243,7 @@ class _DrawOnCanvas extends DrawOn {
     }
     if (outlineCircleWidthPixels > 0 && outlineCircle.alpha > 0) {
       canvas.drawPath(
-          Path()..arcTo(arc, -math.pi / 2, angle, true),
+          Path()..arcTo(arc, -math.pi / 2, sector.angle, true),
           Paint()
             ..style = PaintingStyle.stroke
             ..color = outlineCircle
@@ -256,7 +255,7 @@ class _DrawOnCanvas extends DrawOn {
           Path()
             ..moveTo(0.0, -radius)
             ..lineTo(0.0, 0.0)
-            ..lineTo(math.sin(angle) * radius, -math.cos(angle) * radius),
+            ..lineTo(math.sin(sector.angle) * radius, -math.cos(sector.angle) * radius),
           Paint()
             ..style = PaintingStyle.stroke
             ..color = outlineRadius

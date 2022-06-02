@@ -168,7 +168,7 @@ class SerumCircle {
   final double outlineWidthPixels;
   final Color fill;
   final int dash;
-  final List<double>? angles;
+  final Sector? sector;
   final Color? radiusOutline;
   final double? radiusWidthPixels;
   final int? radiusDash;
@@ -179,19 +179,19 @@ class SerumCircle {
       required this.outlineWidthPixels,
       required this.fill,
       required this.dash,
-      this.angles,
+      this.sector,
       this.radiusOutline,
       this.radiusWidthPixels,
       this.radiusDash});
 
   @override
   String toString() =>
-      "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, angles: $angles, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
+      "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, sector: $sector, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
 
   void draw(DrawOn canvas) {
     // debug(toString());
     if (center != null) {
-      if (angles == null) {
+      if (sector == null) {
         canvas.circleDashed(center: center!, radius: radius, outline: outline, outlineWidthPixels: outlineWidthPixels, fill: fill, dash: dash);
       } else {
         canvas.sectorDashed(
@@ -201,7 +201,7 @@ class SerumCircle {
             outlineWidthPixels: outlineWidthPixels,
             fill: fill,
             dash: dash,
-            angles: angles!,
+            sector: sector!,
             radiusOutline: radiusOutline ?? outline,
             radiusWidthPixels: radiusWidthPixels ?? outlineWidthPixels,
             radiusDash: radiusDash ?? dash);
@@ -218,6 +218,19 @@ abstract class CanvasRoot {
   void draw(Rect drawingArea, Viewport viewport, Function doDraw, {Color? debuggingOutline, bool clip = false});
 
   final Size size;
+}
+
+// ----------------------------------------------------------------------
+
+class Sector {
+  final double begin;
+  final double angle;
+
+  Sector(double bb, double an) : begin = an >= 0.0 ? bb : bb + an, angle = an.abs();
+  const Sector.wholeCircle() : begin = 0.0, angle = math.pi * 2.0;
+  Sector.fromTwoAngles(double a1, double a2) : begin = a2 >= a1 ? a1 : a2, angle = (a2 - a1).abs();
+
+  bool get wholeCircle => angle >= math.pi * 2.0;
 }
 
 // ----------------------------------------------------------------------
@@ -332,19 +345,8 @@ abstract class DrawOn {
       if (dash != 0) warning("dashed circle with aspect $aspect is not supported, solid circle is drawn");
       circle(center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, rotation: rotation, aspect: aspect);
     } else {
-      final gap = math.pi / dash / 2;
-      final singleAngle = (math.pi * 2.0) / dash;
-      for (int i = 0; i < dash; i++) {
-        sector(
-            center: center,
-            radius: radius,
-            rotation: gap + singleAngle * i,
-            angle: singleAngle - gap * 2.0,
-            fill: fill,
-            outlineCircle: outline,
-            outlineCircleWidthPixels: outlineWidthPixels,
-            outlineRadiusWidthPixels: 0.0);
-      }
+      sectorDashed(
+        center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels, dash: dash, sector: const Sector.wholeCircle(), radiusWidthPixels: 0.0, radiusDash: 0);
     }
   }
 
@@ -352,43 +354,55 @@ abstract class DrawOn {
     path([rect.topLeft, rect.topRight, rect.bottomRight, rect.bottomLeft], fill: fill, outline: outline, lineWidthPixels: outlineWidthPixels, close: true);
   }
 
-  void sector({
-    required Vector3 center,
-    required double radius,
-    required double angle,
-    Color fill = const Color(0x00000000),
-    Color outlineCircle = const Color(0xFF000000),
-    double outlineCircleWidthPixels = 1.0,
-    Color outlineRadius = const Color(0xFF000000),
-    double outlineRadiusWidthPixels = 1.0,
-    double rotation = noRotation, // noRotation - first radius in upright
-  });
+  void sector(
+      {required Vector3 center,
+      required double radius,
+      required Sector sector, // 0.0 is upright
+      Color fill = const Color(0x00000000),
+      Color outlineCircle = const Color(0xFF000000),
+      double outlineCircleWidthPixels = 1.0,
+      Color outlineRadius = const Color(0xFF000000),
+      double outlineRadiusWidthPixels = 1.0});
 
   void sectorDashed(
       {required Vector3 center,
       required double radius,
+      required Sector sector, // 0.0 is upright
       Color fill = const Color(0x00000000),
       Color outline = const Color(0xFF000000),
       double outlineWidthPixels = 1.0,
-      double aspect = 1.0,
       required int dash,
-      required List<double> angles,
       Color radiusOutline = const Color(0xFF000000),
       double radiusWidthPixels = 1.0,
       required int radiusDash}) {
     if (dash == 0) {
-      sector(
-          center: center,
-          radius: radius,
-          rotation: angles[0],
-          angle: angles[1],
-          fill: fill,
-          outlineCircle: outline,
-          outlineCircleWidthPixels: outlineWidthPixels,
-          outlineRadius: radiusOutline,
-          outlineRadiusWidthPixels: radiusWidthPixels);
+      if (sector.wholeCircle) {
+        circle(center: center, radius: radius, fill: fill, outline: outline, outlineWidthPixels: outlineWidthPixels);
+      } else {
+        this.sector(
+            center: center,
+            radius: radius,
+            sector: sector,
+            fill: fill,
+            outlineCircle: outline,
+            outlineCircleWidthPixels: outlineWidthPixels,
+            outlineRadius: radiusOutline,
+            outlineRadiusWidthPixels: radiusWidthPixels);
+      }
     } else {
-      debug("sectorDashed angles: $angles");
+      final gap = math.pi / dash / 2;
+      final singleAngle = (math.pi * 2.0) / dash;
+      final dashes = (sector.angle / singleAngle).round();
+      for (int i = 0; i < dashes; i++) {
+        this.sector(
+            center: center,
+            radius: radius,
+            sector: Sector(sector.begin + gap + singleAngle * i, singleAngle - gap * 2.0),
+            fill: fill,
+            outlineCircle: outline,
+            outlineCircleWidthPixels: outlineWidthPixels,
+            outlineRadiusWidthPixels: 0.0);
+      }
     }
   }
 

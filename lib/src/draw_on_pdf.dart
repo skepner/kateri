@@ -277,24 +277,23 @@ class _DrawOnPdf extends DrawOn {
   void sector({
     required Vector3 center,
     required double radius,
-    required double angle,
+    required Sector sector,
     Color fill = const Color(0x00000000),
     Color outlineCircle = const Color(0xFF000000),
     double outlineCircleWidthPixels = 1.0,
     Color outlineRadius = const Color(0xFF000000),
-    double outlineRadiusWidthPixels = 1.0,
-    double rotation = noRotation, // noRotation - first radius in upright
+    double outlineRadiusWidthPixels = 1.0
   }) {
     _canvas
       ..saveContext()
-      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)..rotateZ(rotation));
-    final otherPointOnArc = Offset(math.sin(angle) * radius, -math.cos(angle) * radius);
+      ..setTransform(Matrix4.translationValues(center.x, center.y, 0)..rotateZ(sector.begin));
+    final otherPointOnArc = Offset(math.sin(sector.angle) * radius, -math.cos(sector.angle) * radius);
     if (fill.alpha > 0) {
       final fillc = PdfColor.fromInt(fill.value);
       _canvas
         ..moveTo(0.0, 0.0)
         ..lineTo(0.0, -radius)
-        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: angle > math.pi, sweep: true)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
         ..lineTo(0.0, 0.0)
         ..setGraphicState(PdfGraphicState(fillOpacity: fillc.alpha))
         ..setFillColor(fillc)
@@ -304,7 +303,7 @@ class _DrawOnPdf extends DrawOn {
       final outlineCircleC = PdfColor.fromInt(outlineCircle.value);
       _canvas
         ..moveTo(0.0, -radius)
-        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: angle > math.pi, sweep: true)
+        ..bezierArc(0.0, -radius, radius, radius, otherPointOnArc.dx, otherPointOnArc.dy, large: sector.angle > math.pi, sweep: true)
         ..setGraphicState(PdfGraphicState(strokeOpacity: outlineCircleC.alpha))
         ..setStrokeColor(outlineCircleC)
         ..setLineWidth(outlineCircleWidthPixels * pixelSize)
