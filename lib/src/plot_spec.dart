@@ -21,6 +21,9 @@ abstract class PlotSpec {
   PlotTitle? plotTitle() => null;
   Legend? legend() => null;
   Viewport? viewport() => null;
+  void activate() {
+    // called when plot spac activated, allows calculating delayed configuration
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -132,13 +135,7 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
 // ----------------------------------------------------------------------
 
 class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
-  PlotSpecSemantic(this._chart, this._projection, this._name, this._data) {
-    initDefaultPointSpecs(testAntigenFill: ColorAndModifier("gray80"), outline: ColorAndModifier("gray80"));
-    makeDefaultDrawingOrder(_chart, _projection);
-    _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
-    makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
-    apply(_data["A"] ?? []);
-  }
+  PlotSpecSemantic(this._chart, this._projection, this._name, this._data);
 
   @override
   String name() => _name;
@@ -166,6 +163,20 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   @override
   Legend? legend() => _data["L"] != null ? Legend(_data["L"], _legendRows) : null;
+
+  @override // called when plot spac activated, allows calculating delayed configuration
+  void activate() {
+    if (!_activated) {
+      final stopwatch = Stopwatch()..start();
+      initDefaultPointSpecs(testAntigenFill: ColorAndModifier("gray80"), outline: ColorAndModifier("gray80"));
+      makeDefaultDrawingOrder(_chart, _projection);
+      _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
+      makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
+      apply(_data["A"] ?? []);
+      _activated = true;
+      debug("$_name activated in ${stopwatch.elapsed}");
+    }
+  }
 
   void apply(List<dynamic> data, [int recursionLevel = 1]) {
     if (recursionLevel > 10) throw FormatError("PlotSpecSemantic.apply: too deep recursion");
@@ -390,6 +401,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     return Function.apply(PointLabel.apply, [], args);
   }
 
+  bool _activated = false;
   final Chart _chart;
   final Projection _projection;
 

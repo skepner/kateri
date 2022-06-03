@@ -7,6 +7,7 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 
+import 'error.dart';
 import 'decompress.dart';
 import 'chart.dart';
 import 'socket-events.dart' as socket_events;
@@ -64,14 +65,18 @@ class AntigenicMapViewerData {
 
   void reloadChart() async {
     if (chartFilename != null) {
-      print("reloadChart $chartFilename");
+      final stopwatch = Stopwatch()..start();
       setChart(Chart(await decompressFile(chartFilename!)));
+      debug("$chartFilename re-loaded in ${stopwatch.elapsed}");
     }
   }
 
   void setPlotSpec(int index) {
     if (chart != null && index < plotSpecs.length) {
-      currentPlotSpecIndex = index;
+      if (currentPlotSpecIndex != index) {
+        currentPlotSpecIndex = index;
+        currentPlotSpec.activate();
+      }
       viewport = plotSpecs[index].viewport() ?? projection!.viewport();
       print("projection ${projection!.viewport()}");
       print("used       $viewport  aspect:${viewport!.aspectRatio()}");
@@ -100,6 +105,7 @@ class AntigenicMapViewerData {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
     if (file != null) {
       try {
+        final stopwatch = Stopwatch()..start();
         // accesing file?.path on web always reports an error (regardles of using try/catch)
         if (file.bytes != null) {
           setChart(Chart(decompressBytes(file.bytes!)));
@@ -107,6 +113,7 @@ class AntigenicMapViewerData {
           setChart(Chart(await decompressFile(file.path!)));
           chartFilename = file.path;
         }
+        debug("chart loaded in ${stopwatch.elapsed}");
       } on Exception catch (err) {
         // cannot import chart from a file
         _callbacks.showMessage(err.toString());

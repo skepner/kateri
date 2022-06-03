@@ -12,6 +12,7 @@ import 'package:universal_platform/universal_platform.dart';
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
 
+import 'error.dart';
 import 'draw_on.dart';
 import 'draw_on_canvas.dart';
 import 'draw_on_pdf.dart';
@@ -169,7 +170,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   void showMessage(String text, {Color backgroundColor = Colors.red}) {
-    print("showMessage \"$text\"");
+    debug("showMessage \"$text\"");
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(text), backgroundColor: backgroundColor, duration: const Duration(days: 1)));
@@ -253,9 +254,7 @@ class AntigenicMapPainter extends CustomPainter {
     final stopwatch = Stopwatch()..start();
     _data.antigenicMapPainterSize = size; // to auto-resize window
     viewer.paint(CanvasFlutter(canvas, size));
-    if (stopwatch.elapsedMicroseconds > 5000) {
-      print("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
-    }
+    if (stopwatch.elapsedMicroseconds > 50000) info("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
 
   @override
