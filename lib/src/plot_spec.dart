@@ -198,6 +198,9 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     if (points.isNotEmpty) {
       for (final pointNo in points) {
         modifyPointPlotSpec(entry, pointSpec[pointNo], pointNo: pointNo);
+        if (pointSpec[pointNo].serumCoverage != null) {
+          applySerumCoverage(pointSpec[pointNo].serumCoverage!, pointNo);
+        }
       }
       raiseLowerPoints(entry["D"], points);
     }
@@ -321,49 +324,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     return spec;
   }
 
-  SerumCircle? serumCircleData(Map<String, dynamic> mod, int? pointNo) {
-    try {
-      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
-      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
-      final circleData = _chart.sera[serumNo].semantic["CI${mod['u']?.round() ?? 2}"];
-      if (circleData == null) throw DataError("no serum circle data for fold ${mod['u']}");
-      final radius = ((mod["T"] ?? false) ? circleData["e"] : circleData["t"])?.toDouble();
-      final dash = (radius != null ? (mod["d"] ?? 0) : 100);
-      return SerumCircle(
-          radius: radius ?? mod["u"]?.toDouble() ?? 2.0,
-          outline: NamedColor.fromString(mod["O"] ?? "blue"),
-          outlineWidthPixels: mod["o"]?.toDouble() ?? 1.0,
-          fill: NamedColor.fromString(mod["F"] ?? "transparent"),
-          dash: dash,
-          sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : null,
-          radiusOutline: mod["r"]?["O"],
-          radiusWidthPixels: mod["r"]?["o"],
-          radiusDash: mod["r"]?["d"]);
-    } catch (err) {
-      error("serumCircleData: $err $mod");
-      return null;
-    }
-  }
-
-  SerumCoverage? serumCoverageData(Map<String, dynamic> mod, int? pointNo) {
-    try {
-      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
-      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
-      return SerumCoverage(
-        fold: mod["u"].toDouble() ?? 2.0,
-          withinOutline: mod["I"]?["O"] ?? "pink",
-          withinOutlineWidthPixels: mod["I"]?["o"]?.toDouble() ?? 1.0,
-          withinFill: mod["I"]?["F"] ?? ":bright",
-          outsideOutline: mod["O"]?["O"] ?? "black",
-          outsideOutlineWidthPixels: mod["O"]?["o"]?.toDouble() ?? 1.0,
-          outsideFill: mod["O"]?["F"] ?? ":bright",
-          );
-    } catch (err) {
-      error("serumCoverageData: $err $mod");
-      return null;
-    }
-  }
-
   static PointShape pointShapeFromString(String src) {
     switch (src[0].toUpperCase()) {
       case "C":
@@ -422,6 +382,61 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     // print("$args");
     return Function.apply(PointLabel.apply, [], args);
   }
+
+  // ----------------------------------------------------------------------
+
+  SerumCircle? serumCircleData(Map<String, dynamic> mod, int? pointNo) {
+    try {
+      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
+      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
+      final circleData = _chart.sera[serumNo].semantic["CI${mod['u']?.round() ?? 2}"];
+      if (circleData == null) throw DataError("no serum circle data for fold ${mod['u']}");
+      final radius = ((mod["T"] ?? false) ? circleData["e"] : circleData["t"])?.toDouble();
+      final dash = (radius != null ? (mod["d"] ?? 0) : 100);
+      return SerumCircle(
+          radius: radius ?? mod["u"]?.toDouble() ?? 2.0,
+          outline: NamedColor.fromString(mod["O"] ?? "blue"),
+          outlineWidthPixels: mod["o"]?.toDouble() ?? 1.0,
+          fill: NamedColor.fromString(mod["F"] ?? "transparent"),
+          dash: dash,
+          sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : null,
+          radiusOutline: mod["r"]?["O"],
+          radiusWidthPixels: mod["r"]?["o"],
+          radiusDash: mod["r"]?["d"]);
+    } catch (err) {
+      error("serumCircleData: $err $mod");
+      return null;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+
+  SerumCoverage? serumCoverageData(Map<String, dynamic> mod, int? pointNo) {
+    try {
+      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
+      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
+      return SerumCoverage(
+        fold: mod["u"].toDouble() ?? 2.0,
+        withinOutline: mod["I"]?["O"] ?? "pink",
+        withinOutlineWidthPixels: mod["I"]?["o"]?.toDouble() ?? 3.0,
+        withinFill: mod["I"]?["F"] ?? ":bright",
+        outsideOutline: mod["O"]?["O"] ?? "black",
+        outsideOutlineWidthPixels: mod["O"]?["o"]?.toDouble() ?? 3.0,
+        outsideFill: mod["O"]?["F"] ?? ":bright",
+      );
+    } catch (err) {
+      error("serumCoverageData: $err $mod");
+      return null;
+    }
+  }
+
+  void applySerumCoverage(SerumCoverage serumCoverage, int pointNo) {
+    final serumNo = pointNo - _chart.antigens.length;
+    final homologousTiter = _chart.homologousTiterForSerum(serumNo);
+    debug("SR $serumNo $serumCoverage");
+  }
+
+  // ----------------------------------------------------------------------
 
   bool _activated = false;
   final Chart _chart;

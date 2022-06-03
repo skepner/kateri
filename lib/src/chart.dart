@@ -84,6 +84,20 @@ class Chart extends _JsonAccess {
 
   // ----------------------------------------------------------------------
 
+  String homologousTiterForSerum(int serumNo) {
+    final serum = sera[serumNo];
+    debug("SR $serumNo ${serum.name} ${serum.annotations} ${serum.reassortant} ${serum.passage}");
+    for (int antigenNo = 0; antigenNo < antigens.length; ++antigenNo) {
+      final antigen = antigens[antigenNo];
+      if (serum.name == antigen.name) { // && serum.annotations == antigen.annotations && serum.reassortant == antigen.reassortant) {
+        debug("  AG $antigenNo ${antigen.name} ${antigen.annotations} ${antigen.reassortant} ${antigen.passage}");
+      }
+    }
+    return "*";
+  }
+
+  // ----------------------------------------------------------------------
+
   Info info = Info.empty();
   Projections projections = [];
   Antigens antigens = [];
