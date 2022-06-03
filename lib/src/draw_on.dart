@@ -39,6 +39,7 @@ class PointPlotSpec {
   double aspect = aspectNormal;
   PointLabel? label;
   SerumCircle? serumCircle;
+  SerumCoverage? serumCoverage;
 
   PointPlotSpec();
   PointPlotSpec.from(PointPlotSpec src)
@@ -208,6 +209,31 @@ class SerumCircle {
       }
     }
   }
+}
+
+// ----------------------------------------------------------------------
+
+class SerumCoverage {
+  final double fold;
+  final String withinOutline;
+  final double withinOutlineWidthPixels;
+  final String withinFill;
+  final String outsideOutline;
+  final double outsideOutlineWidthPixels;
+  final String outsideFill;
+
+  SerumCoverage(
+      {required this.fold,
+      required this.withinOutline,
+      required this.withinOutlineWidthPixels,
+      required this.withinFill,
+      required this.outsideOutline,
+      required this.outsideOutlineWidthPixels,
+      required this.outsideFill});
+
+  @override
+  String toString() =>
+      "SerumCoverage(fold: $fold, within: {outline: $withinOutline, outlineWidth: $withinOutlineWidthPixels, fill: $withinFill}, outside: {outline: $outsideOutline, outlineWidth: $outsideOutlineWidthPixels, fill: $outsideFill})";
 }
 
 // ======================================================================

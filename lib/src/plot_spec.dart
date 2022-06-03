@@ -304,6 +304,9 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         case "CI": // serum circle
           spec.serumCircle = serumCircleData(modValue, pointNo);
           break;
+        case "SC": // serum coverage
+          spec.serumCoverage = serumCoverageData(modValue, pointNo);
+          break;
         case "R": // reference to another style, processed in applyEntry()
         case "T": // selector, processed earlier
         case "D": // order, processed in applyEntry()
@@ -329,7 +332,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       return SerumCircle(
           radius: radius ?? mod["u"]?.toDouble() ?? 2.0,
           outline: NamedColor.fromString(mod["O"] ?? "blue"),
-          outlineWidthPixels: mod["o"].toDouble() ?? 1.0,
+          outlineWidthPixels: mod["o"]?.toDouble() ?? 1.0,
           fill: NamedColor.fromString(mod["F"] ?? "transparent"),
           dash: dash,
           sector: mod["a"] != null ? Sector.fromTwoAngles(mod["a"][0], mod["a"][1]) : null,
@@ -338,6 +341,25 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           radiusDash: mod["r"]?["d"]);
     } catch (err) {
       error("serumCircleData: $err $mod");
+      return null;
+    }
+  }
+
+  SerumCoverage? serumCoverageData(Map<String, dynamic> mod, int? pointNo) {
+    try {
+      final serumNo = (pointNo ?? 0) - _chart.antigens.length;
+      if (serumNo < 0 || serumNo >= _chart.sera.length) throw DataError("invalid pointNo: $pointNo or serumNo $serumNo (AG: ${_chart.antigens.length} SR: ${_chart.sera.length})");
+      return SerumCoverage(
+        fold: mod["u"].toDouble() ?? 2.0,
+          withinOutline: mod["I"]?["O"] ?? "pink",
+          withinOutlineWidthPixels: mod["I"]?["o"]?.toDouble() ?? 1.0,
+          withinFill: mod["I"]?["F"] ?? ":bright",
+          outsideOutline: mod["O"]?["O"] ?? "black",
+          outsideOutlineWidthPixels: mod["O"]?["o"]?.toDouble() ?? 1.0,
+          outsideFill: mod["O"]?["F"] ?? ":bright",
+          );
+    } catch (err) {
+      error("serumCoverageData: $err $mod");
       return null;
     }
   }
