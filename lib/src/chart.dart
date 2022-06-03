@@ -1,9 +1,5 @@
-// import 'dart:io';
-// import 'dart:ui';
-// import 'dart:math';
-// import 'dart:typed_data';
 import 'dart:convert'; // json
-
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'error.dart';
@@ -89,8 +85,16 @@ class Chart extends _JsonAccess {
     debug("SR $serumNo ${serum.name} ${serum.annotations} ${serum.reassortant} ${serum.passage}");
     for (int antigenNo = 0; antigenNo < antigens.length; ++antigenNo) {
       final antigen = antigens[antigenNo];
-      if (serum.name == antigen.name) { // && serum.annotations == antigen.annotations && serum.reassortant == antigen.reassortant) {
-        debug("  AG $antigenNo ${antigen.name} ${antigen.annotations} ${antigen.reassortant} ${antigen.passage}");
+      if (serum.name == antigen.name) {
+        int rank = 0;
+        if (!listEquals(serum.annotations, antigen.annotations)) rank += 16;
+        if (serum.reassortant != antigen.reassortant) rank += 8;
+        if (serum.passage != antigen.passage) {
+          rank += 4;
+          if (serum.semantic["p"] != antigen.semantic["p"]) rank += 2;
+        }
+        // && serum.annotations == antigen.annotations && serum.reassortant == antigen.reassortant) {
+        debug("  AG $antigenNo rank: $rank ${antigen.name} ${antigen.annotations} ${antigen.reassortant} ${antigen.passage}");
       }
     }
     return "*";
