@@ -123,13 +123,13 @@ class _EventSink implements EventSink<Uint8List> {
   }
 
   @override
-  void addError(Object error, [StackTrace? stackTrace]) {
-    print("_EventSink.addError $error");
+  void addError(Object err, [StackTrace? stackTrace]) {
+    error("_EventSink.addError $err");
   }
 
   @override
   void close() {
-    print("_EventSink.close");
+    info("_EventSink.close");
   }
 }
 

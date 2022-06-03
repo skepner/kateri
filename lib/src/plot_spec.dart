@@ -392,7 +392,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         // case "i":                // addtional interval between lines as a fraction of line height
         // break;
         default:
-          print(">> WARNING: pointLabelFromAce: unknown point label specification key $key: $val");
+          warning("pointLabelFromAce: unknown point label specification key $key: $val");
           break;
       }
     });

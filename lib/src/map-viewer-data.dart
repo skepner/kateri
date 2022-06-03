@@ -78,8 +78,8 @@ class AntigenicMapViewerData {
         currentPlotSpec.activate();
       }
       viewport = plotSpecs[index].viewport() ?? projection!.viewport();
-      print("projection ${projection!.viewport()}");
-      print("used       $viewport  aspect:${viewport!.aspectRatio()}");
+      info("projection ${projection!.viewport()}");
+      info("used       $viewport  aspect:${viewport!.aspectRatio()}");
     }
   }
 
@@ -168,7 +168,7 @@ class AntigenicMapViewerData {
           await Process.run("open", [filename]);
         }
       }
-      print("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+      debug("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
     }
   }
 }

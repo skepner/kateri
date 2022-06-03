@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import 'error.dart';
+
 // ----------------------------------------------------------------------
 
 // const black = Color(0xFF000000);
@@ -38,8 +40,8 @@ extension NamedColor on Color {
       final color = _colorNames[src.toLowerCase()];
       if (color != null) return color;
     }
-    print(">> WARNING: unrecognized color: \"$src\"");
-    return  Colors.pink;
+    warning("unrecognized color: \"$src\"");
+    return Colors.pink;
   }
 
   static Color fromStringOr(String? src, String dflt) {
@@ -71,7 +73,7 @@ class ColorAndModifier {
         } else if (toAdd == ":pale") {
           _modifier = toAdd;
         } else {
-          print(">> WARNING: unknown color modifier \"$toAdd\"");
+          warning("unknown color modifier \"$toAdd\"");
         }
       } else {
         _color = toAdd;
