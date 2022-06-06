@@ -1,4 +1,5 @@
 import 'dart:convert'; // json
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -70,6 +71,7 @@ class Chart extends _JsonAccess {
       throw FormatError("json decoding failed: $err");
     }
     info = Info(data["c"]["i"]);
+    titers = Titers(data["c"]["t"]);
     antigens = (data["c"]["a"] ?? []).map<Antigen>((pdata) => Antigen(pdata)).toList();
     sera = (data["c"]["s"] ?? []).map<Serum>((pdata) => Serum(pdata)).toList();
     projections = (data["c"]["P"] ?? []).map<Projection>((pdata) => Projection(pdata)).toList();
@@ -80,9 +82,11 @@ class Chart extends _JsonAccess {
 
   // ----------------------------------------------------------------------
 
-  String homologousTiterForSerum(int serumNo) {
+  Titer homologousTiterForSerum(int serumNo) {
     final serum = sera[serumNo];
-    debug("SR $serumNo ${serum.name} ${serum.annotations} ${serum.reassortant} ${serum.passage}");
+    var bestRank = 1024;
+    var bestTiter = Titer("*");
+    // debug("SR $serumNo ${serum.name} ${serum.annotations} ${serum.reassortant} ${serum.passage}");
     for (int antigenNo = 0; antigenNo < antigens.length; ++antigenNo) {
       final antigen = antigens[antigenNo];
       if (serum.name == antigen.name) {
@@ -93,16 +97,21 @@ class Chart extends _JsonAccess {
           rank += 4;
           if (serum.semantic["p"] != antigen.semantic["p"]) rank += 2;
         }
-        // && serum.annotations == antigen.annotations && serum.reassortant == antigen.reassortant) {
-        debug("  AG $antigenNo rank: $rank ${antigen.name} ${antigen.annotations} ${antigen.reassortant} ${antigen.passage}");
+        final titer = titers.titer(antigenNo, serumNo);
+        if (!titer.isDontCare && rank < bestRank) {
+          bestRank = rank;
+          bestTiter = titer;
+        }
+        //debug("  AG $antigenNo rank: $rank titer: $titer ${antigen.name} ${antigen.annotations} ${antigen.reassortant} ${antigen.passage}");
       }
     }
-    return "*";
+    return bestTiter;
   }
 
   // ----------------------------------------------------------------------
 
   Info info = Info.empty();
+  Titers titers = Titers.empty();
   Projections projections = [];
   Antigens antigens = [];
   Sera sera = [];
@@ -202,6 +211,52 @@ class Serum extends _AntigenSerum {
 }
 
 typedef Sera = List<Serum>;
+
+// ----------------------------------------------------------------------
+
+class Titers extends _JsonAccess {
+  Titers(_JsonData data)
+      : _dense = data["l"] != null,
+        super(data);
+  Titers.empty()
+      : _dense = false,
+        super.empty();
+
+  Titer titer(int antigenNo, int serumNo) {
+    if (_dense) {
+      return Titer(data["l"][antigenNo]?[serumNo] ?? "*");
+    } else {
+      return Titer(data["d"][antigenNo]?["$serumNo"] ?? "*");
+    }
+  }
+
+  bool _dense;
+}
+
+class Titer {
+  Titer(this._titer);
+
+  bool get isDontCare => _titer == "*";
+  bool get isLessThan => _titer[0] == "<";
+  bool get isMoreThan => _titer[0] == ">";
+  bool get isThresholded => isLessThan || isMoreThan;
+
+  double get value {
+    if (isDontCare) return 0.0;
+    if (isThresholded) return double.parse(_titer.substring(1));
+    return double.parse(_titer);
+  }
+
+  double get logged => math.log(value / 10.0) / math.ln2;
+  double get loggedForColumnBases {
+    if (isMoreThan) return logged + 1.0;
+    return logged;
+  }
+
+  String toString() => _titer;
+
+  String _titer;
+}
 
 // ----------------------------------------------------------------------
 

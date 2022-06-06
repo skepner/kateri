@@ -433,7 +433,32 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   void applySerumCoverage(SerumCoverage serumCoverage, int pointNo) {
     final serumNo = pointNo - _chart.antigens.length;
     final homologousTiter = _chart.homologousTiterForSerum(serumNo);
-    debug("SR $serumNo $serumCoverage");
+    if (homologousTiter.isDontCare) throw DataError("serum coverage data not available: homologous titer is \"*\"");
+    final titerThreshold = homologousTiter.logged - serumCoverage.fold;
+    if (titerThreshold <= 0.0) throw DataError("serum coverage data for fold ${serumCoverage.fold} not available: homologous titer is too low: $homologousTiter");
+    for (int agNo = 0; agNo < _chart.antigens.length; ++agNo) {
+      final titer = _chart.titers.titer(agNo, serumNo);
+      if (!titer.isDontCare) {
+        if (titer.loggedForColumnBases >= titerThreshold) {
+          applySerumCoverageAntigenWithin(serumCoverage, pointSpec[agNo]);
+        } else {
+          applySerumCoverageAntigenOutside(serumCoverage, pointSpec[agNo]);
+        }
+      }
+    }
+    // debug("SR $serumNo titer: $homologousTiter $serumCoverage");
+  }
+
+  void applySerumCoverageAntigenWithin(SerumCoverage serumCoverage, PointPlotSpec antigenSpec) {
+    antigenSpec.fill.modify(serumCoverage.withinFill);
+    antigenSpec.outline.modify(serumCoverage.withinOutline);
+    antigenSpec.outlineWidthPixels = serumCoverage.withinOutlineWidthPixels;
+  }
+
+  void applySerumCoverageAntigenOutside(SerumCoverage serumCoverage, PointPlotSpec antigenSpec) {
+    antigenSpec.fill.modify(serumCoverage.outsideFill);
+    antigenSpec.outline.modify(serumCoverage.outsideOutline);
+    antigenSpec.outlineWidthPixels = serumCoverage.outsideOutlineWidthPixels;
   }
 
   // ----------------------------------------------------------------------
