@@ -451,6 +451,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     }
     raiseLowerPoints("r", antigensWithin);
     raiseLowerPoints("r", antigensOutside);
+    if (antigensWithin.isEmpty) warning("serum coverage for SR $serumNo: no antigens within fold ${serumCoverage.fold} from homologous titer $homologousTiter");
     // debug("SR $serumNo titer: $homologousTiter $serumCoverage");
   }
 
