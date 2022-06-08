@@ -150,7 +150,16 @@ class AntigenicMapViewerData {
   void connectToServer(String? socketName) async {
     if (socketName != null) {
       _chartBeingLoaded = true;
-      _socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
+      while (true) {
+        try {
+          _socket = await Socket.connect(InternetAddress(socketName, type: InternetAddressType.unix), 0);
+          break; // connected
+        } on SocketException {
+          // socket not available yet, wait
+          sleep(const Duration(milliseconds: 100));
+        }
+      }
+
       socket_events.SocketEventHandler(socketStream: _socket!, antigenicMapViewerData: this).handle();
       _socket!.write("Hello from Kateri");
     }
