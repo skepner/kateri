@@ -48,7 +48,9 @@ class ChartEvent extends Event {
   Uint8List? _data;
   int _stored = 0; // number of bytes already in _data
 
-  ChartEvent();
+  ChartEvent() {
+    info("receiving chart");
+  }
 
   @override
   void act(AntigenicMapViewerData antigenicMapViewerData) {
