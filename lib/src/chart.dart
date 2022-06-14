@@ -184,7 +184,15 @@ class _AntigenSerum extends _JsonAccess {
   String get aa => data["A"] ?? "";
   String get nuc => data["B"] ?? "";
   bool get isReassortant => reassortant.isNotEmpty;
-  bool get isEgg => passage.contains(RegExp(r"(?:E(?:GG)?)[0-9X\?]*$"));
+  bool get isEgg {
+    final semanticP = semantic["p"];
+    if (semanticP != null) {
+      return semanticP == "e";
+    } else {
+      return passage.contains(RegExp(r"(?:E(?:GG)?)[0-9X\?]*( \(|$)")); // "...E1", "...E?", "...E1 (2022-01-01)"
+    }
+  }
+
   Map<String, dynamic> get semantic => data["T"] ?? {};
 }
 
