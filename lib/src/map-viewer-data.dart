@@ -71,6 +71,15 @@ class AntigenicMapViewerData {
     }
   }
 
+  void setPlotSpecByName(String name) {
+    final index = plotSpecs.indexWhere((spec) => spec.name() == name);
+    if (index >= 0) {
+      setPlotSpec(index);
+    } else {
+      warning("plot style \"$name\" not found");
+    }
+  }
+
   void setPlotSpec(int index) {
     if (chart != null && index < plotSpecs.length) {
       if (currentPlotSpecIndex != index) {

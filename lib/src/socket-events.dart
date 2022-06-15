@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data'; // Uint8List
 import 'dart:math';
+import 'dart:convert'; // json
 
 import 'error.dart';
 import 'map-viewer-data.dart';
@@ -23,43 +24,27 @@ class SocketEventHandler {
 // ----------------------------------------------------------------------
 
 abstract class Event {
-  const Event();
+  Event();
+
+  /// Called when the whole even is stored in data
+  void prepare();
 
   void act(AntigenicMapViewerData antigenicMapViewerData);
 
-  /// 4 first bytes of source is a event type code
-  factory Event.create(Uint8List source) {
-    switch (String.fromCharCodes(source, 0, 4)) {
+  /// source starts with 4 bytes of code followed by 4 bytes of data size followed by data
+  factory Event.create(Uint8List source, int sourceStart) {
+    final eventCode = String.fromCharCodes(source, sourceStart, sourceStart + 4);
+    switch (eventCode) {
       case "CHRT":
         return ChartEvent();
+      case "COMD":
+        return CommandEvent();
       default:
-        throw FormatError("unrecognized socket event (${source.length}): \"${String.fromCharCodes(source)}\"");
+        throw FormatError("unrecognized socket event (${source.length - sourceStart}): \"$eventCode\"");
     }
   }
 
-  /// Consumes few or all bytes from the source, returns number of bytes consumed
-  int consume(Uint8List source, int sourceStart);
-
-  /// Returns if event cannot consume more bytes and ready to be sent further
-  bool finished();
-}
-
-class ChartEvent extends Event {
-  Uint8List? _data;
-  int _stored = 0; // number of bytes already in _data
-
-  ChartEvent() {
-    info("receiving chart");
-  }
-
-  @override
-  void act(AntigenicMapViewerData antigenicMapViewerData) {
-    if (_data == null) return;
-    antigenicMapViewerData.setChartFromBytes(_data!);
-  }
-
-  /// returns number of bytes consumed
-  @override
+  /// Consume few or all bytes from the source, return number of bytes consumed, store read bytes into _data
   int consume(Uint8List source, int sourceStart) {
     final sourceStartInit = sourceStart;
     if (_data == null) {
@@ -74,9 +59,27 @@ class ChartEvent extends Event {
     return sourceStart - sourceStartInit + copyCount;
   }
 
-  @override
+  /// Returns if event cannot consume more bytes and ready to be sent further
   bool finished() {
     return _data != null && _data!.length == _stored;
+  }
+
+  Uint8List? _data;
+  int _stored = 0; // number of bytes already in _data
+}
+
+// ----------------------------------------------------------------------
+
+class ChartEvent extends Event {
+  @override
+  void prepare() {
+    info("receiving chart (${_data!.length} bytes)");
+  }
+
+  @override
+  void act(AntigenicMapViewerData antigenicMapViewerData) {
+    if (_data == null) return;
+    antigenicMapViewerData.setChartFromBytes(_data!);
   }
 
   @override
@@ -86,6 +89,51 @@ class ChartEvent extends Event {
     } else {
       return "ChartEvent(${_data!.length} $_stored bytes)";
     }
+  }
+}
+
+// ----------------------------------------------------------------------
+
+typedef _JsonData = Map<String, dynamic>;
+
+class CommandEvent extends Event {
+  late final _JsonData data;
+
+  @override
+  void prepare() {
+    if (_data == null) return;
+
+    info("receiving command (${_data!.length} bytes)");
+
+    late final String utf8Decoded;
+    try {
+      utf8Decoded = utf8.decode(_data!);
+    } catch (err) {
+      throw FormatError("utf8 decoding failed: $err");
+    }
+    try {
+      data = jsonDecode(utf8Decoded);
+    } catch (err) {
+      throw FormatError("json decoding failed: $err");
+    }
+  }
+
+  @override
+  void act(AntigenicMapViewerData antigenicMapViewerData) {
+    // info("CommandEvent.act $data");
+    switch (data["C"]) {
+      case "set_style":
+        antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
+        break;
+      default:
+        error("unrecognized command: $data");
+        break;
+    }
+  }
+
+  @override
+  String toString() {
+    return "CommandEvent $data";
   }
 }
 
@@ -113,11 +161,12 @@ class _EventSink implements EventSink<Uint8List> {
     // print("_EventSink.add ${source.length} \"${String.fromCharCodes(Uint8List.view(source.buffer, sourceStart, 4))}\" sourceStart:$sourceStart");
     while (sourceStart < source.length) {
       if (_current == null) {
-        _current = Event.create(source);
+        _current = Event.create(source, sourceStart);
         sourceStart += 4;
       }
       sourceStart += _current!.consume(source, sourceStart);
       if (_current!.finished()) {
+        _current!.prepare();
         _output.add(_current!);
         _current = null;
       }
