@@ -48,7 +48,7 @@ abstract class Event {
   int consume(Uint8List source, int sourceStart) {
     final sourceStartInit = sourceStart;
     if (_data == null) {
-      if ((source.length - sourceStart) < 4) throw FormatError("ChartEvent: cannot read data size: too few bytes available (${source.length - sourceStart})");
+      if ((source.length - sourceStart) < 4) throw FormatError("Event: cannot read data size: too few bytes available (${source.length - sourceStart})");
       _data = Uint8List(source.buffer.asUint32List(sourceStart, 1)[0]);
       sourceStart += 4;
       if ((source.length - sourceStart) <= 4) return 0;
@@ -56,7 +56,13 @@ abstract class Event {
     final copyCount = min(source.length - sourceStart, _data!.length - _stored);
     _data!.setRange(_stored, _stored + copyCount, Uint8List.view(source.buffer, sourceStart));
     _stored += copyCount;
-    return sourceStart - sourceStartInit + copyCount;
+    var consumed = sourceStart - sourceStartInit + copyCount;
+    if (finished()) {
+      // consume padding to make sure next event starts at 4-byte boundary
+      final remainder = copyCount.remainder(4);
+      if (remainder > 0) consumed += 4 - remainder;
+    }
+    return consumed;
   }
 
   /// Returns if event cannot consume more bytes and ready to be sent further
