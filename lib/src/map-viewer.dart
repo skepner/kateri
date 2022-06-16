@@ -182,8 +182,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   }
 
   @override
-  Future<Uint8List?> exportPdf() async {
-    return antigenicMapPainter.viewer.exportPdf();
+  Future<Uint8List?> exportPdf({double canvasPdfWidth = 800.0}) async {
+    return antigenicMapPainter.viewer.exportPdf(canvasPdfWidth: canvasPdfWidth);
   }
 
   // ----------------------------------------------------------------------
@@ -227,7 +227,7 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
           leading: const Icon(Icons.picture_as_pdf_rounded),
           title: const Text("Export pdf F4"),
           onTap: () {
-            antigenicMapViewerData.exportPdf();
+            antigenicMapViewerData.exportPdf(canvasPdfWidth: 800.0);
             Navigator.pop(context);
           }),
       ListTile(
@@ -372,9 +372,8 @@ class AntigenicMapViewer {
     }
   }
 
-  Future<Uint8List?> exportPdf() async {
+  Future<Uint8List?> exportPdf({double canvasPdfWidth = 800.0}) async {
     if (_data.chart != null && _data.viewport != null) {
-      const canvasPdfWidth = 1000.0;
       final canvasPdf = CanvasPdf(Size(canvasPdfWidth, canvasPdfWidth / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
       return canvasPdf.bytes();
     }

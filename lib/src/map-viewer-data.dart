@@ -20,7 +20,7 @@ abstract class AntigenicMapViewerCallbacks {
   void updateCallback({int? plotSpecIndex});
   void showMessage(String text, {Color backgroundColor = Colors.red});
   void hideMessage();
-  Future<Uint8List?> exportPdf();
+  Future<Uint8List?> exportPdf({double canvasPdfWidth = 800.0});
 }
 
 // ----------------------------------------------------------------------
@@ -176,17 +176,17 @@ class AntigenicMapViewerData {
 
   // ----------------------------------------------------------------------
 
-  void exportPdf() async {
+  void exportPdf({double canvasPdfWidth = 800.0}) async {
     if (chart != null) {
       final stopwatch = Stopwatch()..start();
-      final bytes = await _callbacks.exportPdf(); // antigenicMapPainter.viewer.exportPdf();
+      final bytes = await _callbacks.exportPdf(canvasPdfWidth: canvasPdfWidth); // antigenicMapPainter.viewer.exportPdf();
       if (bytes != null) {
         final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
         if (openExportedPdf && UniversalPlatform.isMacOS) {
           await Process.run("open", [filename]);
         }
       }
-      debug("[exportPdf] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
+      debug("[exportPdf] ${stopwatch.elapsed} -> ${(1e6 / stopwatch.elapsedMicroseconds).toStringAsFixed(2)} frames per second");
     }
   }
 }
