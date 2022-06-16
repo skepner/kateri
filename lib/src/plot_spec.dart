@@ -135,7 +135,10 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
 // ----------------------------------------------------------------------
 
 class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
-  PlotSpecSemantic(this._chart, this._projection, this._name, this._data);
+  PlotSpecSemantic(this._chart, this._projection, this._name, this._data) {
+    _legend.update(_data["L"]);
+    // debug("PlotSpecSemantic ${name()} legend ${_data["L"]}");
+  }
 
   @override
   String name() => _name;
@@ -162,7 +165,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   PlotTitle? plotTitle() => _data["T"] != null ? PlotTitle(_data["T"]) : null;
 
   @override
-  Legend? legend() => _data["L"] != null ? Legend(_data["L"], _legendRows) : null;
+  Legend? legend() => _legend; // _data["L"] != null ? Legend(_data["L"], _legendRows) : null;
 
   @override // called when plot spac activated, allows calculating delayed configuration
   void activate() {
@@ -190,7 +193,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     for (final en in data) {
       applyEntry(en as Map<String, dynamic>, recursionLevel);
     }
-    _legendRows.sort((e1, e2) => e1.priority.compareTo(e2.priority));
+    _legend.legendRows.sort((e1, e2) => e1.priority.compareTo(e2.priority));
   }
 
   void applyEntry(Map<String, dynamic> entry, int recursionLevel) {
@@ -199,6 +202,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       final parentStyle = _chart.data["c"]["R"][entry["R"]];
       if (parentStyle != null) {
         _setViewport(parentStyle["V"]);
+        _legend.update(parentStyle["L"]);
         apply(parentStyle["A"] ?? [], recursionLevel + 1);
       } else {
         warning("(parent) style not found: ${entry['R']}");
@@ -217,10 +221,10 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     final legend = entry["L"];
     if (legend != null) {
       final point = points.isNotEmpty ? PointPlotSpec.from(pointSpec[points[0]]) : modifyPointPlotSpec(entry, PointPlotSpec());
-      _legendRows.add(LegendRow(text: legend["t"] ?? "", point: point, count: points.length, priority: legend["p"] ?? 0));
+      _legend.legendRows.add(LegendRow(text: legend["t"] ?? "", point: point, count: points.length, priority: legend["p"] ?? 0));
     } else if (entry["T"] == null && (entry["F"]?[0] == ":" || entry["O"]?[0] == ":")) {
       // color of all points modified, modify existing legends as well (hack to make legend for pale clades pale too)
-      for (final legendRow in _legendRows) {
+      for (final legendRow in _legend.legendRows) {
         modifyPointPlotSpec({"F": entry["F"] ?? "", "O": entry["O"] ?? ""}, legendRow.point);
       }
     }
@@ -487,8 +491,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   final Map<String, dynamic> _data;
 
   late List<int> _drawingOrder;
-  final List<PointPlotSpec> pointSpec = [];
-  final List<LegendRow> _legendRows = [];
+  final pointSpec = <PointPlotSpec>[];
+  final _legend = Legend();
   Viewport? _viewport;
 }
 
@@ -557,29 +561,59 @@ class LegendRow {
 }
 
 class Legend {
-  Legend([this.data = const <String, dynamic>{}, this.legendRows = const <LegendRow>[]]);
+  void update(Map<String, dynamic>? source) {
+    // debug("legend update $source");
+    source?.forEach((key, val) {
+      switch (key) {
+        case "-":
+          _shown = !val;
+          break;
+        case "C":
+          addCounter = val;
+          break;
+        case "S":
+          pointSize = val.toDouble();
+          break;
+        case "z":
+          showRowsWithZeroCount = val;
+          break;
+        case "B":
+          box = PlotBox.Legend(val);
+          break;
+        case "t":
+          rowStyle = PlotText(val, _legendDefaults);
+          break;
+        case "T":
+          title = PlotText(val, _legendDefaults);
+          break;
+        default:
+          warning("[legend] unrecognized key \"$key\"");
+          break;
+      }
+    });
+  }
 
-  String toString() => "Legend($data)";
+  String toString() => "Legend(...)";
 
-  bool get shown => !(data["-"] ?? false) && legendRows.isNotEmpty;
-  bool get addCounter => data["C"] ?? false;
-  double get pointSize => data["S"] ?? _legendDefaults.fontSize;
-  bool get showRowsWithZeroCount => data["z"] ?? false;
-  PlotBox get box => PlotBox.Legend(data["B"]);
-  PlotText get rowStyle => PlotText(data["t"], _legendDefaults);
-  PlotText get title => PlotText(data["T"], _legendTitleDefaults);
+  bool get shown => _shown && legendRows.isNotEmpty;
 
-  final Map<String, dynamic> data;
-  final List<LegendRow> legendRows;
+  bool _shown = true;
+  bool addCounter = false;
+  double pointSize = _legendDefaults.fontSize;
+  bool showRowsWithZeroCount = false;
+  PlotBox box = PlotBox.Legend();
+  PlotText rowStyle = PlotText(null, _legendDefaults);
+  PlotText title = PlotText(null, _legendTitleDefaults);
+  final List<LegendRow> legendRows = <LegendRow>[];
 }
 
 // ----------------------------------------------------------------------
 
 class PlotBox {
-  PlotBox.Title(Map<String, dynamic>? dat)
+  PlotBox.Title([Map<String, dynamic>? dat])
       : data = dat ?? <String, dynamic>{},
         _defaults = _Defaults.title();
-  PlotBox.Legend(Map<String, dynamic>? dat)
+  PlotBox.Legend([Map<String, dynamic>? dat])
       : data = dat ?? <String, dynamic>{},
         _defaults = _Defaults.legend();
 
