@@ -296,7 +296,7 @@ class AntigenicMapViewer {
     final legend = _data.currentPlotSpec.legend();
     if (legend != null && legend.shown) {
       final textFontSize = legend.rowStyle.fontSize, textStyle = legend.rowStyle.labelStyle;
-      final countLeftPadding = legend.addCounter ? textFontSize * canvas.pixelSize * 0.5 : 0.0;
+      final countLeftPadding = legend.addCounter ? (textFontSize * canvas.pixelSize * 1.0) : 0.0;
       final countTextWidth = legend.addCounter
           ? legend.legendRows.map((row) => row.count.toString()).map((txt) => canvas.textSize(txt, sizePixels: textFontSize, textStyle: textStyle)).map((sz) => sz.width).toList()
           : <double>[];

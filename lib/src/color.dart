@@ -53,7 +53,7 @@ extension NamedColor on Color {
 // ----------------------------------------------------------------------
 
 class ColorAndModifier {
-  static const _paleFactor = 2.5;
+  static const _paleFactor = 0.4;
 
   String _color;
   String? _modifier;
@@ -87,7 +87,7 @@ class ColorAndModifier {
     if (_modifier == ":pale") {
       final hsv = HSVColor.fromColor(clr);
       if (hsv.saturation > 0) {
-        clr = hsv.withSaturation(hsv.saturation / _paleFactor).toColor();
+        clr = hsv.withSaturation(hsv.saturation * _paleFactor).withValue(hsv.value + (1.0 - hsv.value) * (1.0 - _paleFactor)).toColor();
       } else {
         clr = hsv.withValue(_paleValue(hsv.value)).toColor();
       }
@@ -96,11 +96,11 @@ class ColorAndModifier {
   }
 
   double _paleValue(double source) {
-    final val = source * _paleFactor;
+    final val = source / _paleFactor;
     if (val > 1.0) {
       return 1.0;
-    } else if (val == 0.0) {
-      return _paleFactor * 0.3;
+    } else if (val == 0.0) {    // black
+      return 0.5;
     } else {
       return val;
     }
