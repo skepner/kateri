@@ -90,8 +90,24 @@ enum LabelFontFamily {
   times /* , symbol, zapf */
 }
 
-LabelFontFamily labelFontFamilyFromString(String? str) =>
-    str == null ? LabelFontFamily.helvetica : LabelFontFamily.values.firstWhere((lff) => lff.toString().toLowerCase() == ("LabelFontFamily." + str.toLowerCase()));
+LabelFontFamily labelFontFamilyFromString(String? str) {
+  switch (str?.toLowerCase()) {
+    case "monospace":
+      return LabelFontFamily.monospace;
+    case "sansserif":
+      return LabelFontFamily.sansSerif;
+    case "serif":
+      return LabelFontFamily.serif;
+    case "helvetica":
+      return LabelFontFamily.helvetica;
+    case "courier":
+      return LabelFontFamily.courier;
+    case "times":
+      return LabelFontFamily.times;
+    default:
+      return LabelFontFamily.helvetica;
+  }
+}
 
 FontWeight fontWeightFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
 FontStyle fontStyleFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
