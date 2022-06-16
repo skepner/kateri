@@ -192,6 +192,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       final parentStyle = _chart.data["c"]["R"][entry["R"]];
       if (parentStyle != null) {
         apply(parentStyle["A"] ?? [], recursionLevel + 1);
+      } else {
+        warning("(parent) style not found: ${entry['R']}");
       }
     }
     final points = selectPoints(entry["T"], entry["A"]);
