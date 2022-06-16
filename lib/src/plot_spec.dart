@@ -147,7 +147,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   List<int> drawingOrder() => _drawingOrder;
 
   @override
-  Viewport? viewport() => _data["V"] != null ? Viewport.originSizeList(_data["V"].map((value) => value.toDouble()).cast<double>().toList()) : null;
+  Viewport? viewport() => _viewport;
 
   @override
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
@@ -172,9 +172,16 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       makeDefaultDrawingOrder(_chart, _projection);
       _drawingOrder = ddoSera + ddoReferenceAntigens + ddoTestAntigens;
       makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
+      _setViewport(_data["V"]);
       apply(_data["A"] ?? []);
       _activated = true;
       debug("$_name activated in ${stopwatch.elapsed}");
+    }
+  }
+
+  void _setViewport(List<dynamic>? source) {
+    if (source != null) {
+      _viewport = Viewport.originSizeList(source.map((value) => value.toDouble()).cast<double>().toList());
     }
   }
 
@@ -191,6 +198,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
       // parent style
       final parentStyle = _chart.data["c"]["R"][entry["R"]];
       if (parentStyle != null) {
+        _setViewport(parentStyle["V"]);
         apply(parentStyle["A"] ?? [], recursionLevel + 1);
       } else {
         warning("(parent) style not found: ${entry['R']}");
@@ -481,6 +489,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
   late List<int> _drawingOrder;
   final List<PointPlotSpec> pointSpec = [];
   final List<LegendRow> _legendRows = [];
+  Viewport? _viewport;
 }
 
 // ----------------------------------------------------------------------
