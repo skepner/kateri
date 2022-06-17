@@ -514,9 +514,9 @@ class _Defaults {
         backgroundColor = "white",
         borderColor = "black",
         borderWidth = 1.0,
-        padding = const BoxPadding.hw(10.0, 15.0),
+        padding = const BoxPadding.hw(5.0, 10.0),
         originDirection = "Bl",
-        offset = const Offset(20, -20);
+        offset = const Offset(10, -10);
   const _Defaults.legendTitle() : this.legend(fontWeight: "bold", interline: 0.2);
 
   final String fontWeight;
@@ -542,7 +542,7 @@ class PlotTitle {
   String toString() => "PlotTitle($data)";
 
   bool get shown => !(data["-"] ?? false);
-  PlotBox get box => PlotBox.Title(data["B"]);
+  PlotBox get box => PlotBox.title(data["B"]);
   PlotText get text => PlotText(data["T"], _plotTitleDefaults);
 
   final Map<String, dynamic> data;
@@ -578,7 +578,7 @@ class Legend {
           showRowsWithZeroCount = val;
           break;
         case "B":
-          box = PlotBox.Legend(val);
+          box.update(val);
           break;
         case "t":
           rowStyle.update(val);
@@ -601,7 +601,7 @@ class Legend {
   bool addCounter = false;
   double pointSize = _legendDefaults.fontSize;
   bool showRowsWithZeroCount = false;
-  PlotBox box = PlotBox.Legend();
+  PlotBox box = PlotBox.legend();
   PlotText rowStyle = PlotText(null, _legendDefaults);
   PlotText title = PlotText(null, _legendTitleDefaults);
   final List<LegendRow> legendRows = <LegendRow>[];
@@ -610,26 +610,56 @@ class Legend {
 // ----------------------------------------------------------------------
 
 class PlotBox {
-  PlotBox.Title([Map<String, dynamic>? dat])
-      : data = dat ?? <String, dynamic>{},
-        _defaults = _Defaults.title();
-  PlotBox.Legend([Map<String, dynamic>? dat])
-      : data = dat ?? <String, dynamic>{},
-        _defaults = _Defaults.legend();
+  factory PlotBox.title([Map<String, dynamic>? dat]) {
+    final pb = PlotBox.defaults(_Defaults.title());
+    pb.update(dat);
+    return pb;
+  }
+  factory PlotBox.legend([Map<String, dynamic>? dat]) {
+    final pb = PlotBox.defaults(_Defaults.legend());
+    pb.update(dat);
+    return pb;
+  }
+  PlotBox.defaults(_Defaults defaults)
+      : originDirection = defaults.originDirection,
+        offset = defaults.offset,
+        padding = BoxPadding(top: defaults.padding.top, bottom: defaults.padding.bottom, left: defaults.padding.left, right: defaults.padding.right),
+        borderWidth = defaults.borderWidth,
+        backgroundColor = defaults.backgroundColor,
+        borderColor = defaults.borderColor;
 
-  String get originDirection => data["o"] ?? _defaults.originDirection;
-  Offset get offset => data["O"] != null ? Offset(data["O"][0].toDouble(), data["O"][1].toDouble()) : _defaults.offset;
-  BoxPadding get padding => BoxPadding(
-      top: data["p"]?["t"]?.toDouble() ?? _defaults.padding.top,
-      bottom: data["p"]?["b"]?.toDouble() ?? _defaults.padding.bottom,
-      left: data["p"]?["l"]?.toDouble() ?? _defaults.padding.left,
-      right: data["p"]?["r"]?.toDouble() ?? _defaults.padding.right);
-  double get borderWidth => data["W"]?.toDouble() ?? _defaults.borderWidth;
-  String get backgroundColor => data["F"] ?? _defaults.backgroundColor;
-  String get borderColor => data["B"] ?? _defaults.borderColor;
+  void update(Map<String, dynamic>? dat) {
+    dat?.forEach((key, val) {
+      switch (key) {
+        case "o":
+          originDirection = val;
+          break;
+        case "O":
+          offset = Offset(val[0].toDouble(), val[1].toDouble());
+          break;
+        case "p":
+          padding = BoxPadding(
+              top: val["t"]?.toDouble() ?? padding.top, bottom: val["b"]?.toDouble() ?? padding.bottom, left: val["l"]?.toDouble() ?? padding.left, right: val["r"]?.toDouble() ?? padding.right);
+          break;
+        case "W":
+          borderWidth = val.toDouble();
+          break;
+        case "F":
+          backgroundColor = val;
+          break;
+        case "B":
+          borderColor = val;
+          break;
+      }
+    });
+  }
 
-  final Map<String, dynamic> data;
-  final _Defaults _defaults;
+  String originDirection;
+  Offset offset;
+  BoxPadding padding;
+  double borderWidth;
+  String backgroundColor;
+  String borderColor;
 }
 
 class BoxPadding {
