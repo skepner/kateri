@@ -169,25 +169,30 @@ class AntigenicMapViewerData {
         }
       }
 
-      socket_events.SocketEventHandler(socketStream: _socket!, antigenicMapViewerData: this).handle();
-      _socket!.write("Hello from Kateri");
+      socket_events.SocketEventHandler(socket: _socket!, antigenicMapViewerData: this).handle();
+      _socket!.write("HELO");
     }
   }
 
   // ----------------------------------------------------------------------
 
-  void exportPdf({double canvasPdfWidth = 800.0}) async {
+  void exportPdf({String? filename, bool? open, double width = 800.0}) async {
     if (chart != null) {
       final stopwatch = Stopwatch()..start();
-      final bytes = await _callbacks.exportPdf(canvasPdfWidth: canvasPdfWidth); // antigenicMapPainter.viewer.exportPdf();
+      final bytes = await _callbacks.exportPdf(canvasPdfWidth: width); // antigenicMapPainter.viewer.exportPdf();
       if (bytes != null) {
-        final filename = await FileSaver.instance.saveFile(chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
-        if (openExportedPdf && UniversalPlatform.isMacOS) {
-          await Process.run("open", [filename]);
+        final generatedFilename = await FileSaver.instance.saveFile(filename ?? chart!.info.nameForFilename(), bytes, "pdf", mimeType: MimeType.PDF);
+        debug("generatedFilename $generatedFilename");
+        if ((open ?? openExportedPdf) && UniversalPlatform.isMacOS) {
+          await Process.run("open", [generatedFilename]);
         }
       }
       debug("[exportPdf] ${stopwatch.elapsed} -> ${(1e6 / stopwatch.elapsedMicroseconds).toStringAsFixed(2)} frames per second");
     }
+  }
+
+  Future<Uint8List?> exportPdfToBytes({double width = 800.0}) async {
+    return _callbacks.exportPdf(canvasPdfWidth: width);
   }
 }
 

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data'; // Uint8List
 import 'dart:math';
@@ -11,12 +12,13 @@ import 'map-viewer-data.dart';
 class SocketEventHandler {
   final AntigenicMapViewerData antigenicMapViewerData;
   final Stream<Event> _transformed;
+  final Socket socket;
 
-  SocketEventHandler({required Stream<Uint8List> socketStream, required this.antigenicMapViewerData}) : _transformed = socketStream.transform(const _Transformer());
+  SocketEventHandler({required this.socket, required this.antigenicMapViewerData}) : _transformed = socket.transform(const _Transformer());
 
   void handle() async {
     await for (final event in _transformed) {
-      event.act(antigenicMapViewerData);
+      event.act(socket, antigenicMapViewerData);
     }
   }
 }
@@ -29,7 +31,7 @@ abstract class Event {
   /// Called when the whole even is stored in data
   void prepare();
 
-  void act(AntigenicMapViewerData antigenicMapViewerData);
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData);
 
   /// source starts with 4 bytes of code followed by 4 bytes of data size followed by data
   factory Event.create(Uint8List source, int sourceStart) {
@@ -83,7 +85,7 @@ class ChartEvent extends Event {
   }
 
   @override
-  void act(AntigenicMapViewerData antigenicMapViewerData) {
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData) {
     if (_data == null) return;
     antigenicMapViewerData.setChartFromBytes(_data!);
   }
@@ -125,11 +127,25 @@ class CommandEvent extends Event {
   }
 
   @override
-  void act(AntigenicMapViewerData antigenicMapViewerData) {
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData) async {
     // info("CommandEvent.act $data");
     switch (data["C"]) {
       case "set_style":
         antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
+        break;
+      case "pdf":
+        final pdfData = await antigenicMapViewerData.exportPdfToBytes(width: data["width"]?.toDouble());
+        if (pdfData != null) {
+          final remainder = pdfData.length.remainder(4);
+          final padding = remainder != 0 ? Uint8List(4 - remainder) : Uint8List(0);
+          final payloadLength = Uint8List(4);
+          payloadLength.buffer.asUint32List(0, 1)[0] = pdfData.length;
+          info("[socket] sending pdf ${pdfData.length} bytes with padding ${padding.length}");
+          socket.add(Uint8List.fromList("PDFB".codeUnits));
+          socket.add(payloadLength);
+          socket.add(pdfData);
+          socket.add(padding);
+        }
         break;
       default:
         error("unrecognized command: $data");

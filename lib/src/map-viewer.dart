@@ -228,7 +228,7 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
           leading: const Icon(Icons.picture_as_pdf_rounded),
           title: const Text("Export pdf F4"),
           onTap: () {
-            antigenicMapViewerData.exportPdf(canvasPdfWidth: 800.0);
+            antigenicMapViewerData.exportPdf(width: 800.0);
             Navigator.pop(context);
           }),
       ListTile(
