@@ -42,10 +42,10 @@ class PointPlotSpec {
   SerumCoverage? serumCoverage;
 
   PointPlotSpec();
-  PointPlotSpec.from(PointPlotSpec src)
+  PointPlotSpec.from(PointPlotSpec src, {PointShape? forceShape})
       : shown = src.shown,
         sizePixels = src.sizePixels,
-        shape = src.shape,
+        shape = forceShape ?? src.shape,
         fill = src.fill.copy(),
         outline = src.outline.copy(),
         outlineWidthPixels = src.outlineWidthPixels,

@@ -203,6 +203,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + 30.0);
     final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
     if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
+    // debug("resized $targetSize <- $windowSize");
   }
 }
 

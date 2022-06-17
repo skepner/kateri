@@ -220,7 +220,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
     }
     final legend = entry["L"];
     if (legend != null) {
-      final point = points.isNotEmpty ? PointPlotSpec.from(pointSpec[points[0]]) : modifyPointPlotSpec(entry, PointPlotSpec());
+      final point = points.isNotEmpty ? PointPlotSpec.from(pointSpec[points[0]], forceShape: PointShape.circle) : modifyPointPlotSpec(entry, PointPlotSpec());
       _legend.legendRows.add(LegendRow(text: legend["t"] ?? "", point: point, count: points.length, priority: legend["p"] ?? 0));
     } else if (entry["T"] == null && (entry["F"]?[0] == ":" || entry["O"]?[0] == ":")) {
       // color of all points modified, modify existing legends as well (hack to make legend for pale clades pale too)
