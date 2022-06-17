@@ -581,10 +581,10 @@ class Legend {
           box = PlotBox.Legend(val);
           break;
         case "t":
-          rowStyle = PlotText(val, _legendDefaults);
+          rowStyle.update(val);
           break;
         case "T":
-          title = PlotText(val, _legendDefaults);
+          title.update(val);
           break;
         default:
           warning("[legend] unrecognized key \"$key\"");
@@ -658,20 +658,46 @@ class BoxPadding {
 // ----------------------------------------------------------------------
 
 class PlotText {
-  PlotText(Map<String, dynamic>? dat, this._defaults) : data = dat ?? <String, dynamic>{};
+  PlotText(Map<String, dynamic>? dat, _Defaults defaults)
+      : labelStyle =
+            LabelStyle(color: NamedColor.fromString("black"), fontFamily: labelFontFamilyFromString(), fontStyle: fontStyleFromString(), fontWeight: fontWeightFromString(null, defaults.fontWeight)),
+        fontSize = defaults.fontSize,
+        interline = defaults.interline {
+    if (dat != null) update(dat);
+  }
 
-  List<String> get text => data["t"] != null ? const LineSplitter().convert(data["t"]) : <String>[];
+  void update(Map<String, dynamic> dat) {
+    dat.forEach((key, val) {
+      switch (key) {
+        case "t":
+          text = const LineSplitter().convert(val);
+          break;
+        case "s":
+          fontSize = val.toDouble();
+          break;
+        case "i":
+          interline = val.toDouble();
+          break;
+        case "c":
+          labelStyle = labelStyle.cloneWith(color: NamedColor.fromString(val));
+          break;
+        case "f":
+          labelStyle = labelStyle.cloneWith(fontFamily: labelFontFamilyFromString(val));
+          break;
+        case "S":
+          labelStyle = labelStyle.cloneWith(fontStyle: fontStyleFromString(val));
+          break;
+        case "W":
+          labelStyle = labelStyle.cloneWith(fontWeight: fontWeightFromString(val));
+          break;
+      }
+    });
+  }
 
-  LabelStyle get labelStyle => LabelStyle(
-      color: NamedColor.fromString(data["c"] ?? "black"),
-      fontFamily: labelFontFamilyFromString(data["f"]),
-      fontStyle: fontStyleFromString(data["S"]),
-      fontWeight: fontWeightFromString(data["W"], _defaults.fontWeight));
-  double get fontSize => data["s"]?.toDouble() ?? _defaults.fontSize;
-  double get interline => data["i"]?.toDouble() ?? _defaults.interline;
-
-  final Map<String, dynamic> data;
-  final _Defaults _defaults;
+  List<String> text = <String>[];
+  LabelStyle labelStyle;
+  double fontSize;
+  double interline;
 }
 
 // ----------------------------------------------------------------------

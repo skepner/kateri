@@ -90,7 +90,7 @@ enum LabelFontFamily {
   times /* , symbol, zapf */
 }
 
-LabelFontFamily labelFontFamilyFromString(String? str) {
+LabelFontFamily labelFontFamilyFromString([String? str]) {
   switch (str?.toLowerCase()) {
     case "monospace":
       return LabelFontFamily.monospace;
@@ -109,8 +109,8 @@ LabelFontFamily labelFontFamilyFromString(String? str) {
   }
 }
 
-FontWeight fontWeightFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
-FontStyle fontStyleFromString(String? str, [String? dflt]) => (str ?? dflt)?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
+FontWeight fontWeightFromString([String? str, String? dflt]) => (str ?? dflt)?.toLowerCase() == "bold" ? FontWeight.bold : FontWeight.normal;
+FontStyle fontStyleFromString([String? str, String? dflt]) => (str ?? dflt)?.toLowerCase() == "italic" ? FontStyle.italic : FontStyle.normal;
 
 class LabelStyle {
   final Color color;
@@ -124,6 +124,11 @@ class LabelStyle {
         fontFamily = src.fontFamily,
         fontWeight = src.fontWeight,
         fontStyle = src.fontStyle;
+
+  // clone and change field
+  LabelStyle cloneWith({Color? color, LabelFontFamily? fontFamily, FontStyle? fontStyle, FontWeight? fontWeight}) {
+    return LabelStyle(color: color ?? this.color, fontFamily: fontFamily ?? this.fontFamily, fontStyle: fontStyle ?? this.fontStyle, fontWeight: fontWeight ?? this.fontWeight);
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -134,7 +139,7 @@ class PointLabel extends LabelStyle {
   final double sizePixels;
   final double rotation;
 
-  const PointLabel.fromArgs(
+  PointLabel.fromArgs(
       {required this.text,
       required this.offset,
       required this.sizePixels,
