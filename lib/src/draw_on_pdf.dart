@@ -339,12 +339,12 @@ class _DrawOnPdf extends DrawOn {
       ..saveContext()
       ..setStrokeColor(colorc)
       ..setLineWidth(lineWidthPixels * pixelSize);
-    for (var x = viewport.left.ceilToDouble(); x <= viewport.right; x += step) {
+    for (var x = viewport.left; x <= viewport.right; x += step) {
       _canvas
         ..moveTo(x, viewport.top)
         ..lineTo(x, viewport.bottom);
     }
-    for (var y = viewport.top.ceilToDouble(); y <= viewport.bottom; y += step) {
+    for (var y = viewport.top; y <= viewport.bottom; y += step) {
       _canvas
         ..moveTo(viewport.left, y)
         ..lineTo(viewport.right, y);

@@ -51,6 +51,7 @@ class _DrawOnCanvas extends DrawOn {
     canvas.clipRect(Rect.fromLTWH(0.0, 0.0, canvasSize.width, canvasSize.height));
     canvas.scale(canvasSize.width / viewport.width);
     canvas.translate(-viewport.left, -viewport.top);
+    // print("canvas translated ${-viewport.left} ${-viewport.top}");
   }
 
   @override
@@ -299,16 +300,17 @@ class _DrawOnCanvas extends DrawOn {
 
   @override
   void grid({double step = 1.0, Color color = const Color(0xFFCCCCCC), double lineWidthPixels = 1.0}) {
+    final left = viewport.left, top = viewport.top, right = viewport.right, bottom = viewport.bottom;
     var path = Path();
-    for (var x = viewport.left.ceilToDouble(); x <= viewport.right; x += step) {
+    for (var x = left; x <= right; x += step) {
       path
-        ..moveTo(x, viewport.top)
-        ..lineTo(x, viewport.bottom);
+        ..moveTo(x, top)
+        ..lineTo(x, bottom);
     }
-    for (var y = viewport.top.ceilToDouble(); y <= viewport.bottom; y += step) {
+    for (var y = top; y <= bottom; y += step) {
       path
-        ..moveTo(viewport.left, y)
-        ..lineTo(viewport.right, y);
+        ..moveTo(left, y)
+        ..lineTo(right, y);
     }
     canvas
             // ..save()
