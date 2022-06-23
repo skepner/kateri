@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:typed_data'; // Uint8List
 import 'dart:math';
 import 'dart:convert'; // json
+import 'package:flutter/services.dart';
 
 import 'error.dart';
 import 'map-viewer-data.dart';
@@ -13,13 +14,31 @@ class SocketEventHandler {
   final AntigenicMapViewerData antigenicMapViewerData;
   final Stream<Event> _transformed;
   final Socket socket;
+  var _processing = 0;
 
   SocketEventHandler({required this.socket, required this.antigenicMapViewerData}) : _transformed = socket.transform(const _Transformer());
 
   void handle() async {
     await for (final event in _transformed) {
-      event.act(socket, antigenicMapViewerData);
+      event.act(socket, antigenicMapViewerData, this);
     }
+  }
+
+  void startProcessing() {
+    ++_processing;
+  }
+
+  void endProcessing() {
+    --_processing;
+  }
+
+  Future quit() async {
+    await Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 10));
+      return _processing > 0;
+    });
+    socket.add(Uint8List.fromList("QUIT".codeUnits));
+    // info("quitting");
   }
 }
 
@@ -31,7 +50,7 @@ abstract class Event {
   /// Called when the whole even is stored in data
   void prepare();
 
-  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData);
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData, SocketEventHandler handler);
 
   /// source starts with 4 bytes of code followed by 4 bytes of data size followed by data
   factory Event.create(Uint8List source, int sourceStart) {
@@ -85,7 +104,7 @@ class ChartEvent extends Event {
   }
 
   @override
-  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData) {
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData, SocketEventHandler handler) {
     if (_data == null) return;
     antigenicMapViewerData.setChartFromBytes(_data!);
   }
@@ -111,7 +130,7 @@ class CommandEvent extends Event {
   void prepare() {
     if (_data == null) return;
 
-    info("receiving command (${_data!.length} bytes)");
+    // info("receiving command (${_data!.length} bytes)");
 
     late final String utf8Decoded;
     try {
@@ -127,13 +146,14 @@ class CommandEvent extends Event {
   }
 
   @override
-  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData) async {
-    // info("CommandEvent.act $data");
+  void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData, SocketEventHandler handler) async {
+    info("CommandEvent.act ${data['C']}");
     switch (data["C"]) {
       case "set_style":
         antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
         break;
       case "pdf":
+        handler.startProcessing();
         final pdfData = await antigenicMapViewerData.exportPdfToBytes(width: data["width"]?.toDouble());
         if (pdfData != null) {
           final remainder = pdfData.length.remainder(4);
@@ -146,6 +166,10 @@ class CommandEvent extends Event {
           socket.add(pdfData);
           socket.add(padding);
         }
+        handler.endProcessing();
+        break;
+      case "quit":
+        await handler.quit();
         break;
       default:
         error("unrecognized command: $data");
@@ -202,7 +226,8 @@ class _EventSink implements EventSink<Uint8List> {
 
   @override
   void close() {
-    info("_EventSink.close");
+    // info("_EventSink.close");
+    SystemNavigator.pop(animated: true);
   }
 }
 
