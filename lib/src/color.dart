@@ -99,10 +99,19 @@ class ColorAndModifier {
     final val = source / _paleFactor;
     if (val > 1.0) {
       return 1.0;
-    } else if (val == 0.0) {    // black
+    } else if (val == 0.0) {
+      // black
       return 0.5;
     } else {
       return val;
+    }
+  }
+
+  String toString() {
+    if (_modifier != null) {
+      return "$_color:$_modifier";
+    } else {
+      return _color;
     }
   }
 }
