@@ -745,6 +745,7 @@ class PlotSpecLegacy extends PlotSpec {
   }
 
   static String myName() => "Legacy";
+  static const _sizeScale = 5.0;
 
   @override
   String name() => myName();
@@ -771,7 +772,7 @@ class PlotSpecLegacy extends PlotSpec {
       spec.fill = ColorAndModifier(entry["F"] ?? "transparent");
       spec.outline = ColorAndModifier(entry["O"] ?? "black");
       spec.outlineWidthPixels = entry["o"]?.toDouble() ?? 1.0;
-      spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * 10.0;
+      spec.sizePixels = (entry["s"]?.toDouble() ?? 1.0) * _sizeScale;
       switch (entry["S"]?.toUpperCase()[0] ?? "C") {
         case "C":
           spec.shape = PointShape.circle;
@@ -825,9 +826,10 @@ class PlotSpecLegacy extends PlotSpec {
       if (src.outline != ColorAndModifier("black")) obj["O"] = src.outline.toString();
       if (src.outlineWidthPixels != 1.0) obj["o"] = src.outlineWidthPixels;
       if (src.shape != PointShape.circle) obj["S"] = pointShapeToString(src.shape);
-      if (src.sizePixels != 10.0) obj["s"] = src.sizePixels / 10.0;
+      if (src.sizePixels != 10.0) obj["s"] = src.sizePixels / _sizeScale;
       if (src.rotation != 0.0) obj["r"] = src.rotation;
       if (src.aspect != 1.0) obj["a"] = src.aspect;
+      // label
       return obj;
     }).toList();
     _importFromData();
