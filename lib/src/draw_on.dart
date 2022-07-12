@@ -11,6 +11,21 @@ import 'error.dart';
 
 enum PointShape { circle, box, triangle, egg, uglyegg }
 
+String pointShapeToString(PointShape shape) {
+  switch (shape) {
+    case PointShape.circle:
+      return "C";
+    case PointShape.box:
+      return "B";
+    case PointShape.triangle:
+      return "T";
+    case PointShape.egg:
+      return "E";
+    case PointShape.uglyegg:
+      return "U";
+  }
+}
+
 const noRotation = 0.0;
 const rotationReassortant = 0.5;
 const rotationRight30 = math.pi / 6;

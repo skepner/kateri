@@ -818,6 +818,18 @@ class PlotSpecLegacy extends PlotSpec {
     }
     debug("[legacy from] ${uniqueSpecs.length} unique specs for ${source.numberOfPoints()} points");
     _data["p"] = specNoForPoint;
+    _data["P"] = uniqueSpecs.map<Map<String, dynamic>>((PointPlotSpec src) {
+      final obj = <String, dynamic>{};
+      if (!src.shown) obj["+"] = false;
+      if (src.fill != ColorAndModifier("transparent")) obj["F"] = src.fill.toString();
+      if (src.outline != ColorAndModifier("black")) obj["O"] = src.outline.toString();
+      if (src.outlineWidthPixels != 1.0) obj["o"] = src.outlineWidthPixels;
+      if (src.shape != PointShape.circle) obj["S"] = pointShapeToString(src.shape);
+      if (src.sizePixels != 10.0) obj["s"] = src.sizePixels / 10.0;
+      if (src.rotation != 0.0) obj["r"] = src.rotation;
+      if (src.aspect != 1.0) obj["a"] = src.aspect;
+      return obj;
+    }).toList();
     _importFromData();
   }
 
