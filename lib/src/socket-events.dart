@@ -91,6 +91,18 @@ abstract class Event {
     return _data != null && _data!.length == _stored;
   }
 
+  void send(Socket socket, String command, Uint8List data) {
+    final remainder = data.length.remainder(4);
+    final padding = remainder != 0 ? Uint8List(4 - remainder) : Uint8List(0);
+    final payloadLength = Uint8List(4);
+    payloadLength.buffer.asUint32List(0, 1)[0] = data.length;
+    info("[socket] sending $command ${data.length} bytes with padding ${padding.length}");
+    socket.add(Uint8List.fromList(command.codeUnits));
+    socket.add(payloadLength);
+    socket.add(data);
+    socket.add(padding);
+  }
+
   Uint8List? _data;
   int _stored = 0; // number of bytes already in _data
 }
@@ -152,19 +164,31 @@ class CommandEvent extends Event {
       case "set_style":
         antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
         break;
+      case "export_to_legacy": // export current style to legacy plot spec
+        debug("export_to_legacy");
+        break;
+      case "get_chart": // send chart (json) back to server
+        handler.startProcessing();
+        final json = antigenicMapViewerData.chart?.exportToJson();
+        if (json != null) {
+          send(socket, "CHRT", utf8.encoder.convert(json));
+        }
+        handler.endProcessing();
+        break;
       case "pdf":
         handler.startProcessing();
         final pdfData = await antigenicMapViewerData.exportPdfToBytes(width: data["width"]?.toDouble());
         if (pdfData != null) {
-          final remainder = pdfData.length.remainder(4);
-          final padding = remainder != 0 ? Uint8List(4 - remainder) : Uint8List(0);
-          final payloadLength = Uint8List(4);
-          payloadLength.buffer.asUint32List(0, 1)[0] = pdfData.length;
-          info("[socket] sending pdf ${pdfData.length} bytes with padding ${padding.length}");
-          socket.add(Uint8List.fromList("PDFB".codeUnits));
-          socket.add(payloadLength);
-          socket.add(pdfData);
-          socket.add(padding);
+          send(socket, "PDFB", pdfData);
+          // final remainder = pdfData.length.remainder(4);
+          // final padding = remainder != 0 ? Uint8List(4 - remainder) : Uint8List(0);
+          // final payloadLength = Uint8List(4);
+          // payloadLength.buffer.asUint32List(0, 1)[0] = pdfData.length;
+          // info("[socket] sending pdf ${pdfData.length} bytes with padding ${padding.length}");
+          // socket.add(Uint8List.fromList("PDFB".codeUnits));
+          // socket.add(payloadLength);
+          // socket.add(pdfData);
+          // socket.add(padding);
         }
         handler.endProcessing();
         break;

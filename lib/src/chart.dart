@@ -80,6 +80,10 @@ class Chart extends _JsonAccess {
   bool get _hasPlotSpecLegacy => data["c"]["p"] != null;
   bool get _hasPlotSpecSemantic => data["c"]["R"] != null;
 
+  String exportToJson() {
+    return jsonEncode(data);
+  }
+
   // ----------------------------------------------------------------------
 
   Titer homologousTiterForSerum(int serumNo) {
