@@ -94,6 +94,17 @@ class AntigenicMapViewerData {
 
   PlotSpec get currentPlotSpec => plotSpecs[currentPlotSpecIndex];
 
+  PlotSpecLegacy plotSpecLegacy() {
+    final index = plotSpecs.indexWhere((spec) => spec.name() == PlotSpecLegacy.myName());
+    if (index >= 0) {
+      return plotSpecs[index] as PlotSpecLegacy;
+    } else {
+      final ps = chart!.plotSpecLegacy();
+      plotSpecs.add(ps);
+      return ps;
+    }
+  }
+
   bool empty() => chart != null;
 
   void buildStarted() {
@@ -106,6 +117,12 @@ class AntigenicMapViewerData {
   void didChangeDependencies({required String? fileToOpen, required String? socketToConnect}) {
     openLocalAceFile(fileToOpen);
     connectToServer(socketToConnect);
+  }
+
+  void exportCurrentPlotStyleToLegacy() {
+    if (chart != null && currentPlotSpec.name() != PlotSpecLegacy.myName()) {
+      plotSpecLegacy().setFrom(currentPlotSpec);
+    }
   }
 
   // ----------------------------------------------------------------------

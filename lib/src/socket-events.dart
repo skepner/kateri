@@ -165,7 +165,7 @@ class CommandEvent extends Event {
         antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
         break;
       case "export_to_legacy": // export current style to legacy plot spec
-        debug("export_to_legacy");
+        antigenicMapViewerData.exportCurrentPlotStyleToLegacy();
         break;
       case "get_chart": // send chart (json) back to server
         handler.startProcessing();

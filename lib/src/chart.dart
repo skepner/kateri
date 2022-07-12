@@ -36,7 +36,6 @@ class Chart extends _JsonAccess {
   // ----------------------------------------------------------------------
 
   PlotSpec plotSpecDefault([Projection? projection]) => PlotSpecDefault(this, projection ?? projections[0]);
-  PlotSpec plotSpecLegacy([Projection? projection]) => _hasPlotSpecLegacy ? PlotSpecLegacy(this) : plotSpecDefault(projection);
 
   List<PlotSpec> plotSpecs([Projection? projection]) {
     final specs = <PlotSpec>[];
@@ -53,6 +52,13 @@ class Chart extends _JsonAccess {
     }
     specs.sort((e1, e2) => e1.priority().compareTo(e2.priority()));
     return specs;
+  }
+
+  PlotSpecLegacy plotSpecLegacy() {
+    if (!_hasPlotSpecLegacy) {
+      data["c"]["p"] = <String, dynamic>{};
+    }
+    return PlotSpecLegacy(this);
   }
 
   // ----------------------------------------------------------------------

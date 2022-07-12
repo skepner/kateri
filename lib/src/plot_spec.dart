@@ -734,6 +734,27 @@ class PlotText {
 
 class PlotSpecLegacy extends PlotSpec {
   PlotSpecLegacy(this._chart) : _data = _chart.data["c"]["p"] {
+    _importFromData();
+  }
+
+  static String myName() => "Legacy";
+
+  @override
+  String name() => myName();
+
+  @override
+  List<int> drawingOrder() {
+    return _data["d"]?.cast<int>() ?? [];
+  }
+
+  @override
+  PointPlotSpec operator [](int pointNo) => _specs[_data["p"][pointNo]];
+
+  @override
+  int priority() => 998;
+
+  void _importFromData() {
+    _specs.clear();
     for (final entry in _data["P"] ?? []) {
       final spec = PointPlotSpec();
       if (!(entry["+"] ?? true)) spec.shown = false;
@@ -765,19 +786,11 @@ class PlotSpecLegacy extends PlotSpec {
     }
   }
 
-  @override
-  String name() => "Legacy";
-
-  @override
-  List<int> drawingOrder() {
-    return _data["d"]?.cast<int>() ?? [];
+  void setFrom(PlotSpec source) {
+    _data.clear();
+    _data["d"] = source.drawingOrder();
+    _importFromData();
   }
-
-  @override
-  PointPlotSpec operator [](int pointNo) => _specs[_data["p"][pointNo]];
-
-  @override
-  int priority() => 998;
 
   final Chart _chart;
   final Map<String, dynamic> _data;
