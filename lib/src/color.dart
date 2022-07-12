@@ -107,6 +107,7 @@ class ColorAndModifier {
     }
   }
 
+  @override
   String toString() {
     if (_modifier != null) {
       return "$_color:$_modifier";
@@ -114,6 +115,12 @@ class ColorAndModifier {
       return _color;
     }
   }
+
+  @override
+  bool operator ==(other) => (other is ColorAndModifier) && _color == other._color && _modifier == other._modifier;
+
+  @override
+  int get hashCode => _color.hashCode ^ _modifier.hashCode;
 }
 
 // ----------------------------------------------------------------------

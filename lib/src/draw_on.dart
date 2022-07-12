@@ -77,6 +77,36 @@ class PointPlotSpec {
       : sizePixels = refSize,
         shape = PointShape.uglyegg,
         rotation = rotationReassortant;
+
+  @override
+  bool operator ==(other) {
+    return (other is PointPlotSpec) &&
+        shown == other.shown &&
+        sizePixels == other.sizePixels &&
+        shape == other.shape &&
+        fill == other.fill &&
+        outline == other.outline &&
+        outlineWidthPixels == other.outlineWidthPixels &&
+        rotation == other.rotation &&
+        aspect == other.aspect &&
+        label == other.label &&
+        serumCircle == other.serumCircle &&
+        serumCoverage == other.serumCoverage;
+  }
+
+  @override
+  int get hashCode =>
+      shown.hashCode ^
+      sizePixels.hashCode ^
+      shape.hashCode ^
+      fill.hashCode ^
+      outline.hashCode ^
+      outlineWidthPixels.hashCode ^
+      rotation.hashCode ^
+      aspect.hashCode ^
+      label.hashCode ^
+      serumCircle.hashCode ^
+      serumCoverage.hashCode;
 }
 
 // ----------------------------------------------------------------------
@@ -167,6 +197,12 @@ class PointLabel extends LabelStyle {
         sizePixels = src.sizePixels,
         rotation = src.rotation,
         super.from(src);
+
+  @override
+  bool operator ==(other) => (other is PointLabel) && offset == other.offset && text == other.text && sizePixels == other.sizePixels && rotation == other.rotation;
+
+  @override
+  int get hashCode => offset.hashCode ^ text.hashCode ^ sizePixels.hashCode ^ rotation.hashCode;
 }
 
 // ----------------------------------------------------------------------
@@ -209,6 +245,33 @@ class SerumCircle {
   @override
   String toString() =>
       "SerumCircle(radius: $radius, outline: $outline, outlineWidth: $outlineWidthPixels, fill: $fill, dash: $dash, sector: $sector, radiusOutline: $radiusOutline, radiusWidth: $radiusWidthPixels, radiusDash: $radiusDash)";
+
+  @override
+  bool operator ==(other) =>
+      (other is SerumCircle) &&
+      center == center &&
+      radius == radius &&
+      outline == outline &&
+      outlineWidthPixels == outlineWidthPixels &&
+      fill == fill &&
+      dash == dash &&
+      sector == sector &&
+      radiusOutline == radiusOutline &&
+      radiusWidthPixels == radiusWidthPixels &&
+      radiusDash == radiusDash;
+
+  @override
+  int get hashCode =>
+      center.hashCode ^
+      radius.hashCode ^
+      outline.hashCode ^
+      outlineWidthPixels.hashCode ^
+      fill.hashCode ^
+      dash.hashCode ^
+      sector.hashCode ^
+      radiusOutline.hashCode ^
+      radiusWidthPixels.hashCode ^
+      radiusDash.hashCode;
 
   void draw(DrawOn canvas) {
     // debug(toString());
@@ -255,6 +318,21 @@ class SerumCoverage {
   @override
   String toString() =>
       "SerumCoverage(fold: $fold, within: {outline: $withinOutline, outlineWidth: $withinOutlineWidthPixels, fill: $withinFill}, outside: {outline: $outsideOutline, outlineWidth: $outsideOutlineWidthPixels, fill: $outsideFill})";
+
+  @override
+  bool operator ==(other) =>
+      (other is SerumCoverage) &&
+      fold == fold &&
+      withinOutline == withinOutline &&
+      withinOutlineWidthPixels == withinOutlineWidthPixels &&
+      withinFill == withinFill &&
+      outsideOutline == outsideOutline &&
+      outsideOutlineWidthPixels == outsideOutlineWidthPixels &&
+      outsideFill == outsideFill;
+
+  @override
+  int get hashCode =>
+      fold.hashCode ^ withinOutline.hashCode ^ withinOutlineWidthPixels.hashCode ^ withinFill.hashCode ^ outsideOutline.hashCode ^ outsideOutlineWidthPixels.hashCode ^ outsideFill.hashCode;
 }
 
 // ======================================================================
@@ -285,6 +363,12 @@ class Sector {
 
   bool get wholeCircle => angle >= math.pi * 2.0;
   double get end => begin + angle;
+
+  @override
+  bool operator ==(other) => (other is Sector) && begin == other.begin && angle == other.angle;
+
+  @override
+  int get hashCode => begin.hashCode ^ angle.hashCode;
 }
 
 // ----------------------------------------------------------------------
