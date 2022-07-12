@@ -17,6 +17,7 @@ abstract class PlotSpec {
   String title() => name();
   List<int> drawingOrder();
   PointPlotSpec operator [](int pointNo);
+  int numberOfPoints();
   int priority();
   PlotTitle? plotTitle() => null;
   Legend? legend() => null;
@@ -121,6 +122,9 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
 
   @override
+  int numberOfPoints() => pointSpec.length;
+
+  @override
   int priority() => 999;
 
   @override
@@ -154,6 +158,9 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
 
   @override
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
+
+  @override
+  int numberOfPoints() => pointSpec.length;
 
   @override
   int priority() => _data["z"] ?? 0;
@@ -751,6 +758,9 @@ class PlotSpecLegacy extends PlotSpec {
   PointPlotSpec operator [](int pointNo) => _specs[_data["p"][pointNo]];
 
   @override
+  int numberOfPoints() => _data["p"]?.length ?? 0;
+
+  @override
   int priority() => 998;
 
   void _importFromData() {
@@ -789,6 +799,25 @@ class PlotSpecLegacy extends PlotSpec {
   void setFrom(PlotSpec source) {
     _data.clear();
     _data["d"] = source.drawingOrder();
+    final uniqueSpecs = <PointPlotSpec>[];
+    final specNoForPoint = <int>[];
+    for (int pointNo = 0; pointNo < source.numberOfPoints(); ++pointNo) {
+      final pointSpec = source[pointNo];
+      int? matchingIndex;
+      for (int specIndex = 0; specIndex < uniqueSpecs.length; ++specIndex) {
+        if (uniqueSpecs[specIndex] == pointSpec) {
+          matchingIndex = specIndex;
+          break;
+        }
+      }
+      if (matchingIndex == null) {
+        uniqueSpecs.add(pointSpec);
+        matchingIndex = uniqueSpecs.length - 1;
+      }
+      specNoForPoint.add(matchingIndex);
+    }
+    debug("[legacy from] ${uniqueSpecs.length} unique specs for ${source.numberOfPoints()} points");
+    _data["p"] = specNoForPoint;
     _importFromData();
   }
 
