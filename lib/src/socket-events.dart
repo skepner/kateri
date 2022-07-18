@@ -96,7 +96,7 @@ abstract class Event {
     final padding = remainder != 0 ? Uint8List(4 - remainder) : Uint8List(0);
     final payloadLength = Uint8List(4);
     payloadLength.buffer.asUint32List(0, 1)[0] = data.length;
-    info("[socket] sending $command ${data.length} bytes with padding ${padding.length}");
+    // info("[socket] sending $command ${data.length} bytes with padding ${padding.length}");
     socket.add(Uint8List.fromList(command.codeUnits));
     socket.add(payloadLength);
     socket.add(data);
@@ -160,7 +160,7 @@ class CommandEvent extends Event {
 
   @override
   void act(Socket socket, AntigenicMapViewerData antigenicMapViewerData, SocketEventHandler handler) async {
-    info("CommandEvent.act ${data['C']}");
+    // info("CommandEvent.act ${data['C']}");
     switch (data["C"]) {
       case "set_style":
         antigenicMapViewerData.setPlotSpecByName(data["style"] ?? "*unknown*");
