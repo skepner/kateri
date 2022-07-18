@@ -72,7 +72,7 @@ abstract class Event {
       if ((source.length - sourceStart) < 4) throw FormatError("Event: cannot read data size: too few bytes available (${source.length - sourceStart})");
       _data = Uint8List(source.buffer.asUint32List(sourceStart, 1)[0]);
       sourceStart += 4;
-      if ((source.length - sourceStart) <= 4) return 0;
+      if ((source.length - sourceStart) <= 4) return sourceStart - sourceStartInit;
     }
     final copyCount = min(source.length - sourceStart, _data!.length - _stored);
     _data!.setRange(_stored, _stored + copyCount, Uint8List.view(source.buffer, sourceStart));
@@ -142,7 +142,7 @@ class CommandEvent extends Event {
   void prepare() {
     if (_data == null) return;
 
-    // info("receiving command (${_data!.length} bytes)");
+    // debug("receiving command (${_data!.length} bytes)");
 
     late final String utf8Decoded;
     try {
@@ -150,6 +150,7 @@ class CommandEvent extends Event {
     } catch (err) {
       throw FormatError("utf8 decoding failed: $err");
     }
+    // debug(utf8Decoded);
     try {
       data = jsonDecode(utf8Decoded);
     } catch (err) {
