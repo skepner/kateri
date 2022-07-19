@@ -28,6 +28,7 @@ class Viewport {
     } else {
       _aabb = Aabb3();
     }
+    _layoutCenter = _aabb.center;
   }
 
   double get width => _aabb.max.x - _aabb.min.x;
@@ -38,6 +39,16 @@ class Viewport {
   double get top => _aabb.min.y;
   double get bottom => _aabb.max.y;
   double get centerY => (_aabb.min.y + _aabb.max.y) / 2;
+
+  // Vector3? get layoutCenter => _layoutCenter; // for get_vieport command for sig pages mapi data
+
+  List<double>? layoutCenter2() {  // for get_vieport command for sig pages mapi data
+    if (_layoutCenter != null) {
+      return [_layoutCenter!.x, _layoutCenter!.y];
+    } else {
+      return null;
+    }
+  }
 
   double aspectRatio() => width / height;
 
@@ -75,6 +86,7 @@ class Viewport {
   // ----------------------------------------------------------------------
 
   late final Aabb3 _aabb;
+  Vector3? _layoutCenter; // for get_vieport command for sig pages mapi data
 }
 
 // ----------------------------------------------------------------------

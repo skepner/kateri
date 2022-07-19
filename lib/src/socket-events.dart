@@ -178,7 +178,12 @@ class CommandEvent extends Event {
         break;
       case "get_viewport": // send viewport data (json) back to server
         handler.startProcessing();
-        final result = <String, dynamic>{"C": data["C"], "native": antigenicMapViewerData.projection?.viewport().toListDouble(), "used": antigenicMapViewerData.viewport?.toListDouble()};
+        final result = <String, dynamic>{
+          "C": data["C"],
+          "native": antigenicMapViewerData.projection?.viewport().toListDouble(),
+          "native_center": antigenicMapViewerData.projection?.viewport().layoutCenter2(),
+          "used": antigenicMapViewerData.viewport?.toListDouble()
+        };
         send(socket, "JSON", utf8.encoder.convert(jsonEncode(result)));
         handler.endProcessing();
         break;
