@@ -180,6 +180,7 @@ class CommandEvent extends Event {
         handler.startProcessing();
         final result = <String, dynamic>{
           "C": data["C"],
+          "_id": data["_id"],
           "native": antigenicMapViewerData.projection?.viewport().toListDouble(),
           "native_center": antigenicMapViewerData.projection?.viewport().layoutCenter2(),
           "used": antigenicMapViewerData.viewport?.toListDouble()
