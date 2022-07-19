@@ -70,6 +70,7 @@ class Viewport {
   static bool notNull(Vector3? elt) => elt != null;
 
   String toString() => "Viewport[$left, $top, $width, $height]";
+  List<double> toListDouble() => [left, top, width, height];
 
   // ----------------------------------------------------------------------
 
