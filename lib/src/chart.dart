@@ -187,7 +187,7 @@ class _AntigenSerum extends _JsonAccess {
   _AntigenSerum(_JsonData data) : super(data);
 
   String get name => data["N"] ?? "";
-  List<String> get annotations => data["a"] ?? [];
+  List<String> get annotations => data["a"]?.cast<String>() ?? [];
   String get lineage => data["L"] ?? "";
   String get passage => data["P"] ?? "";
   String get reassortant => data["R"] ?? "";
@@ -210,7 +210,7 @@ class Antigen extends _AntigenSerum {
   Antigen(_JsonData data) : super(data);
 
   String get date => data["D"] ?? "";
-  List<String> get labIds => data["l"] ?? [];
+  List<String> get labIds => data["l"]?.cast<String>() ?? [];
 
   bool withinDateRange(String first, String last) {
     final dat = date;
