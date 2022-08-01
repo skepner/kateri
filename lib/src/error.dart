@@ -1,3 +1,7 @@
+import 'package:universal_platform/universal_platform.dart';
+
+// ----------------------------------------------------------------------
+
 class FormatError extends FormatException {
   FormatError(String message) : super(message) {
     error("[FormatError]: $message", stackLevel: 3);
@@ -14,17 +18,29 @@ class DataError extends FormatException {
 
 // ----------------------------------------------------------------------
 
-String currentFilenameLineColumn([int stackLevel = 2]) {
-  try {
-    final re = RegExp('^#${stackLevel}[ \\t]+.+\\(([^\\)]+)\\)\$', multiLine: true);
-    final match = re.firstMatch(StackTrace.current.toString());
-    if (match != null) {
-      return match.group(1) ?? "re[no-group]";
-    } else {
-      return "re[no-match]\n$re\n${StackTrace.current}";
+String currentFilenameLineColumn(int stackLevel) {
+  if (UniversalPlatform.isMacOS) {
+    try {
+      final re = RegExp('^#${stackLevel}[ \\t]+.+\\(([^\\)]+)\\)\$', multiLine: true);
+      final match = re.firstMatch(StackTrace.current.toString());
+      if (match != null) {
+        return match.group(1) ?? "re[no-group]";
+      } else {
+        return "re[no-match]\n$re\n${StackTrace.current}";
+      }
+    } catch (err) {
+      return "re[$err]";
     }
-  } catch (err) {
-    return "re[$err]";
+  } else {
+    return "";
+  }
+}
+
+String currentFilenameLineColumnSuffix(int stackLevel) {
+  if (UniversalPlatform.isMacOS) {
+    return " [${currentFilenameLineColumn(stackLevel + 1)}]";
+  } else {
+    return "";
   }
 }
 
@@ -33,17 +49,17 @@ String currentFilenameLineColumn([int stackLevel = 2]) {
 // }
 
 void error(String message, {int stackLevel = 2}) {
-  print("> ERROR $message [${currentFilenameLineColumn(stackLevel)}]");
+  print("> ERROR $message${currentFilenameLineColumnSuffix(stackLevel)}");
 }
 
 void warning(String message, {int stackLevel = 2}) {
-  print(">> $message [${currentFilenameLineColumn(stackLevel)}]");
+  print(">> $message${currentFilenameLineColumnSuffix(stackLevel)}");
 }
 
 void info(String message, {int stackLevel = 2}) {
-  print(">>> $message [${currentFilenameLineColumn(stackLevel)}]");
+  print(">>> $message${currentFilenameLineColumnSuffix(stackLevel)}");
 }
 
 void debug(String message, {int stackLevel = 2}) {
-  print(">>>> $message [${currentFilenameLineColumn(stackLevel)}]");
+  print(">>>> $message${currentFilenameLineColumnSuffix(stackLevel)}");
 }
