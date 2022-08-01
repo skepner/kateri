@@ -135,7 +135,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                                   // appBar: AppBar(), //title: Text("Kateri")),
                                   drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
                                   body: Stack(children: <Widget>[
-                                    CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                                    MouseRegion(
+                                      onHover: mouseMoved,
+                                      child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                                    ),
                                     Positioned(
                                         left: 0,
                                         top: 0,
@@ -228,6 +231,16 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
     debug("resized $targetSize <- $windowSize");
   }
+
+  // ----------------------------------------------------------------------
+
+  void mouseMoved(PointerEvent ev) {
+    if (_data.chart != null && _data.viewport != null) {
+      final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
+      final pos = Offset(ev.position.dx / unitSize, ev.position.dy / unitSize);
+      print("mouse $pos canvas:${antigenicMapPainter.viewer.canvasSize}");
+    }
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -289,12 +302,14 @@ class AntigenicMapPainter extends CustomPainter {
 
 class AntigenicMapViewer {
   final AntigenicMapViewerData _data;
+  Size canvasSize = const Size(0, 0);
 
   AntigenicMapViewer(this._data);
 
   void paint(CanvasRoot canvas) {
     if (_data.chart != null && _data.viewport != null) {
       canvas.draw(Offset.zero & canvas.size, _data.viewport!, paintOn);
+      canvasSize = canvas.size;
     }
   }
 
