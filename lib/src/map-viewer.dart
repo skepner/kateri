@@ -33,6 +33,10 @@ class PdfIntent extends Intent {
   const PdfIntent();
 }
 
+class ResetWindowSizeIntent extends Intent {
+  const ResetWindowSizeIntent();
+}
+
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewWidget extends StatefulWidget {
@@ -58,6 +62,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   // late double width;
   late double aspectRatio;
   late double borderWidth;
+  late final int _nativeWindowTitleBarHeight;
+
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
@@ -79,6 +85,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     if (UniversalPlatform.isMacOS) {
       windowManager.addListener(this);
       windowManager.ensureInitialized();
+      windowManager.getTitleBarHeight().then((titleBarHeight) {
+        _nativeWindowTitleBarHeight = titleBarHeight;
+        resetWindowSize();
+      });
     }
     super.initState();
   }
@@ -100,41 +110,47 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
           LogicalKeySet(LogicalKeyboardKey.f3): const OpenChartIntent(),
           LogicalKeySet(LogicalKeyboardKey.f4): const PdfIntent(),
           LogicalKeySet(LogicalKeyboardKey.f5): const ReloadChartIntent(),
+          LogicalKeySet(LogicalKeyboardKey.f9): const ResetWindowSizeIntent(),
         },
         child: Actions(
             actions: <Type, Action<Intent>>{
               OpenChartIntent: CallbackAction<OpenChartIntent>(onInvoke: (OpenChartIntent intent) => _data.selectAndOpenAceFile()),
               ReloadChartIntent: CallbackAction<ReloadChartIntent>(onInvoke: (ReloadChartIntent intent) => _data.reloadChart()),
               PdfIntent: CallbackAction<PdfIntent>(onInvoke: (PdfIntent intent) => _data.exportPdf()),
+              ResetWindowSizeIntent: CallbackAction<ResetWindowSizeIntent>(onInvoke: (ResetWindowSizeIntent intent) => this.resetWindowSize()),
             },
             child: Focus(
+                autofocus: true,
+                onFocusChange: (focused) {
+                  print("onFocusChange $focused");
+                },
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                  child: Container(
-                      decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-                      child: AspectRatio(
-                          aspectRatio: aspectRatio,
-                          child: Scaffold(
-                              key: scaffoldKey,
-                              // appBar: AppBar(), //title: Text("Kateri")),
-                              drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                              body: Stack(children: <Widget>[
-                                CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                                Positioned(
-                                    left: 0,
-                                    top: 0,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.menu),
-                                      onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                                    ))
-                              ]))))),
-              SizedBox(
-                width: plotStyleMenuWidth,
-                child: ListView(
-                  children: plotStyleMenu(),
-                ),
-              ),
-            ]))));
+                  Expanded(
+                      child: Container(
+                          decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+                          child: AspectRatio(
+                              aspectRatio: aspectRatio,
+                              child: Scaffold(
+                                  key: scaffoldKey,
+                                  // appBar: AppBar(), //title: Text("Kateri")),
+                                  drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
+                                  body: Stack(children: <Widget>[
+                                    CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.menu),
+                                          onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                                        ))
+                                  ]))))),
+                  SizedBox(
+                    width: plotStyleMenuWidth,
+                    child: ListView(
+                      children: plotStyleMenu(),
+                    ),
+                  ),
+                ]))));
   }
 
   // ----------------------------------------------------------------------
@@ -161,7 +177,9 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     if (plotSpecIndex != null && plotSpecIndex != _data.currentPlotSpecIndex) {
       _data.setPlotSpec(plotSpecIndex);
       aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
-      onWindowResized();
+      if (UniversalPlatform.isMacOS) {
+        onWindowResized();
+      }
     }
     setState(() {
       /* AntigenicMapViewerData updated */
@@ -188,6 +206,11 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   // ----------------------------------------------------------------------
 
+  void resetWindowSize() async {
+    const defaultWindowWidth = 785.0;
+    await windowManager.setSize(Size(defaultWindowWidth + plotStyleMenuWidth, defaultWindowWidth / aspectRatio + _nativeWindowTitleBarHeight), animate: true);
+  }
+
   // @override
   // void onWindowEvent(String eventName) {
   //   print('[WindowManager] onWindowEvent: $eventName');
@@ -200,10 +223,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     if ((targetWidth - plotStyleMenuWidth) < minMapWidth) {
       targetWidth = minMapWidth + plotStyleMenuWidth;
     }
-    final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + 30.0);
+    final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + _nativeWindowTitleBarHeight);
     final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
     if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
-    // debug("resized $targetSize <- $windowSize");
+    debug("resized $targetSize <- $windowSize");
   }
 }
 
