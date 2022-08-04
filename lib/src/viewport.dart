@@ -42,7 +42,8 @@ class Viewport {
 
   // Vector3? get layoutCenter => _layoutCenter; // for get_vieport command for sig pages mapi data
 
-  List<double>? layoutCenter2() {  // for get_vieport command for sig pages mapi data
+  List<double>? layoutCenter2() {
+    // for get_vieport command for sig pages mapi data
     if (_layoutCenter != null) {
       return [_layoutCenter!.x, _layoutCenter!.y];
     } else {
@@ -63,18 +64,33 @@ class Viewport {
   // }
 
   /// extend viewport so it's corners are at the whole number vectors, then re-center layout within this viewport
-  void roundAndRecenter(Layout layout) {
+  void roundAndRecenter(Layout layout, int numberOfDimensions) {
     final roundedSize = (_aabb.max - _aabb.min + Vector3.all(1.0))..ceil();
     final roundedHalfSize = roundedSize / 2;
     final roundedHalfSizeCeiled = Vector3.copy(roundedSize)..ceil();
     final origCenter = _aabb.center;
     _aabb.setCenterAndHalfExtents(roundedHalfSizeCeiled - roundedHalfSize, roundedHalfSize);
-    final adjust = _aabb.center - origCenter;
-    for (var ind = 0; ind < layout.length; ++ind) {
-      if (layout[ind] != null) {
-        layout[ind] = layout[ind]! + adjust;
-      }
+
+    var adjust = _aabb.center - origCenter;
+    switch (numberOfDimensions) {
+      case 1:
+        adjust.y = 0.0;
+        adjust.z = 0.0;
+        break;
+      case 2:
+        adjust.z = 0.0;
+        break;
     }
+
+    for (final element in layout) {
+      element?.setFrom(element + adjust);
+    }
+
+    // for (var ind = 0; ind < layout.length; ++ind) {
+    //   if (layout[ind] != null) {
+    //     layout[ind] = layout[ind]! + adjust;
+    //   }
+    // }
     // print("Viewport.roundAndRecenter ${toString()}");
   }
 

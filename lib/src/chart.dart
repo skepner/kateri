@@ -281,8 +281,10 @@ class Titer {
 class Projection extends _JsonAccess {
   Projection(_JsonData data)
       : layout = data["l"].map<Vector3?>(_layoutElement).toList(),
+        numberOfDimensions = data["l"].firstWhere((elt) => elt != null && elt.length > 0).length,
         _transformation = _makeTransformation(data["t"]),
         super(data) {
+    // print("Projection numberOfDimensions: $numberOfDimensions");
     _makeTransformedLayout();
   }
 
@@ -335,13 +337,14 @@ class Projection extends _JsonAccess {
 
   void _makeTransformedLayout() {
     _transformedLayout = layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
-    _viewport = Viewport.hullLayout(_transformedLayout)..roundAndRecenter(_transformedLayout);
+    _viewport = Viewport.hullLayout(_transformedLayout)..roundAndRecenter(_transformedLayout, numberOfDimensions);
     // _transformedLayout.asMap().forEach((index, value) => print("${index.toString().padLeft(4, ' ')} $value"));
   }
 
   // ----------------------------------------------------------------------
 
   final Layout layout;
+  final int numberOfDimensions;
   final Matrix4 _transformation;
   late Layout _transformedLayout;
   late Viewport _viewport;

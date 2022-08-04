@@ -237,8 +237,11 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   void mouseMoved(PointerEvent ev) {
     if (_data.chart != null && _data.viewport != null) {
       final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
-      final hoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates.lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
-      print("mouse $hoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
+      final hoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates
+          .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
+      if (hoveredPoints.length > 0) {
+        print("mouse $hoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
+      }
     }
   }
 }
@@ -331,6 +334,7 @@ class AntigenicMapViewer {
     canvas.drawDelayed();
     paintLegend(canvas);
     paintTitle(canvas);
+    // pointLookupByCoordinates.report();
   }
 
   // ----------------------------------------------------------------------
@@ -517,10 +521,12 @@ class PointLookupByCoordinates {
 
   // returns list of point indexes under the passed coordinates, first point is drawn on top of others
   List<int> lookupByMouseCoordinates(vec.Vector3 pos) {
-    final hovered = _data.where((element) => element.position.distanceTo(pos) <= element.size).toList();
+    final hovered = _data.where((element) => element.position.distanceTo(pos) <= (element.size / 2)).toList();
     hovered.sort((a, b) => b.drawingOrder.compareTo(a.drawingOrder));
     return hovered.map((element) => element.pointNo).toList();
   }
+
+  void report() => _data.forEach((en) => print(en.toString()));
 }
 
 class _PointLookupByCoordinatesData {
@@ -530,6 +536,10 @@ class _PointLookupByCoordinatesData {
   final int drawingOrder;
 
   _PointLookupByCoordinatesData({required this.pointNo, required this.position, required this.size, required this.drawingOrder});
+
+  @override
+  String toString() => "${pointNo.toString().padLeft(4, ' ')} ${size.toStringAsFixed(3)} $position $drawingOrder";
+  
 }
   
 // ======================================================================
