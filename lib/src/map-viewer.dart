@@ -140,10 +140,13 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                                       child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
                                     ),
                                     Positioned(
-                                        left: 0,
+                                        right: 0,
                                         top: 0,
                                         child: IconButton(
                                           icon: const Icon(Icons.menu),
+                                          iconSize: 20,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
                                           onPressed: () => scaffoldKey.currentState?.openDrawer(),
                                         ))
                                   ]))))),
