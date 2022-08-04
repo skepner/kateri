@@ -237,8 +237,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   void mouseMoved(PointerEvent ev) {
     if (_data.chart != null && _data.viewport != null) {
       final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
-      final pos = Offset(ev.position.dx / unitSize, ev.position.dy / unitSize);
-      print("mouse $pos canvas:${antigenicMapPainter.viewer.canvasSize}");
+      final hoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates.lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
+      print("mouse $hoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
     }
   }
 }
@@ -302,7 +302,8 @@ class AntigenicMapPainter extends CustomPainter {
 
 class AntigenicMapViewer {
   final AntigenicMapViewerData _data;
-  Size canvasSize = const Size(0, 0);
+  var canvasSize = const Size(0, 0);
+  final pointLookupByCoordinates = PointLookupByCoordinates();
 
   AntigenicMapViewer(this._data);
 
@@ -314,16 +315,19 @@ class AntigenicMapViewer {
   }
 
   void paintOn(DrawOn canvas) {
+    // debug("paintOn");
+    pointLookupByCoordinates.clear();
     canvas.grid();
     final layout = _data.projection!.transformedLayout();
-    for (final pointNo in _data.currentPlotSpec.drawingOrder()) {
+    _data.currentPlotSpec.drawingOrder().asMap().forEach((pointDrawingOrder, pointNo) {
       if (layout[pointNo] != null) {
         final pointPlotSpec = _data.currentPlotSpec[pointNo];
         if (pointPlotSpec.shown) {
           canvas.pointOfPlotSpec(layout[pointNo]!, pointPlotSpec);
+          pointLookupByCoordinates.addPoint(pointNo: pointNo, position: layout[pointNo]!, size: pointPlotSpec.sizePixels * canvas.pixelSize, drawingOrder: pointDrawingOrder);
         }
       }
-    }
+    });
     canvas.drawDelayed();
     paintLegend(canvas);
     paintTitle(canvas);
@@ -498,4 +502,34 @@ class _BoxData {
   late final double maxTextWidth;
 }
 
+// ----------------------------------------------------------------------
+
+class PointLookupByCoordinates {
+  final _data = <_PointLookupByCoordinatesData>[];
+
+  void addPoint({required int pointNo, required vec.Vector3 position, required double size, required int drawingOrder}) {
+    _data.add(_PointLookupByCoordinatesData(pointNo: pointNo, position: position, size: size, drawingOrder: drawingOrder));
+  }
+
+  void clear() {
+    _data.clear();
+  }
+
+  // returns list of point indexes under the passed coordinates, first point is drawn on top of others
+  List<int> lookupByMouseCoordinates(vec.Vector3 pos) {
+    final hovered = _data.where((element) => element.position.distanceTo(pos) <= element.size).toList();
+    hovered.sort((a, b) => b.drawingOrder.compareTo(a.drawingOrder));
+    return hovered.map((element) => element.pointNo).toList();
+  }
+}
+
+class _PointLookupByCoordinatesData {
+  final int pointNo;
+  final vec.Vector3 position;
+  final double size;
+  final int drawingOrder;
+
+  _PointLookupByCoordinatesData({required this.pointNo, required this.position, required this.size, required this.drawingOrder});
+}
+  
 // ======================================================================

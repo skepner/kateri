@@ -336,6 +336,7 @@ class Projection extends _JsonAccess {
   void _makeTransformedLayout() {
     _transformedLayout = layout.map((element) => element != null ? _transformation.transform3(element) : null).toList();
     _viewport = Viewport.hullLayout(_transformedLayout)..roundAndRecenter(_transformedLayout);
+    // _transformedLayout.asMap().forEach((index, value) => print("${index.toString().padLeft(4, ' ')} $value"));
   }
 
   // ----------------------------------------------------------------------
