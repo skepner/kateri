@@ -144,23 +144,27 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                       ListTile(
                         title: const Text("Open"),
                         onTap: () => openChart(),
-                        ),
+                      ),
                       ListTile(
                         title: const Text("Reload"),
                         onTap: () => reloadChart(),
-                        ),
+                      ),
                       ListTile(
                         title: const Text("Pdf"),
                         onTap: () => generatePdf(),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ),
-                // AccordionSection(
-                //   isOpen: false,
-                //   header: Text("1 Coloring by AA"),
-                //   content: Text("AA BB\nCC DD\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9"),
-                // ),
+                AccordionSection(
+                  isOpen: false,
+                  header: Text("Coloring by AA"),
+                  content: Column(
+                    children: aaPerPosMenu(),
+                  ),
+                  contentHorizontalPadding: 0.0,
+                  contentVerticalPadding: 0.0,
+                ),
                 AccordionSection(
                   isOpen: true,
                   header: Text("Styles"),
@@ -200,6 +204,28 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
             onTap: () {
               updateCallback(plotSpecIndex: entry.key);
             }))
+        .toList();
+  }
+
+  List<Widget> aaPerPosMenu() {
+    String entryTitle(MapEntry<int, Map<String, int>> entry) {
+      final val = entry.value.entries.map<String>((ee) => "${ee.key}:${ee.value}").join(" ");
+      return "${entry.key} $val";
+    }
+
+    return _data.aaPerPos.entries
+        .map<ListTile>((entry) => ListTile(
+              title: Text(entryTitle(entry)),
+              // selected: entry.key == _data.currentPlotSpecIndex,
+              enableFeedback: false,
+              onTap: () {
+                // updateCallback(plotSpecIndex: entry.key);
+              },
+              contentPadding: const EdgeInsets.only(),
+              minVerticalPadding: 0.0,
+              dense: true,
+              visualDensity: const VisualDensity(vertical: -2.0),
+            ))
         .toList();
   }
 
