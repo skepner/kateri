@@ -110,7 +110,7 @@ class AntigenicMapViewerData {
   void buildStarted() {
     if (UniversalPlatform.isMacOS && chart == null && !_chartBeingLoaded && _socket == null) {
       // forcing open dialog here does not work in web and eventually leads to problems
-      selectAndOpenAceFile();
+      openChart();
     }
   }
 
@@ -127,7 +127,7 @@ class AntigenicMapViewerData {
 
   // ----------------------------------------------------------------------
 
-  Future<void> selectAndOpenAceFile() async {
+  void openChart() async {
     final file = (await FilePicker.platform.pickFiles())?.files.single;
     if (file != null) {
       try {
@@ -193,7 +193,7 @@ class AntigenicMapViewerData {
 
   // ----------------------------------------------------------------------
 
-  void exportPdf({String? filename, bool? open, double width = 800.0}) async {
+  void generatePdf({String? filename, bool? open, double width = 800.0}) async {
     if (chart != null) {
       final stopwatch = Stopwatch()..start();
       final bytes = await _callbacks.exportPdf(canvasPdfWidth: width); // antigenicMapPainter.viewer.exportPdf();
