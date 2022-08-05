@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 import 'package:window_manager/window_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:accordion/accordion.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -118,22 +119,82 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                           ]))))),
           SizedBox(
             width: plotStyleMenuWidth,
-            child: ListView(
-              children: plotStyleMenu(),
+            child: Accordion(
+              maxOpenSections: 1,
+              initialOpeningSequenceDelay: 0,
+              // headerBackgroundColor: Colors.red[50],
+              // headerBackgroundColorOpened: Colors.red[200],
+              // contentBackgroundColor: Colors.red[50],
+              paddingListTop: 0,
+              paddingListBottom: 0,
+              paddingListHorizontal: 0,
+              openAndCloseAnimation: false,
+              scaleWhenAnimating: false,
+              contentBorderWidth: 20,
+              // contentBorderRadius: 0,
+              // contentHorizontalPadding: 20,
+              // contentVerticalPadding: 0,
+              // paddingBetweenClosedSections: 100,
+              children: [
+                AccordionSection(
+                  isOpen: false,
+                  header: const Text("File"),
+                  content: Column(
+                    children: [
+                      ListTile(
+                        title: const Text("Open"),
+                        onTap: () => openChart(),
+                        ),
+                      ListTile(
+                        title: const Text("Reload"),
+                        onTap: () => reloadChart(),
+                        ),
+                      ListTile(
+                        title: const Text("Pdf"),
+                        onTap: () => generatePdf(),
+                        ),
+                      ],
+                    ),
+                ),
+                // AccordionSection(
+                //   isOpen: false,
+                //   header: Text("1 Coloring by AA"),
+                //   content: Text("AA BB\nCC DD\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9"),
+                // ),
+                AccordionSection(
+                  isOpen: true,
+                  header: Text("Styles"),
+                  content: Column(
+                    children: plotStyleMenu(),
+                  ),
+                  headerBackgroundColor: Color(0xFFF0FFF0),
+                  headerBackgroundColorOpened: Color(0xFFE0FFE0),
+                  contentBackgroundColor: Color(0xFFF8FFF8),
+                ),
+                // AccordionSection(
+                //   isOpen: false,
+                //   header: Text("Styles"),
+                //   content: ListView(
+                //     children: plotStyleMenu(),
+                // )
+                // ),
+              ],
             ),
+            // child: ListView(
+            //   children: plotStyleMenu(),
+            // ),
           ),
         ]));
   }
 
   // ----------------------------------------------------------------------
 
-  List<ListTile> plotStyleMenu() {
+  List<Widget> plotStyleMenu() {
     return _data.plotSpecs
         .asMap()
         .entries
         .map<ListTile>((entry) => ListTile(
             title: Text(entry.value.title()),
-            // selectedTileColor: Color(0xFFF0F0FF)
             selected: entry.key == _data.currentPlotSpecIndex,
             enableFeedback: false,
             onTap: () {
