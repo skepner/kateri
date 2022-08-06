@@ -37,6 +37,8 @@ class AntigenicMapViewWidget extends StatefulWidget {
 
 // ----------------------------------------------------------------------
 
+enum _CurrentSection { styles, file, colorByAA }
+
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with WindowListener implements AntigenicMapViewerCallbacks, AntigenicMapShortcutCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -50,6 +52,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
+
+  _CurrentSection _currentSection = _CurrentSection.styles;
 
   static const plotStyleMenuWidth = 200.0;
   static const minMapWidth = 500.0;
@@ -86,107 +90,156 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   Widget build(BuildContext context) {
-    // print("build context: $context");
+    // return build_old(context);
+
     _data.buildStarted();
     antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
     return AntigenicMapShortcuts(
         callbacks: this,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-              child: Container(
-                  decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-                  child: AspectRatio(
-                      aspectRatio: aspectRatio,
-                      child: Scaffold(
-                          key: scaffoldKey,
-                          // appBar: AppBar(), //title: Text("Kateri")),
-                          drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                          body: Stack(children: <Widget>[
-                            MouseRegion(
-                              onHover: mouseMoved,
-                              child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
-                            ),
-                            Positioned(
-                                right: 0,
-                                top: 0,
-                                child: IconButton(
-                                  icon: const Icon(Icons.menu),
-                                  iconSize: 20,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                                ))
-                          ]))))),
+          buildMapPart(),
           SizedBox(
             width: plotStyleMenuWidth,
-            child: Accordion(
-              maxOpenSections: 1,
-              initialOpeningSequenceDelay: 0,
-              // headerBackgroundColor: Colors.red[50],
-              // headerBackgroundColorOpened: Colors.red[200],
-              // contentBackgroundColor: Colors.red[50],
-              paddingListTop: 0,
-              paddingListBottom: 0,
-              paddingListHorizontal: 0,
-              openAndCloseAnimation: false,
-              scaleWhenAnimating: false,
-              contentBorderWidth: 20,
-              // contentBorderRadius: 0,
-              // contentHorizontalPadding: 20,
-              // contentVerticalPadding: 0,
-              // paddingBetweenClosedSections: 100,
+            child: ListView(
               children: [
-                AccordionSection(
-                  isOpen: false,
-                  header: const Text("File"),
-                  content: Column(
+                ListTile(
+                  title: Column(
                     children: [
-                      ListTile(
-                        title: const Text("Open"),
-                        onTap: () => openChart(),
-                      ),
-                      ListTile(
-                        title: const Text("Reload"),
-                        onTap: () => reloadChart(),
-                      ),
-                      ListTile(
-                        title: const Text("Pdf"),
-                        onTap: () => generatePdf(),
-                      ),
-                    ],
-                  ),
+                      ListTile(child: const Text("File")),
+                  selected: _currentSection == _CurrentSection.file,
+                  onTap: () => setState(() => _currentSection = _CurrentSection.file),
                 ),
-                AccordionSection(
-                  isOpen: false,
-                  header: Text("Coloring by AA"),
-                  content: Column(
-                    children: aaPerPosMenu(),
-                  ),
-                  contentHorizontalPadding: 0.0,
-                  contentVerticalPadding: 0.0,
+                ListTile(
+                  title: Text("Color by AA"),
+                  selected: _currentSection == _CurrentSection.colorByAA,
+                  onTap: () => setState(() => _currentSection = _CurrentSection.colorByAA),
                 ),
-                AccordionSection(
-                  isOpen: true,
-                  header: Text("Styles"),
-                  content: Column(
-                    children: plotStyleMenu(),
-                  ),
-                  headerBackgroundColor: Color(0xFFF0FFF0),
-                  headerBackgroundColorOpened: Color(0xFFE0FFE0),
-                  contentBackgroundColor: Color(0xFFF8FFF8),
+                ListTile(
+                  title: Text("Styles"),
+                  selected: _currentSection == _CurrentSection.styles,
+                  onTap: () => setState(() => _currentSection = _CurrentSection.styles),
+                  tileColor: const Color(0xFFFFE2BF),
+                  selectedTileColor: const Color(0xFFFF8E00),
+                  selectedColor: Colors.white,
+                  visualDensity: const VisualDensity(vertical:VisualDensity.minimumDensity),
                 ),
-                // AccordionSection(
-                //   isOpen: false,
-                //   header: Text("Styles"),
-                //   content: ListView(
-                //     children: plotStyleMenu(),
-                // )
-                // ),
               ],
             ),
-            // child: ListView(
-            //   children: plotStyleMenu(),
-            // ),
+          ),
+          //   child: Accordion(
+          //     maxOpenSections: 1,
+          //     initialOpeningSequenceDelay: 0,
+          //     // headerBackgroundColor: Colors.red[50],
+          //     // headerBackgroundColorOpened: Colors.red[200],
+          //     // contentBackgroundColor: Colors.red[50],
+          //     paddingListTop: 0,
+          //     paddingListBottom: 0,
+          //     paddingListHorizontal: 0,
+          //     paddingBetweenOpenSections: 0,
+          //     paddingBetweenClosedSections: 0,
+          //     openAndCloseAnimation: false,
+          //     scaleWhenAnimating: false,
+          //     contentBorderWidth: 20,
+          //     // contentBorderRadius: 0,
+          //     // contentHorizontalPadding: 20,
+          //     // contentVerticalPadding: 0,
+          //     // paddingBetweenClosedSections: 100,
+          //     children: [
+          //       AccordionSection(
+          //         isOpen: false,
+          //         header: const Text("File"),
+          //         content: Column(
+          //           children: [
+          //             ListTile(
+          //               title: const Text("Open"),
+          //               onTap: () => openChart(),
+          //             ),
+          //             ListTile(
+          //               title: const Text("Reload"),
+          //               onTap: () => reloadChart(),
+          //             ),
+          //             ListTile(
+          //               title: const Text("Pdf"),
+          //               onTap: () => generatePdf(),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //       AccordionSection(
+          //         isOpen: false,
+          //         header: Text("Coloring by AA"),
+          //         content: Column(
+          //           children: aaPerPosMenu(),
+          //         ),
+          //         contentHorizontalPadding: 0.0,
+          //         contentVerticalPadding: 0.0,
+          //       ),
+          //       AccordionSection(
+          //         isOpen: true,
+          //         header: Text("Styles"),
+          //         content: Column(
+          //           children: plotStyleMenu(),
+          //         ),
+          //         headerBackgroundColor: Color(0xFFF0FFF0),
+          //         headerBackgroundColorOpened: Color(0xFFE0FFE0),
+          //         contentBackgroundColor: Color(0xFFF8FFF8),
+          //       ),
+          //       // AccordionSection(
+          //       //   isOpen: false,
+          //       //   header: Text("Styles"),
+          //       //   content: ListView(
+          //       //     children: plotStyleMenu(),
+          //       // )
+          //       // ),
+          //     ],
+          //   ),
+          //   // child: ListView(
+          //   //   children: plotStyleMenu(),
+          //   // ),
+          // ),
+        ]));
+  }
+
+  Widget buildMapPart() {
+    return Expanded(
+        child: Container(
+            decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+            child: AspectRatio(
+                aspectRatio: aspectRatio,
+                child: Scaffold(
+                    key: scaffoldKey,
+                    // appBar: AppBar(), //title: Text("Kateri")),
+                    drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
+                    body: Stack(children: <Widget>[
+                      MouseRegion(
+                        onHover: mouseMoved,
+                        child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+                      ),
+                      Positioned(
+                          right: 0,
+                          top: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.menu),
+                            iconSize: 20,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                          ))
+                    ])))));
+  }
+
+  Widget build_old(BuildContext context) {
+    _data.buildStarted();
+    antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
+    return AntigenicMapShortcuts(
+        callbacks: this,
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          buildMapPart(),
+          SizedBox(
+            width: plotStyleMenuWidth,
+            child: ListView(
+              children: plotStyleMenu(),
+            ),
           ),
         ]));
   }
