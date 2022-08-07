@@ -37,12 +37,13 @@ class AntigenicMapViewWidget extends StatefulWidget {
 
 // ----------------------------------------------------------------------
 
-enum _CurrentSection { styles, file, colorByAA }
+// enum _CurrentSection { styles, file, colorByAA }
 
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with WindowListener implements AntigenicMapViewerCallbacks, AntigenicMapShortcutCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final AntigenicMapViewerData _data;
+  late final MenuSectionColumn _menuSectionColumn;
 
   // String path = "*nothing*";
   // late double width;
@@ -53,13 +54,14 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
-  _CurrentSection _currentSection = _CurrentSection.styles;
+  // _CurrentSection _currentSection = _CurrentSection.styles;
 
-  static const plotStyleMenuWidth = 200.0;
+  static const plotStyleMenuWidth = 220.0;
   static const minMapWidth = 500.0;
 
   _AntigenicMapViewWidgetState() {
     _data = AntigenicMapViewerData(this);
+    _menuSectionColumn = MenuSectionColumn(this);
   }
 
   @override
@@ -90,42 +92,14 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   Widget build(BuildContext context) {
-    // return build_old(context);
-
     _data.buildStarted();
     antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
     return AntigenicMapShortcuts(
         callbacks: this,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           buildMapPart(),
-          SizedBox(
-            width: plotStyleMenuWidth,
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Column(
-                    children: [
-                      ListTile(child: const Text("File")),
-                  selected: _currentSection == _CurrentSection.file,
-                  onTap: () => setState(() => _currentSection = _CurrentSection.file),
-                ),
-                ListTile(
-                  title: Text("Color by AA"),
-                  selected: _currentSection == _CurrentSection.colorByAA,
-                  onTap: () => setState(() => _currentSection = _CurrentSection.colorByAA),
-                ),
-                ListTile(
-                  title: Text("Styles"),
-                  selected: _currentSection == _CurrentSection.styles,
-                  onTap: () => setState(() => _currentSection = _CurrentSection.styles),
-                  tileColor: const Color(0xFFFFE2BF),
-                  selectedTileColor: const Color(0xFFFF8E00),
-                  selectedColor: Colors.white,
-                  visualDensity: const VisualDensity(vertical:VisualDensity.minimumDensity),
-                ),
-              ],
-            ),
-          ),
+          _menuSectionColumn.build(),
+
           //   child: Accordion(
           //     maxOpenSections: 1,
           //     initialOpeningSequenceDelay: 0,
@@ -149,20 +123,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
           //         isOpen: false,
           //         header: const Text("File"),
           //         content: Column(
-          //           children: [
-          //             ListTile(
-          //               title: const Text("Open"),
-          //               onTap: () => openChart(),
-          //             ),
-          //             ListTile(
-          //               title: const Text("Reload"),
-          //               onTap: () => reloadChart(),
-          //             ),
-          //             ListTile(
-          //               title: const Text("Pdf"),
-          //               onTap: () => generatePdf(),
-          //             ),
-          //           ],
           //         ),
           //       ),
           //       AccordionSection(
@@ -174,28 +134,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
           //         contentHorizontalPadding: 0.0,
           //         contentVerticalPadding: 0.0,
           //       ),
-          //       AccordionSection(
-          //         isOpen: true,
-          //         header: Text("Styles"),
-          //         content: Column(
-          //           children: plotStyleMenu(),
-          //         ),
-          //         headerBackgroundColor: Color(0xFFF0FFF0),
-          //         headerBackgroundColorOpened: Color(0xFFE0FFE0),
-          //         contentBackgroundColor: Color(0xFFF8FFF8),
-          //       ),
-          //       // AccordionSection(
-          //       //   isOpen: false,
-          //       //   header: Text("Styles"),
-          //       //   content: ListView(
-          //       //     children: plotStyleMenu(),
-          //       // )
-          //       // ),
           //     ],
           //   ),
-          //   // child: ListView(
-          //   //   children: plotStyleMenu(),
-          //   // ),
           // ),
         ]));
   }
@@ -228,59 +168,29 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                     ])))));
   }
 
-  Widget build_old(BuildContext context) {
-    _data.buildStarted();
-    antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
-    return AntigenicMapShortcuts(
-        callbacks: this,
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          buildMapPart(),
-          SizedBox(
-            width: plotStyleMenuWidth,
-            child: ListView(
-              children: plotStyleMenu(),
-            ),
-          ),
-        ]));
-  }
-
   // ----------------------------------------------------------------------
 
-  List<Widget> plotStyleMenu() {
-    return _data.plotSpecs
-        .asMap()
-        .entries
-        .map<ListTile>((entry) => ListTile(
-            title: Text(entry.value.title()),
-            selected: entry.key == _data.currentPlotSpecIndex,
-            enableFeedback: false,
-            onTap: () {
-              updateCallback(plotSpecIndex: entry.key);
-            }))
-        .toList();
-  }
+  // List<Widget> aaPerPosMenu() {
+  //   String entryTitle(MapEntry<int, Map<String, int>> entry) {
+  //     final val = entry.value.entries.map<String>((ee) => "${ee.key}:${ee.value}").join(" ");
+  //     return "${entry.key} $val";
+  //   }
 
-  List<Widget> aaPerPosMenu() {
-    String entryTitle(MapEntry<int, Map<String, int>> entry) {
-      final val = entry.value.entries.map<String>((ee) => "${ee.key}:${ee.value}").join(" ");
-      return "${entry.key} $val";
-    }
-
-    return _data.aaPerPos.entries
-        .map<ListTile>((entry) => ListTile(
-              title: Text(entryTitle(entry)),
-              // selected: entry.key == _data.currentPlotSpecIndex,
-              enableFeedback: false,
-              onTap: () {
-                // updateCallback(plotSpecIndex: entry.key);
-              },
-              contentPadding: const EdgeInsets.only(),
-              minVerticalPadding: 0.0,
-              dense: true,
-              visualDensity: const VisualDensity(vertical: -2.0),
-            ))
-        .toList();
-  }
+  //   return _data.aaPerPos.entries
+  //       .map<ListTile>((entry) => ListTile(
+  //             title: Text(entryTitle(entry)),
+  //             // selected: entry.key == _data.currentPlotSpecIndex,
+  //             enableFeedback: false,
+  //             onTap: () {
+  //               // updateCallback(plotSpecIndex: entry.key);
+  //             },
+  //             contentPadding: const EdgeInsets.only(),
+  //             minVerticalPadding: 0.0,
+  //             dense: true,
+  //             visualDensity: const VisualDensity(vertical: -2.0),
+  //           ))
+  //       .toList();
+  // }
 
   // ----------------------------------------------------------------------
 
@@ -362,6 +272,108 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
         print("mouse $hoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
       }
     }
+  }
+}
+
+// ----------------------------------------------------------------------
+
+class MenuSectionColumn {
+  final _AntigenicMapViewWidgetState _parent;
+  final columnWidth = 220.0;
+  late final List<_MenuSection> _sections;
+
+  MenuSectionColumn(this._parent) {
+    _sections = <_MenuSection>[
+      _MenuSectionFile(_parent._data),
+      _MenuSectionStyles(_parent, isExpanded: true),
+    ];
+  }
+
+  Widget build() {
+    return SizedBox(
+      width: columnWidth,
+      child: SingleChildScrollView(
+        child: Container(
+          child: ExpansionPanelList(
+            expansionCallback: (int index, bool isExpanded) {
+              _parent.setState(() {
+                _sections[index].isExpanded = !isExpanded;
+              });
+            },
+            children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+abstract class _MenuSection {
+  bool isExpanded;
+
+  _MenuSection(this.isExpanded);
+
+  ExpansionPanel build();
+}
+
+class _MenuSectionFile extends _MenuSection {
+  final AntigenicMapViewerData _data;
+
+  _MenuSectionFile(this._data, {bool isExpanded: false}) : super(isExpanded);
+
+  ExpansionPanel build() {
+    return ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("File")),
+      body: Material(
+        color: const Color(0xFFF0F0FF),
+        shape: Border.all(color: const Color(0xFFA0A0FF)),
+        child: Column(
+          children: [
+            ListTile(
+              title: const Text("Open"),
+              onTap: () => _data.openChart(),
+            ),
+            ListTile(
+              title: const Text("Reload"),
+              onTap: () => _data.reloadChart(),
+            ),
+            ListTile(
+              title: const Text("Pdf"),
+              onTap: () => _data.generatePdf(),
+            ),
+          ],
+        ),
+      ),
+      isExpanded: isExpanded,
+    );
+  }
+}
+
+class _MenuSectionStyles extends _MenuSection {
+  final _AntigenicMapViewWidgetState _parent;
+
+  _MenuSectionStyles(this._parent, {bool isExpanded: false}) : super(isExpanded);
+
+  ExpansionPanel build() {
+    print("build styles");
+    return ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("Styles")),
+      body: Column(
+        children: styleTiles(),
+      ),
+      isExpanded: isExpanded,
+    );
+  }
+
+  List<Widget> styleTiles() {
+    return _parent._data.plotSpecs.asMap().entries.map<ListTile>((entry) {
+      return ListTile(
+        title: Text(entry.value.title()),
+        selected: entry.key == _parent._data.currentPlotSpecIndex,
+        enableFeedback: false,
+        onTap: () => _parent.updateCallback(plotSpecIndex: entry.key),
+      );
+    }).toList();
   }
 }
 
