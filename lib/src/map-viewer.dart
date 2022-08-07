@@ -37,16 +37,12 @@ class AntigenicMapViewWidget extends StatefulWidget {
 
 // ----------------------------------------------------------------------
 
-// enum _CurrentSection { styles, file, colorByAA }
-
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with WindowListener implements AntigenicMapViewerCallbacks, AntigenicMapShortcutCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final AntigenicMapViewerData _data;
   late final MenuSectionColumn _menuSectionColumn;
 
-  // String path = "*nothing*";
-  // late double width;
   late double aspectRatio;
   late double borderWidth;
   late final int _nativeWindowTitleBarHeight;
@@ -54,9 +50,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
-  // _CurrentSection _currentSection = _CurrentSection.styles;
-
-  static const plotStyleMenuWidth = 220.0;
   static const minMapWidth = 500.0;
 
   _AntigenicMapViewWidgetState() {
@@ -240,7 +233,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   @override
   void resetWindowSize() async {
     const defaultWindowWidth = 785.0;
-    await windowManager.setSize(Size(defaultWindowWidth + plotStyleMenuWidth, defaultWindowWidth / aspectRatio + _nativeWindowTitleBarHeight), animate: true);
+    await windowManager.setSize(Size(defaultWindowWidth + _menuSectionColumn.columnWidth, defaultWindowWidth / aspectRatio + _nativeWindowTitleBarHeight), animate: true);
   }
 
   // @override
@@ -252,10 +245,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   void onWindowResized() async {
     final windowSize = await windowManager.getSize();
     var targetWidth = windowSize.width;
-    if ((targetWidth - plotStyleMenuWidth) < minMapWidth) {
-      targetWidth = minMapWidth + plotStyleMenuWidth;
+    if ((targetWidth - _menuSectionColumn.columnWidth) < minMapWidth) {
+      targetWidth = minMapWidth + _menuSectionColumn.columnWidth;
     }
-    final targetSize = Size(targetWidth, (targetWidth - plotStyleMenuWidth) / aspectRatio + _nativeWindowTitleBarHeight);
+    final targetSize = Size(targetWidth, (targetWidth - _menuSectionColumn.columnWidth) / aspectRatio + _nativeWindowTitleBarHeight);
     final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
     if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
     debug("resized $targetSize <- $windowSize");
