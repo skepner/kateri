@@ -41,7 +41,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final AntigenicMapViewerData _data;
-  late final MenuSectionColumnWidget _menuSectionColumn;
 
   late double aspectRatio;
   late double borderWidth;
@@ -51,10 +50,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
   static const minMapWidth = 500.0;
+  static const menuSectionColumnWidth = 220.0;
 
   _AntigenicMapViewWidgetState() {
     _data = AntigenicMapViewerData(this);
-    _menuSectionColumn = MenuSectionColumnWidget(antigenicMapViewWidgetState: this);
   }
 
   @override
@@ -91,7 +90,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
         callbacks: this,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           buildMapPart(),
-          _menuSectionColumn,
+          MenuSectionColumnWidget(antigenicMapViewWidgetState: this, columnWidth: menuSectionColumnWidth),
 
           //   child: Accordion(
           //     maxOpenSections: 1,
@@ -233,7 +232,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   @override
   void resetWindowSize() async {
     const defaultWindowWidth = 785.0;
-    await windowManager.setSize(Size(defaultWindowWidth + _menuSectionColumn.columnWidth, defaultWindowWidth / aspectRatio + _nativeWindowTitleBarHeight), animate: true);
+    await windowManager.setSize(Size(defaultWindowWidth + menuSectionColumnWidth, defaultWindowWidth / aspectRatio + _nativeWindowTitleBarHeight), animate: true);
   }
 
   // @override
@@ -245,10 +244,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   void onWindowResized() async {
     final windowSize = await windowManager.getSize();
     var targetWidth = windowSize.width;
-    if ((targetWidth - _menuSectionColumn.columnWidth) < minMapWidth) {
-      targetWidth = minMapWidth + _menuSectionColumn.columnWidth;
+    if ((targetWidth - menuSectionColumnWidth) < minMapWidth) {
+      targetWidth = minMapWidth + menuSectionColumnWidth;
     }
-    final targetSize = Size(targetWidth, (targetWidth - _menuSectionColumn.columnWidth) / aspectRatio + _nativeWindowTitleBarHeight);
+    final targetSize = Size(targetWidth, (targetWidth - menuSectionColumnWidth) / aspectRatio + _nativeWindowTitleBarHeight);
     final diff = Offset(targetSize.width - windowSize.width, targetSize.height - windowSize.height).distanceSquared;
     if (diff > 4.0) await windowManager.setSize(targetSize, animate: true);
     debug("resized $targetSize <- $windowSize");
@@ -271,9 +270,9 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 // ----------------------------------------------------------------------
 
 class MenuSectionColumnWidget extends StatefulWidget {
-  const MenuSectionColumnWidget({Key? key, required this.antigenicMapViewWidgetState}) : super(key: key);
+  const MenuSectionColumnWidget({Key? key, required this.antigenicMapViewWidgetState, required this.columnWidth}) : super(key: key);
 
-  final columnWidth = 220.0;
+  final double columnWidth;
   final _AntigenicMapViewWidgetState antigenicMapViewWidgetState;
 
   @override
