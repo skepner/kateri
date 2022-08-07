@@ -41,7 +41,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final AntigenicMapViewerData _data;
-  late final MenuSectionColumn _menuSectionColumn;
+  late final MenuSectionColumnWidget _menuSectionColumn;
 
   late double aspectRatio;
   late double borderWidth;
@@ -54,7 +54,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   _AntigenicMapViewWidgetState() {
     _data = AntigenicMapViewerData(this);
-    _menuSectionColumn = MenuSectionColumn(this);
+    _menuSectionColumn = MenuSectionColumnWidget(antigenicMapViewWidgetState: this);
   }
 
   @override
@@ -91,7 +91,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
         callbacks: this,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           buildMapPart(),
-          _menuSectionColumn.build(),
+          _menuSectionColumn,
 
           //   child: Accordion(
           //     maxOpenSections: 1,
@@ -270,32 +270,41 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
 // ----------------------------------------------------------------------
 
-class MenuSectionColumn {
-  final _AntigenicMapViewWidgetState _parent;
+class MenuSectionColumnWidget extends StatefulWidget {
+  const MenuSectionColumnWidget({Key? key, required this.antigenicMapViewWidgetState}) : super(key: key);
+
   final columnWidth = 220.0;
+  final _AntigenicMapViewWidgetState antigenicMapViewWidgetState;
+
+  @override
+  State<MenuSectionColumnWidget> createState() => _MenuSectionColumnWidgetState();
+}
+
+class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   late final List<_MenuSection> _sections;
 
-  MenuSectionColumn(this._parent) {
+  @override
+  void initState() {
     _sections = <_MenuSection>[
-      _MenuSectionFile(_parent._data),
-      _MenuSectionStyles(_parent, isExpanded: true),
+      _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
+      _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
     ];
+    super.initState();
   }
 
-  Widget build() {
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
-      width: columnWidth,
+      width: widget.columnWidth,
       child: SingleChildScrollView(
-        child: Container(
           child: ExpansionPanelList(
             expansionCallback: (int index, bool isExpanded) {
-              _parent.setState(() {
+              setState(() {
                 _sections[index].isExpanded = !isExpanded;
               });
             },
             children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
           ),
-        ),
       ),
     );
   }
@@ -312,10 +321,12 @@ abstract class _MenuSection {
 class _MenuSectionFile extends _MenuSection {
   final AntigenicMapViewerData _data;
 
-  _MenuSectionFile(this._data, {bool isExpanded: false}) : super(isExpanded);
+  _MenuSectionFile(this._data, {bool isExpanded = false}) : super(isExpanded);
 
+  @override
   ExpansionPanel build() {
     return ExpansionPanel(
+      canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("File")),
       body: Material(
         color: const Color(0xFFF0F0FF),
@@ -345,11 +356,12 @@ class _MenuSectionFile extends _MenuSection {
 class _MenuSectionStyles extends _MenuSection {
   final _AntigenicMapViewWidgetState _parent;
 
-  _MenuSectionStyles(this._parent, {bool isExpanded: false}) : super(isExpanded);
+  _MenuSectionStyles(this._parent, {bool isExpanded = false}) : super(isExpanded);
 
+  @override
   ExpansionPanel build() {
-    print("build styles");
     return ExpansionPanel(
+      canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("Styles")),
       body: Column(
         children: styleTiles(),
