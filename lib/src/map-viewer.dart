@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 import 'package:window_manager/window_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
-import 'package:accordion/accordion.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
@@ -49,7 +48,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
-  var _hoveredPoints = <int>[];
+
+  var _hoveredPoints = ValueNotifier<List<int>>(<int>[]);
 
   static const minMapWidth = 500.0;
   static const menuSectionColumnWidth = 220.0;
@@ -65,6 +65,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     _data.openExportedPdf = widget.openExportedPdf;
+
+    _hoveredPoints.addListener(() {
+      print("_hoveredPoints ${_hoveredPoints.value}");
+    });
 
     if (UniversalPlatform.isMacOS) {
       windowManager.addListener(this);
@@ -221,7 +225,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   // ----------------------------------------------------------------------
 
   Iterable<String> hoveredPoint() {
-    return _hoveredPoints.map<String>((index) => index.toString());
+    return _hoveredPoints.value.map<String>((index) => index.toString());
   }
 
   void mouseMoved(PointerEvent ev) {
@@ -229,8 +233,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
       final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
       final newlyHoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates
           .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
-      if (!listEquals(newlyHoveredPoints, _hoveredPoints)) {
-        _hoveredPoints = newlyHoveredPoints;
+      if (!listEquals(newlyHoveredPoints, _hoveredPoints.value)) {
+        _hoveredPoints.value = newlyHoveredPoints;
         print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
         setState(() {});
       }
