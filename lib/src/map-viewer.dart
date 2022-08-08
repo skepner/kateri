@@ -330,12 +330,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SelectableText.rich(
-                        TextSpan(
-                          children: hoveredPoints.map(formatAntigenSerum).toList(),
-                          // hoveredPoints.map<String>((int item) => item.toString()).join("\n")),
-                        ),
-                      ),
+                        child: SelectableText.rich(formatAntigensSera(hoveredPoints)),
                       ),
                       primary: true,
                     ),
@@ -353,11 +348,16 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
     );
   }
 
-  TextSpan formatAntigenSerum(_PointElement point) {
-    // final no = point.no.toString().padLeft(4, ' ');
+  TextSpan formatAntigensSera(List<_PointElement> points) {
     return TextSpan(
-      text: "${point.name}\n",
-      style: TextStyle(color: point.antigen ? antigenColor : serumColor),
+      children: points.asMap().entries.map<TextSpan>((entry) {
+        // final no = entry.value.no.toString().padLeft(4, ' ');
+        final nl = (entry.key < (points.length - 1)) ? "\n" : "";
+        return TextSpan(
+          text: "${entry.value.name}$nl",
+          style: TextStyle(color: entry.value.antigen ? antigenColor : serumColor),
+        );
+      }).toList(),
     );
   }
 }
