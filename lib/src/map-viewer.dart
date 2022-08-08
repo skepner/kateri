@@ -240,7 +240,7 @@ class PointHoveringDetector {
   final AntigenicMapViewerData data;
   final hoveredPointsNotifier = ValueNotifier<List<_PointElement>>([]);
   late AntigenicMapPainter _antigenicMapPainter;
-  static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.shift, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight]);
+  static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.alt, LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight]);
 
   PointHoveringDetector({required this.data});
 
