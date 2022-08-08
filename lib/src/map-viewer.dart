@@ -224,6 +224,7 @@ class PointHoveringDetector {
   final AntigenicMapViewerData data;
   final hoveredPointsNotifier = ValueNotifier<List<int>>(<int>[]);
   late AntigenicMapPainter _antigenicMapPainter;
+  static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.shift, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight]);
 
   PointHoveringDetector({required this.data});
 
@@ -237,21 +238,25 @@ class PointHoveringDetector {
   }
 
   void mouseMoved(PointerEvent ev) {
-    if (data.chart != null && data.viewport != null) {
+    if (data.chart != null && data.viewport != null && !isLocked()) {
       final unitSize = _antigenicMapPainter.viewer.canvasSize.width / data.viewport!.width;
       final newlyHoveredPoints = _antigenicMapPainter.viewer.pointLookupByCoordinates
           .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0));
       if (!listEquals(newlyHoveredPoints, hoveredPointsNotifier.value)) {
         hoveredPointsNotifier.value = newlyHoveredPoints;
-        print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top)} canvas:${_antigenicMapPainter.viewer.canvasSize}");
+        // print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top)} canvas:${_antigenicMapPainter.viewer.canvasSize}");
       }
     }
   }
 
   void mouseExit(PointerEvent ev) {
-    if (hoveredPointsNotifier.value.isNotEmpty) {
+    if (!isLocked() && hoveredPointsNotifier.value.isNotEmpty) {
       hoveredPointsNotifier.value = [];
     }
+  }
+
+  bool isLocked() {
+    return HardwareKeyboard.instance.logicalKeysPressed.intersection(_lockKeys).isNotEmpty;
   }
 }
 
@@ -295,13 +300,27 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
               },
               children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
             ),
+            primary: false,
           ),
           ValueListenableBuilder<List<int>>(
               valueListenable: widget.hoveredPointsNotifier,
               builder: (BuildContext context, List<int> hoveredPoints, Widget? child) {
-                return ListView(
-                  children: hoveredPoints.map<Widget>((int item) => Text(item.toString())).toList(),
-                );
+                if (hoveredPoints.isNotEmpty) {
+                  return DecoratedBox(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: hoveredPoints.map<Widget>((int item) => Text(item.toString())).toList(),
+                      ),
+                      primary: true,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      color: Colors.white,
+                    ),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
               }),
         ],
       ),
