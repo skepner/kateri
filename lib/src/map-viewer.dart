@@ -5,6 +5,7 @@ import 'dart:typed_data'; // Uint8List
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 import 'package:window_manager/window_manager.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -48,6 +49,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
+  var _hoveredPoints = <int>[];
 
   static const minMapWidth = 500.0;
   static const menuSectionColumnWidth = 220.0;
@@ -91,44 +93,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           buildMapPart(),
           MenuSectionColumnWidget(antigenicMapViewWidgetState: this, columnWidth: menuSectionColumnWidth),
-
-          //   child: Accordion(
-          //     maxOpenSections: 1,
-          //     initialOpeningSequenceDelay: 0,
-          //     // headerBackgroundColor: Colors.red[50],
-          //     // headerBackgroundColorOpened: Colors.red[200],
-          //     // contentBackgroundColor: Colors.red[50],
-          //     paddingListTop: 0,
-          //     paddingListBottom: 0,
-          //     paddingListHorizontal: 0,
-          //     paddingBetweenOpenSections: 0,
-          //     paddingBetweenClosedSections: 0,
-          //     openAndCloseAnimation: false,
-          //     scaleWhenAnimating: false,
-          //     contentBorderWidth: 20,
-          //     // contentBorderRadius: 0,
-          //     // contentHorizontalPadding: 20,
-          //     // contentVerticalPadding: 0,
-          //     // paddingBetweenClosedSections: 100,
-          //     children: [
-          //       AccordionSection(
-          //         isOpen: false,
-          //         header: const Text("File"),
-          //         content: Column(
-          //         ),
-          //       ),
-          //       AccordionSection(
-          //         isOpen: false,
-          //         header: Text("Coloring by AA"),
-          //         content: Column(
-          //           children: aaPerPosMenu(),
-          //         ),
-          //         contentHorizontalPadding: 0.0,
-          //         contentVerticalPadding: 0.0,
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ]));
   }
 
@@ -145,6 +109,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
                     body: Stack(children: <Widget>[
                       MouseRegion(
                         onHover: mouseMoved,
+                        onExit: mouseExit,
                         child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
                       ),
                       Positioned(
@@ -255,15 +220,25 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   // ----------------------------------------------------------------------
 
+  Iterable<String> hoveredPoint() {
+    return _hoveredPoints.map<String>((index) => index.toString());
+  }
+
   void mouseMoved(PointerEvent ev) {
     if (_data.chart != null && _data.viewport != null) {
       final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
-      final hoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates
+      final newlyHoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates
           .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
-      if (hoveredPoints.length > 0) {
-        print("mouse $hoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
+      if (!listEquals(newlyHoveredPoints, _hoveredPoints)) {
+        _hoveredPoints = newlyHoveredPoints;
+        print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
+        setState(() {});
       }
     }
+  }
+
+  void mouseExit(PointerEvent ev) {
+    print("mouseExit");
   }
 }
 
@@ -295,15 +270,22 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.columnWidth,
-      child: SingleChildScrollView(
-          child: ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                _sections[index].isExpanded = !isExpanded;
-              });
-            },
-            children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  _sections[index].isExpanded = !isExpanded;
+                });
+              },
+              children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
+            ),
           ),
+          ListView(
+            children: widget.antigenicMapViewWidgetState.hoveredPoint().map<Widget>((String item) => Text(item)).toList(),
+          ),
+        ],
       ),
     );
   }
