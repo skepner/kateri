@@ -183,7 +183,7 @@ class Info extends _JsonAccess {
 
 // ----------------------------------------------------------------------
 
-class _AntigenSerum extends _JsonAccess {
+abstract class _AntigenSerum extends _JsonAccess {
   _AntigenSerum(_JsonData data) : super(data);
 
   String get name => data["N"] ?? "";
@@ -203,6 +203,8 @@ class _AntigenSerum extends _JsonAccess {
     }
   }
 
+  String designation();
+
   Map<String, dynamic> get semantic => data["T"] ?? {};
 }
 
@@ -217,6 +219,21 @@ class Antigen extends _AntigenSerum {
     if (dat.isEmpty) return first.isEmpty; // antigen without date is within range if first is empty, i.e. it is kinda at the beginning of all dates
     return (first.isEmpty || first.compareTo(dat) <= 0) && (last.isEmpty || last.compareTo(dat) > 0);
   }
+
+  @override
+  String designation() {
+    var desig = name;
+    if (annotations.isNotEmpty) {
+      desig = "$desig ${annotations.join(' ')}";
+    }
+    if (reassortant.isNotEmpty) {
+      desig = "$desig $reassortant";
+    }
+    if (passage.isNotEmpty) {
+      desig = "$desig $passage";
+    }
+    return desig;
+  }
 }
 
 typedef Antigens = List<Antigen>;
@@ -226,6 +243,21 @@ class Serum extends _AntigenSerum {
 
   String get species => data["s"] ?? "";
   String get serumId => data["I"] ?? "";
+
+  @override
+  String designation() {
+    var desig = name;
+    if (annotations.isNotEmpty) {
+      desig = "$desig ${annotations.join(' ')}";
+    }
+    if (reassortant.isNotEmpty) {
+      desig = "$desig $reassortant";
+    }
+    if (serumId.isNotEmpty) {
+      desig = "$desig $serumId";
+    }
+    return desig;
+  }
 }
 
 typedef Sera = List<Serum>;

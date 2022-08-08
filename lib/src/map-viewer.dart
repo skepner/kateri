@@ -12,6 +12,7 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'app.dart'; // CommandLineData
 import 'map-viewer-data.dart';
+import 'chart.dart';
 
 import 'error.dart';
 import 'draw_on.dart';
@@ -51,7 +52,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late final PointHoveringDetector _pointHoveringDetector;
 
   static const minMapWidth = 500.0;
-  static const menuSectionColumnWidth = 220.0;
+  static const menuSectionColumnWidth = 400.0;
 
   _AntigenicMapViewWidgetState() {
     _data = AntigenicMapViewerData(this);
@@ -220,9 +221,24 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
 // ----------------------------------------------------------------------
 
+class _PointElement {
+  final int no;
+  late final bool antigen;
+  late final String name;
+
+  _PointElement(this.no, Chart chart) {
+    antigen = no < chart.antigens.length;
+    if (antigen) {
+      name = chart.antigens[no].designation();
+    } else {
+      name = chart.sera[no - chart.antigens.length].designation();
+    }
+  }
+}
+
 class PointHoveringDetector {
   final AntigenicMapViewerData data;
-  final hoveredPointsNotifier = ValueNotifier<List<int>>(<int>[]);
+  final hoveredPointsNotifier = ValueNotifier<List<_PointElement>>([]);
   late AntigenicMapPainter _antigenicMapPainter;
   static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.shift, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight]);
 
@@ -241,7 +257,9 @@ class PointHoveringDetector {
     if (data.chart != null && data.viewport != null && !isLocked()) {
       final unitSize = _antigenicMapPainter.viewer.canvasSize.width / data.viewport!.width;
       final newlyHoveredPoints = _antigenicMapPainter.viewer.pointLookupByCoordinates
-          .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0));
+          .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0))
+          .map((index) => _PointElement(index, data.chart!))
+          .toList();
       if (!listEquals(newlyHoveredPoints, hoveredPointsNotifier.value)) {
         hoveredPointsNotifier.value = newlyHoveredPoints;
         // print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top)} canvas:${_antigenicMapPainter.viewer.canvasSize}");
@@ -267,7 +285,7 @@ class MenuSectionColumnWidget extends StatefulWidget {
 
   final double columnWidth;
   final _AntigenicMapViewWidgetState antigenicMapViewWidgetState;
-  final ValueNotifier<List<int>> hoveredPointsNotifier;
+  final ValueNotifier<List<_PointElement>> hoveredPointsNotifier;
 
   @override
   State<MenuSectionColumnWidget> createState() => _MenuSectionColumnWidgetState();
@@ -275,6 +293,8 @@ class MenuSectionColumnWidget extends StatefulWidget {
 
 class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   late final List<_MenuSection> _sections;
+  static const antigenColor = Color(0xFF000080);
+  static const serumColor = Color(0xFF804000);
 
   @override
   void initState() {
@@ -302,13 +322,21 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
             ),
             primary: false,
           ),
-          ValueListenableBuilder<List<int>>(
+          ValueListenableBuilder(
               valueListenable: widget.hoveredPointsNotifier,
-              builder: (BuildContext context, List<int> hoveredPoints, Widget? child) {
+              builder: (BuildContext context, List<_PointElement> hoveredPoints, Widget? child) {
                 if (hoveredPoints.isNotEmpty) {
                   return DecoratedBox(
                     child: SingleChildScrollView(
-                      child: SelectableText(hoveredPoints.map<String>((int item) => item.toString()).join("\n")),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SelectableText.rich(
+                        TextSpan(
+                          children: hoveredPoints.map(formatAntigenSerum).toList(),
+                          // hoveredPoints.map<String>((int item) => item.toString()).join("\n")),
+                        ),
+                      ),
+                      ),
                       primary: true,
                     ),
                     decoration: BoxDecoration(
@@ -322,6 +350,14 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
               }),
         ],
       ),
+    );
+  }
+
+  TextSpan formatAntigenSerum(_PointElement point) {
+    // final no = point.no.toString().padLeft(4, ' ');
+    return TextSpan(
+      text: "${point.name}\n",
+      style: TextStyle(color: point.antigen ? antigenColor : serumColor),
     );
   }
 }
