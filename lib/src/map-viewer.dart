@@ -300,7 +300,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   void initState() {
     _sections = <_MenuSection>[
       _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
-      _MenuSectionColorByAA(widget.antigenicMapViewWidgetState._data, (){setState(() {});}),
+      _MenuSectionColorByAA(this),
       _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
     ];
     super.initState();
@@ -360,6 +360,16 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
         );
       }).toList(),
     );
+  }
+
+  void redraw() {
+    setState(() {});
+  }
+
+  void collapseAll() {
+    for (final section in _sections) {
+      section.isExpanded = false;
+    }
   }
 }
 
@@ -444,12 +454,11 @@ class _MenuSectionStyles extends _MenuSection {
 }
 
 class _MenuSectionColorByAA extends _MenuSection {
-  final AntigenicMapViewerData _data;
+  final _MenuSectionColumnWidgetState _menuSectionColumn;
   late final _focusNode;
   String? _error;
-  final Function setState;
 
-  _MenuSectionColorByAA(this._data, this.setState, {bool isExpanded = false}) : super(isExpanded) {
+  _MenuSectionColorByAA(this._menuSectionColumn, {bool isExpanded = false}) : super(isExpanded) {
     _focusNode = FocusNode();
   }
 
@@ -496,12 +505,20 @@ class _MenuSectionColorByAA extends _MenuSection {
     _error = null;
     if (value != null && value.isNotEmpty) {
       try {
-        final positions = value.split(" ").map<int>((String elt) => int.parse(elt)).toList();
-        print("onSubmitted $positions");
+        final positions = value.split(" ").map<int>((String elt) {
+          final val = int.parse(elt);
+          if (val < 1 || val > 550) {
+            throw DataError("invalid position");
+          }
+          return val;
+        }).toList();
+        _menuSectionColumn.widget.antigenicMapViewWidgetState.updateCallback(plotSpecIndex: 0);
+        _menuSectionColumn.collapseAll();
+        isExpanded = true;
       } catch (_) {
         _error = "enter space separated positions";
-        setState();
       }
+      _menuSectionColumn.redraw();
     }
     _focusNode.requestFocus();
   }
