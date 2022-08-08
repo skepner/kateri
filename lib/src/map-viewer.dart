@@ -300,6 +300,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   void initState() {
     _sections = <_MenuSection>[
       _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
+      _MenuSectionColorByAA(widget.antigenicMapViewWidgetState._data),
       _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
     ];
     super.initState();
@@ -315,7 +316,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
             child: ExpansionPanelList(
               expansionCallback: (int index, bool isExpanded) {
                 setState(() {
-                  _sections[index].isExpanded = !isExpanded;
+                  _sections[index].expand(!isExpanded);
                 });
               },
               children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
@@ -368,6 +369,10 @@ abstract class _MenuSection {
   _MenuSection(this.isExpanded);
 
   ExpansionPanel build();
+
+  void expand(bool exp) {
+    isExpanded = exp;
+  }
 }
 
 class _MenuSectionFile extends _MenuSection {
@@ -381,7 +386,7 @@ class _MenuSectionFile extends _MenuSection {
       canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("File")),
       body: Material(
-        color: const Color(0xFFF0F0FF),
+        color: const Color(0xFFF8F8FF),
         shape: Border.all(color: const Color(0xFFA0A0FF)),
         child: Column(
           children: [
@@ -415,8 +420,12 @@ class _MenuSectionStyles extends _MenuSection {
     return ExpansionPanel(
       canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("Styles")),
-      body: Column(
-        children: styleTiles(),
+      body: Material(
+        color: const Color(0xFFF8FFF8),
+        shape: Border.all(color: const Color(0xFFA0FFA0)),
+        child: Column(
+          children: styleTiles(),
+        ),
       ),
       isExpanded: isExpanded,
     );
@@ -431,6 +440,65 @@ class _MenuSectionStyles extends _MenuSection {
         onTap: () => _parent.updateCallback(plotSpecIndex: entry.key),
       );
     }).toList();
+  }
+}
+
+class _MenuSectionColorByAA extends _MenuSection {
+  final AntigenicMapViewerData _data;
+  final focusNode = FocusNode();
+
+  _MenuSectionColorByAA(this._data, {bool isExpanded = false}) : super(isExpanded);
+
+  @override
+  ExpansionPanel build() {
+    return ExpansionPanel(
+      canTapOnHeader: true,
+      headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("Color by AA")),
+      body: Material(
+        color: const Color(0xFFFFF8F0),
+        shape: Border.all(color: const Color(0xFFFFFBA0)),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FocusTraversalGroup(
+                child: Form(
+                  autovalidateMode: AutovalidateMode.always,
+                  onChanged: () {
+                    print("form changed");
+                    // Form.of(primaryFocus!.context!)!.save();
+                  },
+                  child: TextFormField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      labelText: "Positions",
+                      hintText: "space separated, e.g. 193 156",
+                    ),
+                    validator: (String? value) {
+                      print("validator $value");
+                      return null; // value != null && value.isNotEmpty ? null : "invalid";
+                    },
+                    onSaved: (String? value) {
+                      print("onSaved $value");
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isExpanded: isExpanded,
+    );
+  }
+
+  @override
+  void expand(bool exp) {
+    super.expand(exp);
+    if (isExpanded) {
+      focusNode.requestFocus();
+    }
   }
 }
 
