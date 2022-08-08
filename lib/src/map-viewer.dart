@@ -49,7 +49,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
 
-  var _hoveredPoints = ValueNotifier<List<int>>(<int>[]);
+  var hoveredPointsNotifier = ValueNotifier<List<int>>(<int>[]);
 
   static const minMapWidth = 500.0;
   static const menuSectionColumnWidth = 220.0;
@@ -65,10 +65,6 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
     _data.openExportedPdf = widget.openExportedPdf;
-
-    _hoveredPoints.addListener(() {
-      print("_hoveredPoints ${_hoveredPoints.value}");
-    });
 
     if (UniversalPlatform.isMacOS) {
       windowManager.addListener(this);
@@ -224,17 +220,17 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   // ----------------------------------------------------------------------
 
-  Iterable<String> hoveredPoint() {
-    return _hoveredPoints.value.map<String>((index) => index.toString());
-  }
+  // Iterable<String> hoveredPoint() {
+  //   return hoveredPointsNotifier.value.map<String>((index) => index.toString());
+  // }
 
   void mouseMoved(PointerEvent ev) {
     if (_data.chart != null && _data.viewport != null) {
       final unitSize = antigenicMapPainter.viewer.canvasSize.width / _data.viewport!.width;
       final newlyHoveredPoints = antigenicMapPainter.viewer.pointLookupByCoordinates
           .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top, 0.0));
-      if (!listEquals(newlyHoveredPoints, _hoveredPoints.value)) {
-        _hoveredPoints.value = newlyHoveredPoints;
+      if (!listEquals(newlyHoveredPoints, hoveredPointsNotifier.value)) {
+        hoveredPointsNotifier.value = newlyHoveredPoints;
         print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + _data.viewport!.left, ev.position.dy / unitSize + _data.viewport!.top)} canvas:${antigenicMapPainter.viewer.canvasSize}");
         setState(() {});
       }
@@ -286,9 +282,13 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
               children: _sections.map<ExpansionPanel>((_MenuSection section) => section.build()).toList(),
             ),
           ),
-          ListView(
-            children: widget.antigenicMapViewWidgetState.hoveredPoint().map<Widget>((String item) => Text(item)).toList(),
-          ),
+          ValueListenableBuilder<List<int>>(
+              valueListenable: widget.antigenicMapViewWidgetState.hoveredPointsNotifier,
+              builder: (BuildContext context, List<int> hoveredPoints, Widget? child) {
+                return ListView(
+                  children: hoveredPoints.map<Widget>((int item) => Text(item.toString())).toList(),
+                );
+              }),
         ],
       ),
     );
