@@ -300,7 +300,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   void initState() {
     _sections = <_MenuSection>[
       _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
-      _MenuSectionColorByAA(widget.antigenicMapViewWidgetState._data),
+      _MenuSectionColorByAA(widget.antigenicMapViewWidgetState._data, (){setState(() {});}),
       _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
     ];
     super.initState();
@@ -445,9 +445,13 @@ class _MenuSectionStyles extends _MenuSection {
 
 class _MenuSectionColorByAA extends _MenuSection {
   final AntigenicMapViewerData _data;
-  final focusNode = FocusNode();
+  late final _focusNode;
+  String? _error;
+  final Function setState;
 
-  _MenuSectionColorByAA(this._data, {bool isExpanded = false}) : super(isExpanded);
+  _MenuSectionColorByAA(this._data, this.setState, {bool isExpanded = false}) : super(isExpanded) {
+    _focusNode = FocusNode();
+  }
 
   @override
   ExpansionPanel build() {
@@ -461,29 +465,15 @@ class _MenuSectionColorByAA extends _MenuSection {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: FocusTraversalGroup(
-                child: Form(
-                  autovalidateMode: AutovalidateMode.always,
-                  onChanged: () {
-                    print("form changed");
-                    // Form.of(primaryFocus!.context!)!.save();
-                  },
-                  child: TextFormField(
-                    autofocus: true,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      labelText: "Positions",
-                      hintText: "space separated, e.g. 193 156",
-                    ),
-                    validator: (String? value) {
-                      print("validator $value");
-                      return null; // value != null && value.isNotEmpty ? null : "invalid";
-                    },
-                    onSaved: (String? value) {
-                      print("onSaved $value");
-                    },
-                  ),
+              child: TextField(
+                autofocus: true,
+                focusNode: _focusNode,
+                decoration: InputDecoration(
+                  labelText: "Positions",
+                  hintText: "space separated, e.g. 193 156",
+                  errorText: _error,
                 ),
+                onSubmitted: onSubmitted,
               ),
             ),
           ],
@@ -497,8 +487,23 @@ class _MenuSectionColorByAA extends _MenuSection {
   void expand(bool exp) {
     super.expand(exp);
     if (isExpanded) {
-      focusNode.requestFocus();
+      print("requestFocus");
+      _focusNode.requestFocus();
     }
+  }
+
+  void onSubmitted(String? value) {
+    _error = null;
+    if (value != null && value.isNotEmpty) {
+      try {
+        final positions = value.split(" ").map<int>((String elt) => int.parse(elt)).toList();
+        print("onSubmitted $positions");
+      } catch (_) {
+        _error = "enter space separated positions";
+        setState();
+      }
+    }
+    _focusNode.requestFocus();
   }
 }
 
