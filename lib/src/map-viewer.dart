@@ -308,9 +308,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
                 if (hoveredPoints.isNotEmpty) {
                   return DecoratedBox(
                     child: SingleChildScrollView(
-                      child: Column(
-                        children: hoveredPoints.map<Widget>((int item) => Text(item.toString())).toList(),
-                      ),
+                      child: SelectableText(hoveredPoints.map<String>((int item) => item.toString()).join("\n")),
                       primary: true,
                     ),
                     decoration: BoxDecoration(
