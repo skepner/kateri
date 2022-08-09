@@ -150,7 +150,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   void updateCallback({int? plotSpecIndex}) {
-    print("plotSpecIndex: $plotSpecIndex");
+    // print("plotSpecIndex: $plotSpecIndex");
     if (plotSpecIndex != null && plotSpecIndex != _data.currentPlotSpecIndex) {
       _data.setPlotSpec(plotSpecIndex);
       aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
@@ -520,7 +520,6 @@ class _MenuSectionColorByAA extends _MenuSection {
         _menuSectionColumn.widget.antigenicMapViewWidgetState.setPlotSpecColoredByAA(positions);
         _menuSectionColumn.collapseAll();
         isExpanded = true;
-        print("setPlotSpecColoredByAA");
       } catch (err) {
         print("ERROR onSubmitted: $err");
         _error = "enter space separated positions";

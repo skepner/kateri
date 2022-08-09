@@ -39,7 +39,7 @@ class _DefaultDrawingOrder {
 
   List<int> defaultDrawingOrder() => ddoSera + ddoReferenceAntigens + ddoTestAntigens;
 
-  static void raiseLowerPoints(List<int> order, String? raiseLower, List<int> points) {
+  static List<int> raiseLowerPoints(List<int> order, String? raiseLower, List<int> points) {
     if (raiseLower != null) {
       final List<int> keep = [], move = [];
       for (final pnt in order) {
@@ -55,15 +55,7 @@ class _DefaultDrawingOrder {
         order = move + keep;
       }
     }
-
-    switch (raiseLower) {
-      case "r":
-        break;
-      case "l":
-        break;
-      default:
-        break;
-    }
+    return order;
   }
 
   late final List<int> ddoSera, ddoReferenceAntigens, ddoTestAntigens;
@@ -250,7 +242,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           applySerumCoverage(pointSpec[pointNo].serumCoverage!, pointNo);
         }
       }
-      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, entry["D"], points);
+      _drawingOrder = _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, entry["D"], points);
     }
     final legend = entry["L"];
     if (legend != null) {
@@ -470,8 +462,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         }
       }
     }
-    _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensWithin);
-    _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensOutside);
+    _drawingOrder = _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensWithin);
+    _drawingOrder = _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensOutside);
     if (antigensWithin.isEmpty) warning("serum coverage for SR $serumNo: no antigens within fold ${serumCoverage.fold} from homologous titer $homologousTiter");
     // debug("SR $serumNo titer: $homologousTiter $serumCoverage");
   }
@@ -885,14 +877,16 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
     // print("$aaPerPos");
     for (int specNo = 0; specNo < posAaAntigenIndexes.length; ++specNo) {
       final points = posAaAntigenIndexes[specNo].value;
+      // print("${posAaAntigenIndexes[specNo].key} $points");
       for (final no in points) {
         pointSpec[no].fill.modify(distinctColors[specNo]);
         pointSpec[no].outline.modify("black");
       }
-      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", points);
+      _drawingOrder = _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", points);
       final point = PointPlotSpec.from(pointSpec[points[0]], forceShape: PointShape.circle);
       _legend.legendRows.add(LegendRow(text: posAaAntigenIndexes[specNo].key, point: point, count: points.length, priority: specNo));
     }
+    // print(_drawingOrder);
   }
 
   List<MapEntry<String, List<int>>> _collectAAPerPos(List<int> positions) {
@@ -911,7 +905,7 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
 
   final Chart _chart;
   final Projection _projection;
-  late final List<int> _drawingOrder;
+  late List<int> _drawingOrder;
   final _legend = Legend();
 
   static const distinctColors = [
