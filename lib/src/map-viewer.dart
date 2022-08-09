@@ -510,7 +510,7 @@ class _MenuSectionColorByAA extends _MenuSection {
     _error = null;
     if (value != null && value.isNotEmpty) {
       try {
-        final positions = value.split(" ").map<int>((String elt) {
+        final positions = value.trim().split(" ").map<int>((String elt) {
           final val = int.parse(elt);
           if (val < 1 || val > 550) {
             throw DataError("invalid position");

@@ -604,6 +604,10 @@ class Legend {
 
   bool get shown => _shown && legendRows.isNotEmpty;
 
+  void reset() {
+    legendRows.clear();
+  }
+
   bool _shown = true;
   bool addCounter = false;
   double pointSize = _legendDefaults.fontSize;
@@ -866,6 +870,9 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
   int numberOfPoints() => _drawingOrder.length;
 
   @override
+  Legend? legend() => _legend;
+
+  @override
   int priority() => 997;
 
   @override
@@ -873,13 +880,18 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
 
   void setPositions(List<int> positions) {
     final posAaAntigenIndexes = _collectAAPerPos(positions);
+    _legend.reset();
+    _legend.addCounter = true;
     // print("$aaPerPos");
     for (int specNo = 0; specNo < posAaAntigenIndexes.length; ++specNo) {
-      for (final no in posAaAntigenIndexes[specNo].value) {
+      final points = posAaAntigenIndexes[specNo].value;
+      for (final no in points) {
         pointSpec[no].fill.modify(distinctColors[specNo]);
         pointSpec[no].outline.modify("black");
       }
-      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", posAaAntigenIndexes[specNo].value);
+      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", points);
+      final point = PointPlotSpec.from(pointSpec[points[0]], forceShape: PointShape.circle);
+      _legend.legendRows.add(LegendRow(text: posAaAntigenIndexes[specNo].key, point: point, count: points.length, priority: specNo));
     }
   }
 
@@ -900,6 +912,7 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
   final Chart _chart;
   final Projection _projection;
   late final List<int> _drawingOrder;
+  final _legend = Legend();
 
   static const distinctColors = [
     "#03569b", // dark blue
