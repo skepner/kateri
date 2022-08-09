@@ -892,11 +892,13 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
   List<MapEntry<String, List<int>>> _collectAAPerPos(List<int> positions) {
     final dataMap = <String, List<int>>{};
     for (final entry in _chart.antigens.asMap().entries) {
-      final key = positions.map((pos) => "$pos${entry.value.aa.length >= pos ? entry.value.aa[pos - 1] : 'X'}").join(" "); // --> "192K 182L"
-      dataMap.update(key, (List<int> old) {
-        old.add(entry.key);
-        return old;
-      }, ifAbsent: () => [entry.key]);
+      if (entry.value.aa.isNotEmpty) {
+        final key = positions.map((pos) => "$pos${entry.value.aa.length >= pos ? entry.value.aa[pos - 1] : 'X'}").join(" "); // --> "192K 182L"
+        dataMap.update(key, (List<int> old) {
+          old.add(entry.key);
+          return old;
+        }, ifAbsent: () => [entry.key]);
+      }
     }
     final data = dataMap.entries.toList();
     data.sort((e1, e2) => e2.value.length.compareTo(e1.value.length)); // sort by number of antigens descending
