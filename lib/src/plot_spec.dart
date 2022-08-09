@@ -30,12 +30,14 @@ abstract class PlotSpec {
 // ----------------------------------------------------------------------
 
 class _DefaultDrawingOrder {
-  void makeDefaultDrawingOrder(Chart chart, Projection projection) {
+  makeDefaultDrawingOrder(Chart chart, Projection projection) {
     bool hasCoord(int pointNo) => projection.layout[pointNo] != null;
     ddoSera = Iterable<int>.generate(chart.sera.length, (srNo) => srNo + chart.antigens.length).where(hasCoord).toList();
     ddoReferenceAntigens = chart.referenceAntigens().where(hasCoord).toList();
     ddoTestAntigens = Iterable<int>.generate(chart.antigens.length).where((agNo) => !ddoReferenceAntigens.contains(agNo)).where(hasCoord).toList();
   }
+
+  List<int> defaultDrawingOrder() => ddoSera + ddoReferenceAntigens + ddoTestAntigens;
 
   late final List<int> ddoSera, ddoReferenceAntigens, ddoTestAntigens;
 }
@@ -114,9 +116,7 @@ class PlotSpecDefault extends PlotSpec with _DefaultDrawingOrder, _DefaultPointS
   String name() => "Default";
 
   @override
-  List<int> drawingOrder() {
-    return ddoSera + ddoReferenceAntigens + ddoTestAntigens;
-  }
+  List<int> drawingOrder() => defaultDrawingOrder();
 
   @override
   PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
@@ -744,11 +744,11 @@ class PlotSpecLegacy extends PlotSpec {
     _importFromData();
   }
 
-  static String myName() => "Legacy";
+  static const myName = "Legacy";
   static const _sizeScale = 5.0;
 
   @override
-  String name() => myName();
+  String name() => myName;
 
   @override
   List<int> drawingOrder() {
@@ -838,6 +838,42 @@ class PlotSpecLegacy extends PlotSpec {
   final Chart _chart;
   final Map<String, dynamic> _data;
   final List<PointPlotSpec> _specs = [];
+}
+
+// ----------------------------------------------------------------------
+
+class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPointSpecs {
+  PlotSpecColorByAA(this._chart, this._projection) {
+    initDefaultPointSpecs(testAntigenFill: ColorAndModifier("grey"), outline: ColorAndModifier("grey"));
+    makeDefaultDrawingOrder(_chart, _projection);
+    _drawingOrder = defaultDrawingOrder();
+    makeDefaultPointSpecs(chart: _chart, isReferenceAntigen: (agNo) => ddoReferenceAntigens.contains(agNo));
+  }
+
+  static const myName = "*color-by-aa";
+  // static const _sizeScale = 5.0;
+
+  @override
+  String name() => myName;
+
+  @override
+  List<int> drawingOrder() => _drawingOrder;
+
+  @override
+  PointPlotSpec operator [](int pointNo) => pointSpec[pointNo];
+
+  @override
+  int numberOfPoints() => _drawingOrder.length;
+
+  @override
+  int priority() => 997;
+
+  @override
+  bool _addPointSpecByCloning() => true;
+
+  final Chart _chart;
+  final Projection _projection;
+  late final List<int> _drawingOrder;
 }
 
 // ----------------------------------------------------------------------

@@ -82,6 +82,19 @@ class AntigenicMapViewerData {
     }
   }
 
+  int addPlotSpecColorByAA() {
+    var index = plotSpecs.indexWhere((spec) => spec.name() == PlotSpecColorByAA.myName);
+    if (index >= 0) {
+      setPlotSpec(index);
+    } else if (chart != null && projection != null) {
+      plotSpecs.add(PlotSpecColorByAA(chart!, projection!));
+      index = plotSpecs.length - 1;
+    } else {
+      throw DataError("no chart");
+    }
+    return index;
+  }
+
   void setPlotSpec(int index) {
     if (chart != null && index < plotSpecs.length) {
       if (currentPlotSpecIndex != index) {
@@ -97,7 +110,7 @@ class AntigenicMapViewerData {
   PlotSpec get currentPlotSpec => plotSpecs[currentPlotSpecIndex];
 
   PlotSpecLegacy plotSpecLegacy() {
-    final index = plotSpecs.indexWhere((spec) => spec.name() == PlotSpecLegacy.myName());
+    final index = plotSpecs.indexWhere((spec) => spec.name() == PlotSpecLegacy.myName);
     if (index >= 0) {
       return plotSpecs[index] as PlotSpecLegacy;
     } else {
@@ -122,7 +135,7 @@ class AntigenicMapViewerData {
   }
 
   void exportCurrentPlotStyleToLegacy() {
-    if (chart != null && currentPlotSpec.name() != PlotSpecLegacy.myName()) {
+    if (chart != null && currentPlotSpec.name() != PlotSpecLegacy.myName) {
       plotSpecLegacy().setFrom(currentPlotSpec);
     }
   }

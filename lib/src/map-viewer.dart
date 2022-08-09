@@ -150,6 +150,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   @override
   void updateCallback({int? plotSpecIndex}) {
+    print("plotSpecIndex: $plotSpecIndex");
     if (plotSpecIndex != null && plotSpecIndex != _data.currentPlotSpecIndex) {
       _data.setPlotSpec(plotSpecIndex);
       aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
@@ -160,6 +161,10 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     setState(() {
       /* AntigenicMapViewerData updated */
     });
+  }
+
+  void setPlotSpecColoredByAA(List<int> positions) {
+    updateCallback(plotSpecIndex: _data.addPlotSpecColorByAA());
   }
 
   @override
@@ -496,7 +501,7 @@ class _MenuSectionColorByAA extends _MenuSection {
   void expand(bool exp) {
     super.expand(exp);
     if (isExpanded) {
-      print("requestFocus");
+      // print("requestFocus");
       _focusNode.requestFocus();
     }
   }
@@ -512,10 +517,12 @@ class _MenuSectionColorByAA extends _MenuSection {
           }
           return val;
         }).toList();
-        _menuSectionColumn.widget.antigenicMapViewWidgetState.updateCallback(plotSpecIndex: 0);
+        _menuSectionColumn.widget.antigenicMapViewWidgetState.setPlotSpecColoredByAA(positions);
         _menuSectionColumn.collapseAll();
         isExpanded = true;
-      } catch (_) {
+        print("setPlotSpecColoredByAA");
+      } catch (err) {
+        print("ERROR onSubmitted: $err");
         _error = "enter space separated positions";
       }
       _menuSectionColumn.redraw();
