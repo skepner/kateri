@@ -37,7 +37,7 @@ class AntigenicMapViewerData {
   Size antigenicMapPainterSize = Size.zero; // to auto-resize window
   List<PlotSpec> plotSpecs = <PlotSpec>[];
   int currentPlotSpecIndex = -1;
-  final aaPerPos = <int, Map<String, int>>{};
+  // final aaPerPos = <int, Map<String, int>>{};
 
   AntigenicMapViewerData(this._callbacks);
 
@@ -49,7 +49,7 @@ class AntigenicMapViewerData {
     _callbacks.hideMessage();
     currentPlotSpecIndex = -1;
     _callbacks.updateCallback(plotSpecIndex: 0);
-    makeAaPerPos();
+    // makeAaPerPos();
   }
 
   void setChartFromBytes(Uint8List bytes) {
@@ -82,16 +82,14 @@ class AntigenicMapViewerData {
     }
   }
 
-  int addPlotSpecColorByAA() {
+  int addPlotSpecColorByAA(List<int> positions) {
+    if (chart == null && projection == null) throw DataError("no chart, chart: $chart projection: $projection");
     var index = plotSpecs.indexWhere((spec) => spec.name() == PlotSpecColorByAA.myName);
-    if (index >= 0) {
-      setPlotSpec(index);
-    } else if (chart != null && projection != null) {
+    if (index < 0) {
       plotSpecs.add(PlotSpecColorByAA(chart!, projection!));
       index = plotSpecs.length - 1;
-    } else {
-      throw DataError("no chart");
     }
+    (plotSpecs[index] as PlotSpecColorByAA).setPositions(positions);
     return index;
   }
 
@@ -229,24 +227,24 @@ class AntigenicMapViewerData {
 
   // ----------------------------------------------------------------------
 
-  void makeAaPerPos() {
-    aaPerPos.clear();
-    if (chart != null) {
-      for (final aas in chart!.antigens.map((ag) => ag.aa)) {
-        for (var pos = 0; pos < aas.length; ++pos) {
-          aaPerPos.update(pos, (oldVal) {
-            oldVal.update(aas[pos], (oldCount) => oldCount + 1, ifAbsent: () => 1);
-            return oldVal;
-          }, ifAbsent: () => <String, int>{aas[pos]: 1});
-        }
-      }
-    }
-    aaPerPos.removeWhere((pos, aas) => aas.length < 2);
-    // print("makeAaPerPos");
-    // aaPerPos.forEach((pos, aas) {
-    //   print("    $pos   $aas");
-    // });
-  }
+  // void makeAaPerPos() {
+  //   aaPerPos.clear();
+  //   if (chart != null) {
+  //     for (final aas in chart!.antigens.map((ag) => ag.aa)) {
+  //       for (var pos = 0; pos < aas.length; ++pos) {
+  //         aaPerPos.update(pos, (oldVal) {
+  //           oldVal.update(aas[pos], (oldCount) => oldCount + 1, ifAbsent: () => 1);
+  //           return oldVal;
+  //         }, ifAbsent: () => <String, int>{aas[pos]: 1});
+  //       }
+  //     }
+  //   }
+  //   aaPerPos.removeWhere((pos, aas) => aas.length < 2);
+  //   // print("makeAaPerPos");
+  //   // aaPerPos.forEach((pos, aas) {
+  //   //   print("    $pos   $aas");
+  //   // });
+  // }
 }
 
 // ----------------------------------------------------------------------

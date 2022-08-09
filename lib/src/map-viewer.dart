@@ -164,7 +164,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   }
 
   void setPlotSpecColoredByAA(List<int> positions) {
-    updateCallback(plotSpecIndex: _data.addPlotSpecColorByAA());
+    updateCallback(plotSpecIndex: _data.addPlotSpecColorByAA(positions));
   }
 
   @override

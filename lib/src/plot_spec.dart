@@ -39,6 +39,33 @@ class _DefaultDrawingOrder {
 
   List<int> defaultDrawingOrder() => ddoSera + ddoReferenceAntigens + ddoTestAntigens;
 
+  static void raiseLowerPoints(List<int> order, String? raiseLower, List<int> points) {
+    if (raiseLower != null) {
+      final List<int> keep = [], move = [];
+      for (final pnt in order) {
+        if (points.contains(pnt)) {
+          move.add(pnt);
+        } else {
+          keep.add(pnt);
+        }
+      }
+      if (raiseLower == "r") {
+        order = keep + move;
+      } else {
+        order = move + keep;
+      }
+    }
+
+    switch (raiseLower) {
+      case "r":
+        break;
+      case "l":
+        break;
+      default:
+        break;
+    }
+  }
+
   late final List<int> ddoSera, ddoReferenceAntigens, ddoTestAntigens;
 }
 
@@ -223,7 +250,7 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           applySerumCoverage(pointSpec[pointNo].serumCoverage!, pointNo);
         }
       }
-      raiseLowerPoints(entry["D"], points);
+      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, entry["D"], points);
     }
     final legend = entry["L"];
     if (legend != null) {
@@ -266,33 +293,6 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
           Iterable<List<int>>.generate(_chart.sera.length, (srNo) => [srNo, srNo + _chart.antigens.length]).where((ref) => match(ref[1], ref[0], _chart.sera[ref[0]].semantic)).map((ref) => ref[1]));
     }
     return selected;
-  }
-
-  void raiseLowerPoints(String? raiseLower, List<int> points) {
-    if (raiseLower != null) {
-      final List<int> keep = [], move = [];
-      for (final pnt in _drawingOrder) {
-        if (points.contains(pnt)) {
-          move.add(pnt);
-        } else {
-          keep.add(pnt);
-        }
-      }
-      if (raiseLower == "r") {
-        _drawingOrder = keep + move;
-      } else {
-        _drawingOrder = move + keep;
-      }
-    }
-
-    switch (raiseLower) {
-      case "r":
-        break;
-      case "l":
-        break;
-      default:
-        break;
-    }
   }
 
   PointPlotSpec modifyPointPlotSpec(Map<String, dynamic> mod, PointPlotSpec spec, {int? pointNo}) {
@@ -470,8 +470,8 @@ class PlotSpecSemantic extends PlotSpec with _DefaultDrawingOrder, _DefaultPoint
         }
       }
     }
-    raiseLowerPoints("r", antigensWithin);
-    raiseLowerPoints("r", antigensOutside);
+    _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensWithin);
+    _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", antigensOutside);
     if (antigensWithin.isEmpty) warning("serum coverage for SR $serumNo: no antigens within fold ${serumCoverage.fold} from homologous titer $homologousTiter");
     // debug("SR $serumNo titer: $homologousTiter $serumCoverage");
   }
@@ -871,9 +871,54 @@ class PlotSpecColorByAA extends PlotSpec with _DefaultDrawingOrder, _DefaultPoin
   @override
   bool _addPointSpecByCloning() => true;
 
+  void setPositions(List<int> positions) {
+    final posAaAntigenIndexes = _collectAAPerPos(positions);
+    // print("$aaPerPos");
+    for (int specNo = 0; specNo < posAaAntigenIndexes.length; ++specNo) {
+      for (final no in posAaAntigenIndexes[specNo].value) {
+        pointSpec[no].fill.modify(distinctColors[specNo]);
+        pointSpec[no].outline.modify("black");
+      }
+      _DefaultDrawingOrder.raiseLowerPoints(_drawingOrder, "r", posAaAntigenIndexes[specNo].value);
+    }
+  }
+
+  List<MapEntry<String, List<int>>> _collectAAPerPos(List<int> positions) {
+    final dataMap = <String, List<int>>{};
+    for (final entry in _chart.antigens.asMap().entries) {
+      final key = positions.map((pos) => "$pos${entry.value.aa.length > pos ? entry.value.aa[pos] : 'X'}").join(" "); // --> "192K 182L"
+      dataMap.update(key, (List<int> old) {
+        old.add(entry.key);
+        return old;
+      }, ifAbsent: () => [entry.key]);
+    }
+    final data = dataMap.entries.toList();
+    data.sort((e1, e2) => e2.value.length.compareTo(e1.value.length)); // sort by number of antigens descending
+    return data;
+  }
+
   final Chart _chart;
   final Projection _projection;
   late final List<int> _drawingOrder;
+
+  static const distinctColors = [
+    "#03569b", // dark blue
+    "#e72f27", // dark red
+    "#ffc808", // yellow
+    "#a2b324", // dark green
+    "#a5b8c7", // grey
+    "#049457", // green
+    "#f1b066", // pale orange
+    "#742f32", // brown
+    "#9e806e", // brown
+    "#75ada9", // turquoise
+    "#675b2c",
+    "#a020f0",
+    "#8b8989",
+    "#e9a390",
+    "#dde8cf",
+    "#00939f",
+  ];
 }
 
 // ----------------------------------------------------------------------
