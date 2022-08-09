@@ -1,6 +1,6 @@
 name: kateri
 description: Antigenic Map Viewer
-version: 0.1.0
+version: 0.1.20220810
 homepage: https://antigenic-cartography.org
 
 environment:

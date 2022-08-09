@@ -306,6 +306,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
     _sections = <_MenuSection>[
       _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
       _MenuSectionColorByAA(this),
+      _MenuSectionRegion(this),
       _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
     ];
     super.initState();
@@ -527,6 +528,57 @@ class _MenuSectionColorByAA extends _MenuSection {
       _menuSectionColumn.redraw();
     }
     _focusNode.requestFocus();
+  }
+}
+
+class _MenuSectionRegion extends _MenuSection {
+  final _MenuSectionColumnWidgetState _menuSectionColumn;
+  String? _error;
+
+  _MenuSectionRegion(this._menuSectionColumn, {bool isExpanded = false}) : super(isExpanded);
+
+  @override
+  ExpansionPanel build() {
+    return ExpansionPanel(
+      canTapOnHeader: true,
+      headerBuilder: (BuildContext context, bool isExpanded) => const ListTile(title: Text("Regions")),
+      body: Material(
+        color: const Color(0xFFFFF8FF),
+        shape: Border.all(color: const Color(0xFFFFE0FF)),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: "Vertices",
+                  hintText: "small number",
+                  errorText: _error,
+                ),
+                onSubmitted: onSubmitted,
+              ),
+            ),
+          ],
+        ),
+      ),
+      isExpanded: isExpanded,
+    );
+  }
+
+  void onSubmitted(String? value) {
+    _error = null;
+    if (value != null && value.isNotEmpty) {
+      try {
+        final vertices = int.parse(value.trim());
+        if (vertices < 3 || vertices > 10) throw DataError("invalid number of vertices");
+        isExpanded = true;
+      } catch (err) {
+        print("ERROR onSubmitted: $err");
+        _error = "invalid number";
+      }
+      _menuSectionColumn.redraw();
+    }
   }
 }
 
