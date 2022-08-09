@@ -521,8 +521,7 @@ class _MenuSectionColorByAA extends _MenuSection {
         _menuSectionColumn.widget.antigenicMapViewWidgetState.setPlotSpecColoredByAA(positions);
         _menuSectionColumn.collapseAll();
         isExpanded = true;
-      } catch (err) {
-        print("ERROR onSubmitted: $err");
+      } on DataError {
         _error = "enter space separated positions";
       }
       _menuSectionColumn.redraw();
@@ -573,8 +572,7 @@ class _MenuSectionRegion extends _MenuSection {
         final vertices = int.parse(value.trim());
         if (vertices < 3 || vertices > 10) throw DataError("invalid number of vertices");
         isExpanded = true;
-      } catch (err) {
-        print("ERROR onSubmitted: $err");
+      } on DataError {
         _error = "invalid number";
       }
       _menuSectionColumn.redraw();
