@@ -261,13 +261,15 @@ class PointHoveringDetector {
   void mouseMoved(PointerEvent ev) {
     if (data.chart != null && data.viewport != null && !isLocked()) {
       final unitSize = _antigenicMapPainter.viewer.canvasSize.width / data.viewport!.width;
-      final newlyHoveredPoints = _antigenicMapPainter.viewer.pointLookupByCoordinates
-          .lookupByMouseCoordinates(vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0))
-          .map((index) => _PointElement(index, data.chart!))
-          .toList();
+      final mousePosition = vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0);
+      final newlyHoveredPoints = _antigenicMapPainter.viewer.pointLookupByCoordinates.lookupByMouseCoordinates(mousePosition).map((index) => _PointElement(index, data.chart!)).toList();
       if (!listEquals(newlyHoveredPoints, hoveredPointsNotifier.value)) {
         hoveredPointsNotifier.value = newlyHoveredPoints;
         // print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top)} canvas:${_antigenicMapPainter.viewer.canvasSize}");
+      }
+      final regionPathVertices = _antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePosition);
+      if (regionPathVertices.isNotEmpty) {
+        print("regionPathVertices $regionPathVertices");
       }
     }
   }
@@ -641,9 +643,7 @@ class AntigenicMapViewer {
   final AntigenicMapViewerData _data;
   var canvasSize = const Size(0, 0);
   final pointLookupByCoordinates = PointLookupByCoordinates();
-  final List<RegionPath> regions = [
-    RegionPath(vertices: const [Offset(-0.5, -0.5), Offset(0.5, -0.5), Offset(0.5, 0.5), Offset(-0.5, 0.5)])
-  ];
+  final regions = Regions();
 
   AntigenicMapViewer(this._data);
 
@@ -669,9 +669,7 @@ class AntigenicMapViewer {
       }
     });
     canvas.drawDelayed();
-    for (final region in regions) {
-      region.paint(canvas);
-    }
+    regions.paint(canvas);
 
     paintLegend(canvas);
     paintTitle(canvas);
@@ -884,8 +882,46 @@ class _PointLookupByCoordinatesData {
 
 // ----------------------------------------------------------------------
 
+class Regions {
+  final List<RegionPath> regions = [
+    RegionPath(vertices: [vec.Vector3(0.5, 0.5, 0.0), vec.Vector3(2.5, 0.5, 0.0), vec.Vector3(2.5, 2.5, 0.0), vec.Vector3(0.5, 2.5, 0.0)])
+  ];
+  var pixelSize = 1.0;
+
+  void paint(DrawOn canvas) {
+    pixelSize = canvas.pixelSize;
+    for (final region in regions) {
+      region.paint(canvas);
+    }
+  }
+
+  List<RegionVertexRef> verticesByCoordinates(vec.Vector3 pos) {
+    final hovered = <RegionVertexRef>[];
+    regions.asMap().forEach((int regionNo, RegionPath region) {
+      hovered.addAll(region.vertices
+          .asMap()
+          .entries
+          .where((entry) => entry.value.distanceTo(pos) <= (region.vertexSizePixels * pixelSize / 2))
+          .map((entry) => RegionVertexRef(regionNo: regionNo, vertexNo: entry.key))
+          .toList());
+    });
+    return hovered;
+  }
+}
+
+class RegionVertexRef {
+  int regionNo;
+  int vertexNo;
+
+  RegionVertexRef({required this.regionNo, required this.vertexNo});
+
+  @override
+  String toString() => "RegionVertexRef(reg: $regionNo, vx: $vertexNo)";
+
+}
+
 class RegionPath {
-  final List<Offset> vertices;
+  final List<vec.Vector3> vertices;
   final Color color;
   final double lineWidthPixels;
   final double vertexSizePixels;
@@ -893,9 +929,9 @@ class RegionPath {
   RegionPath({required this.vertices, this.color = Colors.red, this.lineWidthPixels = 3.0, this.vertexSizePixels = 8.0});
 
   void paint(DrawOn canvas) {
-    canvas.path(vertices, outline: color, lineWidthPixels: lineWidthPixels, close: true);
+    canvas.path(vertices.map((vertex) => Offset(vertex.x, vertex.y)).toList(), outline: color, lineWidthPixels: lineWidthPixels, close: true);
     for (final vertex in vertices) {
-      canvas.point(center: vec.Vector3(vertex.dx, vertex.dy, 0.0), sizePixels: vertexSizePixels, fill: color, outline: color);
+      canvas.point(center: vertex, sizePixels: vertexSizePixels, fill: color, outline: color);
     }
   }
 }
