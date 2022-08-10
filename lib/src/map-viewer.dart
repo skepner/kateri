@@ -641,6 +641,9 @@ class AntigenicMapViewer {
   final AntigenicMapViewerData _data;
   var canvasSize = const Size(0, 0);
   final pointLookupByCoordinates = PointLookupByCoordinates();
+  final List<RegionPath> regions = [
+    RegionPath(vertices: const [Offset(-0.5, -0.5), Offset(0.5, -0.5), Offset(0.5, 0.5), Offset(-0.5, 0.5)])
+  ];
 
   AntigenicMapViewer(this._data);
 
@@ -666,6 +669,10 @@ class AntigenicMapViewer {
       }
     });
     canvas.drawDelayed();
+    for (final region in regions) {
+      region.paint(canvas);
+    }
+
     paintLegend(canvas);
     paintTitle(canvas);
     // pointLookupByCoordinates.report();
@@ -873,6 +880,24 @@ class _PointLookupByCoordinatesData {
 
   @override
   String toString() => "${pointNo.toString().padLeft(4, ' ')} ${size.toStringAsFixed(3)} $position $drawingOrder";
+}
+
+// ----------------------------------------------------------------------
+
+class RegionPath {
+  final List<Offset> vertices;
+  final Color color;
+  final double lineWidthPixels;
+  final double vertexSizePixels;
+
+  RegionPath({required this.vertices, this.color = Colors.red, this.lineWidthPixels = 3.0, this.vertexSizePixels = 8.0});
+
+  void paint(DrawOn canvas) {
+    canvas.path(vertices, outline: color, lineWidthPixels: lineWidthPixels, close: true);
+    for (final vertex in vertices) {
+      canvas.point(center: vec.Vector3(vertex.dx, vertex.dy, 0.0), sizePixels: vertexSizePixels, fill: color, outline: color);
+    }
+  }
 }
 
 // ======================================================================
