@@ -248,15 +248,18 @@ class MouseInteractionWidget extends StatefulWidget {
 class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
   static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.alt, LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight]);
   RegionVertexRef? _draggedVertex;
+  SystemMouseCursor cursor = SystemMouseCursors.basic;
 
   @override
   void initState() {
     super.initState();
+    // mouseCursorReset();
   }
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: cursor,
       onHover: mouseMoved,
       onExit: mouseExit,
       child: GestureDetector(
@@ -266,6 +269,20 @@ class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
         onPanEnd: dragEnd,
       ),
     );
+  }
+
+  void _mouseCursorReset() => _setMouseCursor(SystemMouseCursors.basic);
+
+  void _mouseCursorDraggingRegionVertexPossible() => _setMouseCursor(SystemMouseCursors.grab);
+
+  void _mouseCursorDraggingRegionVertex() => _setMouseCursor(SystemMouseCursors.grabbing);
+
+  void _setMouseCursor(SystemMouseCursor newcursor) {
+    if (newcursor != cursor) {
+      setState(() {
+        cursor = newcursor;
+      });
+    }
   }
 
   void mouseMoved(PointerEvent ev) {
@@ -279,7 +296,9 @@ class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
       }
       final regionPathVertices = widget.antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePos);
       if (regionPathVertices.isNotEmpty) {
-        // print("regionPathVertices $regionPathVertices");
+        _mouseCursorDraggingRegionVertexPossible();
+      } else {
+        _mouseCursorReset();
       }
     }
   }
@@ -295,6 +314,7 @@ class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
     final regionPathVertices = widget.antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePos);
     if (regionPathVertices.isNotEmpty) {
       _draggedVertex = regionPathVertices[0];
+      _mouseCursorDraggingRegionVertex();
       // print("DragStart $_draggedVertex");
     }
   }
@@ -316,6 +336,7 @@ class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
       print(widget.antigenicMapPainter.viewer.regions
           .reportRegion(_draggedVertex!, vec.Vector3(widget.antigenicMapPainter.viewer.data.viewport!.left, widget.antigenicMapPainter.viewer.data.viewport!.top, 0.0)));
       _draggedVertex = null;
+      _mouseCursorReset();
     }
   }
 
