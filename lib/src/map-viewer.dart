@@ -615,14 +615,29 @@ class _MenuSectionRegion extends _MenuSection {
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: "Vertices",
-                  hintText: "small number",
-                  errorText: _error,
-                ),
-                onSubmitted: onSubmitted,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: TextField(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: "Vertices",
+                        hintText: "small number",
+                        errorText: _error,
+                      ),
+                      onSubmitted: onSubmitted,
+                    ),
+                  ),
+                  Flexible(
+                    child: Center(
+                      child: ElevatedButton(
+                        child: const Text("add"),
+                        onPressed: addRegion,
+                        style: ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -635,9 +650,7 @@ class _MenuSectionRegion extends _MenuSection {
   @override
   void expand(bool exp) {
     super.expand(exp);
-    print("_MenuSectionRegion expand $exp");
     _menuSectionColumn.widget.antigenicMapViewWidgetState.viewer.regions.shown = _isExpanded;
-    // _menuSectionColumn.widget.antigenicMapViewWidgetState.setState(() {});
   }
 
   void onSubmitted(String? value) {
@@ -652,6 +665,10 @@ class _MenuSectionRegion extends _MenuSection {
       }
       _menuSectionColumn.redraw();
     }
+  }
+
+  void addRegion() {
+    print("addRegion");
   }
 }
 
