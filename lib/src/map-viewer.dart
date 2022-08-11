@@ -1006,7 +1006,10 @@ class RegionPath {
   }
 
   String report(vec.Vector3 viewportOrigin) {
-    return vertices.map((vertex) => vertex - viewportOrigin).map((vertex) => "[${vertex.x}, ${vertex.y}]").join(", ");
+    final viewportRelative = vertices.map((vertex) => vertex - viewportOrigin).map((vertex) => "[${vertex.x.toStringAsFixed(2)}, ${vertex.y.toStringAsFixed(2)}]").join(", ");
+    return viewportRelative;
+    // final layoutRelative = vertices.map((vertex) => "[${vertex.x.toStringAsFixed(2)}, ${vertex.y.toStringAsFixed(2)}]").join(", ");
+    // return "viewport relative: $viewportRelative\nlayout relative: $layoutRelative";
   }
 
   String toString() => "RegionPath($vertices)";
