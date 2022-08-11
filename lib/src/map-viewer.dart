@@ -668,7 +668,8 @@ class _MenuSectionRegion extends _MenuSection {
   }
 
   void addRegion() {
-    print("addRegion");
+    _menuSectionColumn.widget.antigenicMapViewWidgetState.viewer.regions.add();
+    _menuSectionColumn.widget.antigenicMapViewWidgetState.setState(() {});
   }
 }
 
@@ -972,9 +973,7 @@ class _PointLookupByCoordinatesData {
 // ----------------------------------------------------------------------
 
 class Regions {
-  final List<RegionPath> regions = [
-    RegionPath(vertices: [vec.Vector3(0.5, 0.5, 0.0), vec.Vector3(2.5, 0.5, 0.0), vec.Vector3(2.5, 2.5, 0.0), vec.Vector3(0.5, 2.5, 0.0)])
-  ];
+  final List<RegionPath> regions = [];
   var pixelSize = 1.0;
   bool shown = false;
 
@@ -1006,6 +1005,10 @@ class Regions {
   }
 
   String reportRegion(RegionVertexRef vertexRef, vec.Vector3 viewportOrigin) => regions[vertexRef.regionNo].report(viewportOrigin);
+
+  void add() {
+    regions.add(RegionPath(vertices: [vec.Vector3(0.5, 0.5, 0.0), vec.Vector3(2.5, 0.5, 0.0), vec.Vector3(2.5, 2.5, 0.0), vec.Vector3(0.5, 2.5, 0.0)]));
+  }
 }
 
 class RegionVertexRef {
