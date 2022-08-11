@@ -441,20 +441,20 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
 
   void collapseAll() {
     for (final section in _sections) {
-      section.isExpanded = false;
+      section.expand(false);
     }
   }
 }
 
 abstract class _MenuSection {
-  bool isExpanded;
+  bool _isExpanded;
 
-  _MenuSection(this.isExpanded);
+  _MenuSection(this._isExpanded);
 
   ExpansionPanel build();
 
   void expand(bool exp) {
-    isExpanded = exp;
+    _isExpanded = exp;
   }
 }
 
@@ -488,7 +488,7 @@ class _MenuSectionFile extends _MenuSection {
           ],
         ),
       ),
-      isExpanded: isExpanded,
+      isExpanded: _isExpanded,
     );
   }
 }
@@ -510,7 +510,7 @@ class _MenuSectionStyles extends _MenuSection {
           children: styleTiles(),
         ),
       ),
-      isExpanded: isExpanded,
+      isExpanded: _isExpanded,
     );
   }
 
@@ -561,14 +561,14 @@ class _MenuSectionColorByAA extends _MenuSection {
           ],
         ),
       ),
-      isExpanded: isExpanded,
+      isExpanded: _isExpanded,
     );
   }
 
   @override
   void expand(bool exp) {
     super.expand(exp);
-    if (isExpanded) {
+    if (_isExpanded) {
       // print("requestFocus");
       _focusNode.requestFocus();
     }
@@ -587,7 +587,7 @@ class _MenuSectionColorByAA extends _MenuSection {
         }).toList();
         _menuSectionColumn.widget.antigenicMapViewWidgetState.setPlotSpecColoredByAA(positions);
         _menuSectionColumn.collapseAll();
-        isExpanded = true;
+        _isExpanded = true;
       } on DataError {
         _error = "enter space separated positions";
       }
@@ -628,8 +628,16 @@ class _MenuSectionRegion extends _MenuSection {
           ],
         ),
       ),
-      isExpanded: isExpanded,
+      isExpanded: _isExpanded,
     );
+  }
+
+  @override
+  void expand(bool exp) {
+    super.expand(exp);
+    print("_MenuSectionRegion expand $exp");
+    _menuSectionColumn.widget.antigenicMapViewWidgetState.viewer.regions.shown = _isExpanded;
+    // _menuSectionColumn.widget.antigenicMapViewWidgetState.setState(() {});
   }
 
   void onSubmitted(String? value) {
@@ -638,7 +646,7 @@ class _MenuSectionRegion extends _MenuSection {
       try {
         final vertices = int.parse(value.trim());
         if (vertices < 3 || vertices > 10) throw DataError("invalid number of vertices");
-        isExpanded = true;
+        _isExpanded = true;
       } on DataError {
         _error = "invalid number";
       }
@@ -951,11 +959,14 @@ class Regions {
     RegionPath(vertices: [vec.Vector3(0.5, 0.5, 0.0), vec.Vector3(2.5, 0.5, 0.0), vec.Vector3(2.5, 2.5, 0.0), vec.Vector3(0.5, 2.5, 0.0)])
   ];
   var pixelSize = 1.0;
+  bool shown = false;
 
   void paint(DrawOn canvas) {
-    pixelSize = canvas.pixelSize;
-    for (final region in regions) {
-      region.paint(canvas);
+    if (shown) {
+      pixelSize = canvas.pixelSize;
+      for (final region in regions) {
+        region.paint(canvas);
+      }
     }
   }
 
