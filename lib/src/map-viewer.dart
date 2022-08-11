@@ -313,7 +313,8 @@ class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
   void dragEnd(DragEndDetails details) {
     // no position in details
     if (_draggedVertex != null) {
-      print(widget.antigenicMapPainter.viewer.regions.reportRegion(_draggedVertex!));
+      print(widget.antigenicMapPainter.viewer.regions
+          .reportRegion(_draggedVertex!, vec.Vector3(widget.antigenicMapPainter.viewer.data.viewport!.left, widget.antigenicMapPainter.viewer.data.viewport!.top, 0.0)));
       _draggedVertex = null;
     }
   }
@@ -955,9 +956,7 @@ class Regions {
     // print("vertexMove ${reportRegion(vertexRef)}");
   }
 
-  String reportRegion(RegionVertexRef vertexRef) {
-    return regions[vertexRef.regionNo].report();
-  }
+  String reportRegion(RegionVertexRef vertexRef, vec.Vector3 viewportOrigin) => regions[vertexRef.regionNo].report(viewportOrigin);
 }
 
 class RegionVertexRef {
@@ -985,7 +984,9 @@ class RegionPath {
     }
   }
 
-  String report() => vertices.toString();
+  String report(vec.Vector3 viewportOrigin) {
+    return vertices.map((vertex) => vertex - viewportOrigin).map((vertex) => "[${vertex.x}, ${vertex.y}]").join(", ");
+  }
 
   String toString() => "RegionPath($vertices)";
 }
