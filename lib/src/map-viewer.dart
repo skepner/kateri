@@ -40,8 +40,9 @@ class AntigenicMapViewWidget extends StatefulWidget {
 
 class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with WindowListener implements AntigenicMapViewerCallbacks, AntigenicMapShortcutCallbacks {
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  var paintKey = GlobalKey<ScaffoldState>();
 
-  late final AntigenicMapViewerData _data;
+  late final AntigenicMapViewer viewer;
 
   late double aspectRatio;
   late double borderWidth;
@@ -49,13 +50,13 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
 
   late Color borderColor;
   late AntigenicMapPainter antigenicMapPainter; // re-created upon changing state in build()
-  late final PointHoveringDetector _pointHoveringDetector;
+  // late final PointHoveringDetector _pointHoveringDetector;
 
   static const minMapWidth = 500.0;
   static const menuSectionColumnWidth = 400.0;
 
   _AntigenicMapViewWidgetState() {
-    _data = AntigenicMapViewerData(this);
+    viewer = AntigenicMapViewer(AntigenicMapViewerData(this));
   }
 
   @override
@@ -64,8 +65,8 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
     aspectRatio = 1.0;
     borderWidth = widget.borderWidth;
     borderColor = widget.borderColor;
-    _data.openExportedPdf = widget.openExportedPdf;
-    _pointHoveringDetector = PointHoveringDetector(data: _data);
+    viewer.data.openExportedPdf = widget.openExportedPdf;
+    // _pointHoveringDetector = PointHoveringDetector(data: viewer.data);
 
     if (UniversalPlatform.isMacOS) {
       windowManager.addListener(this);
@@ -82,78 +83,69 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   void didChangeDependencies() {
     super.didChangeDependencies();
     final commandLineData = CommandLineData.of(context);
-    _data.didChangeDependencies(fileToOpen: commandLineData.fileToOpen, socketToConnect: commandLineData.socketToConnect);
+    viewer.data.didChangeDependencies(fileToOpen: commandLineData.fileToOpen, socketToConnect: commandLineData.socketToConnect);
   }
 
   @override
   Widget build(BuildContext context) {
-    _data.buildStarted();
-    antigenicMapPainter = AntigenicMapPainter(_data); // must be re-created!
+    viewer.data.buildStarted();
+    antigenicMapPainter = AntigenicMapPainter(viewer); // must be re-created!
+    final mouseInteractionWidget = MouseInteractionWidget(
+      child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+      antigenicMapPainter: antigenicMapPainter,
+      updateCallback: this.update,
+    );
     return AntigenicMapShortcuts(
-        callbacks: this,
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          buildMapPart(),
-          MenuSectionColumnWidget(antigenicMapViewWidgetState: this, columnWidth: menuSectionColumnWidth, hoveredPointsNotifier: _pointHoveringDetector.hoveredPointsNotifier),
-        ]));
-  }
-
-  Widget buildMapPart() {
-    return Expanded(
-        child: Container(
-            decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
-            child: AspectRatio(
+      callbacks: this,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(border: Border.all(color: borderColor, width: borderWidth)),
+              child: AspectRatio(
                 aspectRatio: aspectRatio,
                 child: Scaffold(
-                    key: scaffoldKey,
-                    // appBar: AppBar(), //title: Text("Kateri")),
-                    drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: _data)),
-                    body: Stack(children: <Widget>[
-                      _pointHoveringDetector.build(antigenicMapPainter),
+                  key: scaffoldKey,
+                  // appBar: AppBar(), //title: Text("Kateri")),
+                  drawer: Drawer(child: AntigenicMapViewWidgetMenu(antigenicMapViewerData: viewer.data)),
+                  body: Stack(
+                    children: <Widget>[
+                      mouseInteractionWidget,
                       Positioned(
-                          right: 0,
-                          top: 0,
-                          child: IconButton(
-                            icon: const Icon(Icons.menu),
-                            iconSize: 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                          ))
-                    ])))));
+                        right: 0,
+                        top: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.menu),
+                          iconSize: 20,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          MenuSectionColumnWidget(antigenicMapViewWidgetState: this, columnWidth: menuSectionColumnWidth, hoveredPointsNotifier: mouseInteractionWidget.hoveredPointsNotifier),
+        ],
+      ),
+    );
   }
 
-  // ----------------------------------------------------------------------
-
-  // List<Widget> aaPerPosMenu() {
-  //   String entryTitle(MapEntry<int, Map<String, int>> entry) {
-  //     final val = entry.value.entries.map<String>((ee) => "${ee.key}:${ee.value}").join(" ");
-  //     return "${entry.key} $val";
-  //   }
-
-  //   return _data.aaPerPos.entries
-  //       .map<ListTile>((entry) => ListTile(
-  //             title: Text(entryTitle(entry)),
-  //             // selected: entry.key == _data.currentPlotSpecIndex,
-  //             enableFeedback: false,
-  //             onTap: () {
-  //               // updateCallback(plotSpecIndex: entry.key);
-  //             },
-  //             contentPadding: const EdgeInsets.only(),
-  //             minVerticalPadding: 0.0,
-  //             dense: true,
-  //             visualDensity: const VisualDensity(vertical: -2.0),
-  //           ))
-  //       .toList();
-  // }
-
+  void update() {
+    setState(() {});
+  }
   // ----------------------------------------------------------------------
 
   @override
   void updateCallback({int? plotSpecIndex}) {
     // print("plotSpecIndex: $plotSpecIndex");
-    if (plotSpecIndex != null && plotSpecIndex != _data.currentPlotSpecIndex) {
-      _data.setPlotSpec(plotSpecIndex);
-      aspectRatio = _data.viewport?.aspectRatio() ?? 1.0;
+    if (plotSpecIndex != null && plotSpecIndex != viewer.data.currentPlotSpecIndex) {
+      viewer.data.setPlotSpec(plotSpecIndex);
+      aspectRatio = viewer.data.viewport?.aspectRatio() ?? 1.0;
       if (UniversalPlatform.isMacOS) {
         onWindowResized();
       }
@@ -164,7 +156,7 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   }
 
   void setPlotSpecColoredByAA(List<int> positions) {
-    updateCallback(plotSpecIndex: _data.addPlotSpecColorByAA(positions));
+    updateCallback(plotSpecIndex: viewer.data.addPlotSpecColorByAA(positions));
   }
 
   @override
@@ -188,13 +180,13 @@ class _AntigenicMapViewWidgetState extends State<AntigenicMapViewWidget> with Wi
   // ----------------------------------------------------------------------
 
   @override
-  void openChart() => _data.openChart();
+  void openChart() => viewer.data.openChart();
 
   @override
-  void reloadChart() => _data.reloadChart();
+  void reloadChart() => viewer.data.reloadChart();
 
   @override
-  void generatePdf() => _data.generatePdf();
+  void generatePdf() => viewer.data.generatePdf();
 
   @override
   void resetWindowSize() async {
@@ -241,43 +233,94 @@ class _PointElement {
   }
 }
 
-class PointHoveringDetector {
-  final AntigenicMapViewerData data;
+class MouseInteractionWidget extends StatefulWidget {
+  final Widget child;
+  final AntigenicMapPainter antigenicMapPainter;
+  final Function updateCallback;
   final hoveredPointsNotifier = ValueNotifier<List<_PointElement>>([]);
-  late AntigenicMapPainter _antigenicMapPainter;
+
+  MouseInteractionWidget({Key? key, required this.child, required this.antigenicMapPainter, required this.updateCallback}) : super(key: key);
+
+  @override
+  State<MouseInteractionWidget> createState() => _MouseInteractionWidgetState();
+}
+
+class _MouseInteractionWidgetState extends State<MouseInteractionWidget> {
   static final _lockKeys = Set<LogicalKeyboardKey>.unmodifiable(<LogicalKeyboardKey>[LogicalKeyboardKey.alt, LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight]);
+  RegionVertexRef? _draggedVertex;
 
-  PointHoveringDetector({required this.data});
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  Widget build(AntigenicMapPainter antigenicMapPainter) {
-    _antigenicMapPainter = antigenicMapPainter;
+  @override
+  Widget build(BuildContext context) {
     return MouseRegion(
       onHover: mouseMoved,
       onExit: mouseExit,
-      child: CustomPaint(painter: antigenicMapPainter, size: const Size(99999, 99999)),
+      child: GestureDetector(
+        child: widget.child,
+        onPanStart: dragStart,
+        onPanUpdate: dragUpdate,
+        onPanEnd: dragEnd,
+      ),
     );
   }
 
   void mouseMoved(PointerEvent ev) {
-    if (data.chart != null && data.viewport != null && !isLocked()) {
-      final unitSize = _antigenicMapPainter.viewer.canvasSize.width / data.viewport!.width;
-      final mousePosition = vec.Vector3(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top, 0.0);
-      final newlyHoveredPoints = _antigenicMapPainter.viewer.pointLookupByCoordinates.lookupByMouseCoordinates(mousePosition).map((index) => _PointElement(index, data.chart!)).toList();
-      if (!listEquals(newlyHoveredPoints, hoveredPointsNotifier.value)) {
-        hoveredPointsNotifier.value = newlyHoveredPoints;
-        // print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + data.viewport!.left, ev.position.dy / unitSize + data.viewport!.top)} canvas:${_antigenicMapPainter.viewer.canvasSize}");
+    if (widget.antigenicMapPainter.viewer.data.chart != null && widget.antigenicMapPainter.viewer.data.viewport != null && !isLocked()) {
+      final mousePos = mousePosition(ev.position);
+      final newlyHoveredPoints =
+          widget.antigenicMapPainter.viewer.pointLookupByCoordinates.lookupByMouseCoordinates(mousePos).map((index) => _PointElement(index, widget.antigenicMapPainter.viewer.data.chart!)).toList();
+      if (!listEquals(newlyHoveredPoints, widget.hoveredPointsNotifier.value)) {
+        widget.hoveredPointsNotifier.value = newlyHoveredPoints;
+        // print("mouse $newlyHoveredPoints ${Offset(ev.position.dx / unitSize + widget.antigenicMapPainter.viewer.data.viewport!.left, ev.position.dy / unitSize + widget.antigenicMapPainter.viewer.data.viewport!.top)} canvas:${widget.antigenicMapPainter.viewer.canvasSize}");
       }
-      final regionPathVertices = _antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePosition);
+      final regionPathVertices = widget.antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePos);
       if (regionPathVertices.isNotEmpty) {
-        print("regionPathVertices $regionPathVertices");
+        // print("regionPathVertices $regionPathVertices");
       }
     }
   }
 
   void mouseExit(PointerEvent ev) {
-    if (!isLocked() && hoveredPointsNotifier.value.isNotEmpty) {
-      hoveredPointsNotifier.value = [];
+    if (!isLocked() && widget.hoveredPointsNotifier.value.isNotEmpty) {
+      widget.hoveredPointsNotifier.value = [];
     }
+  }
+
+  void dragStart(DragStartDetails details) {
+    final mousePos = mousePosition(details.globalPosition);
+    final regionPathVertices = widget.antigenicMapPainter.viewer.regions.verticesByCoordinates(mousePos);
+    if (regionPathVertices.isNotEmpty) {
+      _draggedVertex = regionPathVertices[0];
+      // print("DragStart $_draggedVertex");
+    }
+  }
+
+  void dragUpdate(DragUpdateDetails details) {
+    if (_draggedVertex != null) {
+      final mousePos = mousePosition(details.globalPosition);
+      widget.antigenicMapPainter.viewer.regions.vertexMove(_draggedVertex!, mousePos);
+      widget.updateCallback(); //
+      //setState(() {});
+      // print("dragUpdate $mousePos ${widget.antigenicMapPainter.viewer.regions.reportRegion(_draggedVertex!)}");
+      // print("DragUpdate $_draggedVertex $mousePos");
+    }
+  }
+
+  void dragEnd(DragEndDetails details) {
+    // no position in details
+    if (_draggedVertex != null) {
+      print(widget.antigenicMapPainter.viewer.regions.reportRegion(_draggedVertex!));
+      _draggedVertex = null;
+    }
+  }
+
+  vec.Vector3 mousePosition(Offset rawPosition) {
+    final unitSize = widget.antigenicMapPainter.viewer.canvasSize.width / widget.antigenicMapPainter.viewer.data.viewport!.width;
+    return vec.Vector3(rawPosition.dx / unitSize + widget.antigenicMapPainter.viewer.data.viewport!.left, rawPosition.dy / unitSize + widget.antigenicMapPainter.viewer.data.viewport!.top, 0.0);
   }
 
   bool isLocked() {
@@ -306,7 +349,7 @@ class _MenuSectionColumnWidgetState extends State<MenuSectionColumnWidget> {
   @override
   void initState() {
     _sections = <_MenuSection>[
-      _MenuSectionFile(widget.antigenicMapViewWidgetState._data),
+      _MenuSectionFile(widget.antigenicMapViewWidgetState.viewer.data),
       _MenuSectionColorByAA(this),
       _MenuSectionRegion(this),
       _MenuSectionStyles(widget.antigenicMapViewWidgetState, isExpanded: true),
@@ -450,10 +493,10 @@ class _MenuSectionStyles extends _MenuSection {
   }
 
   List<Widget> styleTiles() {
-    return _parent._data.plotSpecs.asMap().entries.map<ListTile>((entry) {
+    return _parent.viewer.data.plotSpecs.asMap().entries.map<ListTile>((entry) {
       return ListTile(
         title: Text(entry.value.title()),
-        selected: entry.key == _parent._data.currentPlotSpecIndex,
+        selected: entry.key == _parent.viewer.data.currentPlotSpecIndex,
         enableFeedback: false,
         onTap: () => _parent.updateCallback(plotSpecIndex: entry.key),
       );
@@ -621,14 +664,13 @@ class AntigenicMapViewWidgetMenu extends StatelessWidget {
 
 class AntigenicMapPainter extends CustomPainter {
   final AntigenicMapViewer viewer;
-  final AntigenicMapViewerData _data;
 
-  AntigenicMapPainter(this._data) : viewer = AntigenicMapViewer(_data);
+  AntigenicMapPainter(this.viewer);
 
   @override
   void paint(Canvas canvas, Size size) {
     final stopwatch = Stopwatch()..start();
-    _data.antigenicMapPainterSize = size; // to auto-resize window
+    viewer.data.antigenicMapPainterSize = size; // to auto-resize window
     viewer.paint(CanvasFlutter(canvas, size));
     if (stopwatch.elapsedMicroseconds > 50000) info("[paint] ${stopwatch.elapsed} -> ${1e6 / stopwatch.elapsedMicroseconds} frames per second");
   }
@@ -640,16 +682,16 @@ class AntigenicMapPainter extends CustomPainter {
 // ----------------------------------------------------------------------
 
 class AntigenicMapViewer {
-  final AntigenicMapViewerData _data;
+  final AntigenicMapViewerData data;
   var canvasSize = const Size(0, 0);
   final pointLookupByCoordinates = PointLookupByCoordinates();
   final regions = Regions();
 
-  AntigenicMapViewer(this._data);
+  AntigenicMapViewer(this.data);
 
   void paint(CanvasRoot canvas) {
-    if (_data.chart != null && _data.viewport != null) {
-      canvas.draw(Offset.zero & canvas.size, _data.viewport!, paintOn);
+    if (data.chart != null && data.viewport != null) {
+      canvas.draw(Offset.zero & canvas.size, data.viewport!, paintOn);
       canvasSize = canvas.size;
     }
   }
@@ -658,10 +700,10 @@ class AntigenicMapViewer {
     // debug("paintOn");
     pointLookupByCoordinates.clear();
     canvas.grid();
-    final layout = _data.projection!.transformedLayout();
-    _data.currentPlotSpec.drawingOrder().asMap().forEach((pointDrawingOrder, pointNo) {
+    final layout = data.projection!.transformedLayout();
+    data.currentPlotSpec.drawingOrder().asMap().forEach((pointDrawingOrder, pointNo) {
       if (layout[pointNo] != null) {
-        final pointPlotSpec = _data.currentPlotSpec[pointNo];
+        final pointPlotSpec = data.currentPlotSpec[pointNo];
         if (pointPlotSpec.shown) {
           canvas.pointOfPlotSpec(layout[pointNo]!, pointPlotSpec);
           pointLookupByCoordinates.addPoint(pointNo: pointNo, position: layout[pointNo]!, size: pointPlotSpec.sizePixels * canvas.pixelSize, drawingOrder: pointDrawingOrder);
@@ -679,7 +721,7 @@ class AntigenicMapViewer {
   // ----------------------------------------------------------------------
 
   void paintLegend(DrawOn canvas) {
-    final legend = _data.currentPlotSpec.legend();
+    final legend = data.currentPlotSpec.legend();
     if (legend != null && legend.shown) {
       final textFontSize = legend.rowStyle.fontSize, textStyle = legend.rowStyle.labelStyle;
       final countLeftPadding = legend.addCounter ? (textFontSize * canvas.pixelSize * 1.0) : 0.0;
@@ -736,7 +778,7 @@ class AntigenicMapViewer {
   }
 
   void paintTitle(DrawOn canvas) {
-    final title = _data.currentPlotSpec.plotTitle();
+    final title = data.currentPlotSpec.plotTitle();
     if (title != null && title.shown) {
       final box = _BoxData(
           canvas: canvas,
@@ -759,8 +801,8 @@ class AntigenicMapViewer {
   }
 
   Future<Uint8List?> exportPdf({double canvasPdfWidth = 800.0}) async {
-    if (_data.chart != null && _data.viewport != null) {
-      final canvasPdf = CanvasPdf(Size(canvasPdfWidth, canvasPdfWidth / _data.viewport!.width * _data.viewport!.height))..paintBy(paint);
+    if (data.chart != null && data.viewport != null) {
+      final canvasPdf = CanvasPdf(Size(canvasPdfWidth, canvasPdfWidth / data.viewport!.width * data.viewport!.height))..paintBy(paint);
       return canvasPdf.bytes();
     }
     return null;
@@ -907,6 +949,15 @@ class Regions {
     });
     return hovered;
   }
+
+  void vertexMove(RegionVertexRef vertexRef, vec.Vector3 moveTo) {
+    regions[vertexRef.regionNo].vertices[vertexRef.vertexNo] = moveTo;
+    // print("vertexMove ${reportRegion(vertexRef)}");
+  }
+
+  String reportRegion(RegionVertexRef vertexRef) {
+    return regions[vertexRef.regionNo].report();
+  }
 }
 
 class RegionVertexRef {
@@ -917,7 +968,6 @@ class RegionVertexRef {
 
   @override
   String toString() => "RegionVertexRef(reg: $regionNo, vx: $vertexNo)";
-
 }
 
 class RegionPath {
@@ -934,6 +984,10 @@ class RegionPath {
       canvas.point(center: vertex, sizePixels: vertexSizePixels, fill: color, outline: color);
     }
   }
+
+  String report() => vertices.toString();
+
+  String toString() => "RegionPath($vertices)";
 }
 
 // ======================================================================
