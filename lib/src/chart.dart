@@ -40,7 +40,7 @@ class Chart extends _JsonAccess {
   List<PlotSpec> plotSpecs([Projection? projection]) {
     final specs = <PlotSpec>[];
     if (_hasPlotSpecSemantic) {
-      data["c"]["R"].forEach((String name, Map<String, dynamic> plotSpecData) {
+      data["c"]["R"].cast<String, Map<String, dynamic>>().forEach((String name, Map<String, dynamic> plotSpecData) {
         specs.add(PlotSpecSemantic(this, projection ?? projections[0], name, plotSpecData));
       });
     }
