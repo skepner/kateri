@@ -60,7 +60,17 @@ flutter build macos
 ```
 - .ace files can then be opened and viewed in the app
 
-## Automatically running Kateri from other scripts
+## Automatically running kateri from other scripts and commandline (the easy way)
+- Run ```nano ~/.zshrc```
+- Add the following line:
+```
+export PATH=/Users/${USER}/Desktop/pipeline/kateri/scripts/:$PATH
+```
+- save and exit
+- Run ```source ~/.zshrc``` or restart the terminal
+- kateri may now be run from the commandline using the command ```kateri``` with or without a path to a .ace file
+
+## Automatically running Kateri from other scripts and commandline (the hard way)
 - create a simple shell script (e.g. "kateri.sh") containing the following (modified to be your path to the kateri folder):
 ```
 #! /bin/sh
