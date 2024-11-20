@@ -1,0 +1,10 @@
+#! /bin/sh
+
+# find location of this script
+SCRIPTDIR=$(dirname "$0")
+# parent directory of script directory
+KATERILOC=$(dirname "${SCRIPTDIR}")
+
+# run kateri
+exec "${KATERILOC}/build/macos/Build/Products/Release/kateri.app/Contents/MacOS/kateri" "$@"
+# echo $(PWD)
